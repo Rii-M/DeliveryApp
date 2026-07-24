@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../models/product_unit.dart';
@@ -135,7 +136,7 @@ class CartScreen extends ConsumerWidget {
                           const SizedBox(height: 16),
                           FilledButton.icon(
                             onPressed: state.isValid
-                                ? () => Navigator.pop(context, true)
+                                ? () => GoRouter.of(context).pop(true)
                                 : null,
                             icon: const Icon(Icons.arrow_forward),
                             label: Text(l10n.continueLabel),

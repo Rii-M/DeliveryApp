@@ -18,6 +18,7 @@ import '../../features/sales_return/screen/sales_return_history_screen.dart';
 import '../../features/sales_return/screen/sales_return_screen.dart';
 import '../../features/sync/screen/sync_screen.dart';
 import '../../l10n/app_localizations.dart';
+import '../../features/delivery/screen/cart_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -38,10 +39,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(
-      path: '/splash',
-      builder: (context, state) => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-       ),
+        path: '/splash',
+        builder: (context, state) =>
+            const Scaffold(body: Center(child: CircularProgressIndicator())),
       ),
       GoRoute(
         path: '/login',
@@ -54,99 +54,111 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: '/dashboard',
-            pageBuilder: (context, state) => const NoTransitionPage(
-              child: DashboardScreen(),
-            ),
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: DashboardScreen()),
           ),
-        GoRoute(
-          path: '/delivery',
-          pageBuilder: (context, state) {
-            final deliveryId = int.tryParse(
-                state.uri.queryParameters['deliveryId'] ?? '');
-            return NoTransitionPage(
-              child: DeliveryScreen(deliveryId: deliveryId),
-            );
-          },
-        ),
-        GoRoute(
-          path: '/sales-return',
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: SalesReturnScreen(),
+          GoRoute(
+            path: '/delivery',
+            pageBuilder: (context, state) {
+              final deliveryId = int.tryParse(
+                state.uri.queryParameters['deliveryId'] ?? '',
+              );
+              return NoTransitionPage(
+                child: DeliveryScreen(deliveryId: deliveryId),
+              );
+            },
           ),
-        ),
-        GoRoute(
-          path: '/sync',
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: SyncScreen(),
+          GoRoute(
+            path: '/sales-return',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: SalesReturnScreen()),
           ),
-        ),
-        GoRoute(
-          path: '/delivery-history',
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: DeliveryHistoryScreen(),
+          GoRoute(
+            path: '/sync',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: SyncScreen()),
           ),
-        ),
-        GoRoute(
-          path: '/sales-return-history',
-          pageBuilder: (context, state) => const NoTransitionPage(
-            child: SalesReturnHistoryScreen(),
+          GoRoute(
+            path: '/delivery-history',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: DeliveryHistoryScreen()),
           ),
-        ),
-      ],
-    ),
-    GoRoute(
-      path: '/delivery-detail/:id',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) {
-        final deliveryId = int.tryParse(
-            state.pathParameters['id'] ?? '');
-        return DeliveryScreen(deliveryId: deliveryId);
-      },
-    ),
-    GoRoute(
-      path: '/sales-return-detail/:id',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) {
-        final salesReturnId = int.tryParse(
-            state.pathParameters['id'] ?? '');
-        return SalesReturnDetailScreen(salesReturnId: salesReturnId!);
-      },
-    ),
-    GoRoute(
-      path: '/estimate',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) {
-        final deliveryId = int.tryParse(
-            state.uri.queryParameters['deliveryId'] ?? '');
-        return EstimateScreen(deliveryId: deliveryId);
-      },
-    ),
-    GoRoute(
-      path: '/profile',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const ProfileScreen(),
-    ),
-    GoRoute(
-      path: '/estimate-history',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const EstimateHistoryScreen(),
-    ),
-    GoRoute(
-      path: '/categories',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const CategoriesScreen(),
-    ),
-    GoRoute(
-      path: '/products',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const ProductsScreen(),
-    ),
-    GoRoute(
-      path: '/customers',
-      parentNavigatorKey: _rootNavigatorKey,
-      builder: (context, state) => const CustomersScreen(),
-    ),
-  ],
+          GoRoute(
+            path: '/sales-return-history',
+            pageBuilder: (context, state) =>
+                const NoTransitionPage(child: SalesReturnHistoryScreen()),
+          ),
+          GoRoute(
+            path: '/delivery',
+            pageBuilder: (context, state) {
+              final deliveryId = int.tryParse(
+                state.uri.queryParameters['deliveryId'] ?? '',
+              );
+              return NoTransitionPage(
+                child: DeliveryScreen(deliveryId: deliveryId),
+              );
+            },
+            routes: [
+              GoRoute(
+                path: 'cart',
+                builder: (context, state) => const CartScreen(),
+              ),
+            ],
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/delivery-detail/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final deliveryId = int.tryParse(state.pathParameters['id'] ?? '');
+          return DeliveryScreen(deliveryId: deliveryId);
+        },
+      ),
+      GoRoute(
+        path: '/sales-return-detail/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final salesReturnId = int.tryParse(state.pathParameters['id'] ?? '');
+          return SalesReturnDetailScreen(salesReturnId: salesReturnId!);
+        },
+      ),
+      GoRoute(
+        path: '/estimate',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) {
+          final deliveryId = int.tryParse(
+            state.uri.queryParameters['deliveryId'] ?? '',
+          );
+          return EstimateScreen(deliveryId: deliveryId);
+        },
+      ),
+      GoRoute(
+        path: '/profile',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/estimate-history',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const EstimateHistoryScreen(),
+      ),
+      GoRoute(
+        path: '/categories',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CategoriesScreen(),
+      ),
+      GoRoute(
+        path: '/products',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const ProductsScreen(),
+      ),
+      GoRoute(
+        path: '/customers',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CustomersScreen(),
+      ),
+    ],
   );
 });
 
