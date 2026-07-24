@@ -576,4 +576,7 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get pleaseEnterPaymode => 'कृपया भुक्तानी मोड थप्नुहोस्';
+
+  @override
+  String get preferences => 'प्राथमिकता';
 }

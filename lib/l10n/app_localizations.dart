@@ -1171,6 +1171,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please add payment entry'**
   String get pleaseEnterPaymode;
+
+  /// No description provided for @preferences.
+  ///
+  /// In en, this message translates to:
+  /// **'preferences'**
+  String get preferences;
 }
 
 class _AppLocalizationsDelegate

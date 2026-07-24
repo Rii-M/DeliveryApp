@@ -29,7 +29,7 @@ class ProfileScreen extends ConsumerWidget {
         children: [
           _buildProfileHeader(displayName, displayEmail, theme),
           const SizedBox(height: 28),
-          _sectionLabel('see what shows', theme),
+          _sectionLabel( AppLocalizations.of(context)!.preferences, theme),
           const SizedBox(height: 8),
           _buildSettingsTile(
             theme: theme,
