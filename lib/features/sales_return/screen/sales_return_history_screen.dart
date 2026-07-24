@@ -100,7 +100,7 @@ class _SalesReturnHistoryScreenState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${_customerName(sr.customerId)}  \u2022  ${sr.items.length} ${l10n.itemCount(sr.items.length.toString())}',
+                                '${_customerName(sr.customerId)}  \u2022   ${l10n.itemCount(sr.items.length.toString())}',
                               ),
                               Text(sr.createdDate.formattedDateTime),
                             ],
