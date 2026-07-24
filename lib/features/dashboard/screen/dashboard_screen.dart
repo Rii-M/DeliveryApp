@@ -306,21 +306,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               ),
             ),
             const SizedBox(width: 12),
-Expanded(
+            Expanded(
               child: StatCard(
                 title: l10n.salesReturns,
                 value: state.todaysSalesReturns.toString(),
                 icon: Icons.assignment_return,
                 onTap: () => context.push('/sales-return-history'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: StatCard(
-                title: l10n.customers,
-                value: state.assignedCustomersCount.toString(),
-                icon: Icons.people,
-                onTap: () => context.push('/customers'),
               ),
             ),
           ],
@@ -346,6 +337,16 @@ Expanded(
               ),
             ),
           ],
+        ),
+        const SizedBox(width: 12),
+        SizedBox(
+          width: double.infinity,
+              child: StatCard(
+                title: l10n.customers,
+                value: state.assignedCustomersCount.toString(),
+                icon: Icons.people,
+                onTap: () => context.push('/customers'),
+              ),
         ),
       ],
     );
