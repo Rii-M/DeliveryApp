@@ -6,6 +6,7 @@ const _customerIdKey = 'auth_customer_id';
 const _driverIdKey = 'auth_driver_id';
 const _userNameKey = 'auth_user_name';
 const _outletIdKey = 'auth_outlet_id';
+const _emailKey = 'auth_email';
 
 const _storage = FlutterSecureStorage();
 
@@ -33,12 +34,17 @@ Future<String?> getSavedOutletId() async {
   return _storage.read(key: _outletIdKey);
 }
 
+Future<String?> getEmail() async {
+  return _storage.read(key: _emailKey);
+}
+
 Future<void> saveAuthData({
   required String token,
   required String baseUrl,
   String? customerId,
   String? driverId,
   String? userName,
+  String? email,
   String? outletId,
 }) async {
   await _storage.write(key: _tokenKey, value: token);
@@ -51,6 +57,9 @@ Future<void> saveAuthData({
   }
   if (userName != null) {
     await _storage.write(key: _userNameKey, value: userName);
+  }
+  if (email != null) {
+    await _storage.write(key: _emailKey, value: email);
   }
   if (outletId != null) {
     await _storage.write(key: _outletIdKey, value: outletId);

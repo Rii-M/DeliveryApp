@@ -21,6 +21,7 @@ class AuthState {
   final String? customerId;
   final String? driverId;
   final String? userName;
+  final String? email;
   final String? outletId;
   final List<SelectionOption>? companies;
   final List<SelectionOption>? branches;
@@ -38,6 +39,7 @@ class AuthState {
     this.customerId,
     this.driverId,
     this.userName,
+    this.email,
     this.outletId,
     this.companies,
     this.branches,
@@ -56,6 +58,7 @@ class AuthState {
     String? customerId,
     String? driverId,
     String? userName,
+    String? email,
     String? outletId,
     List<SelectionOption>? companies,
     List<SelectionOption>? branches,
@@ -73,6 +76,7 @@ class AuthState {
       customerId: customerId ?? this.customerId,
       driverId: driverId ?? this.driverId,
       userName: userName ?? this.userName,
+      email: email ?? this.email,
       outletId: outletId ?? this.outletId,
       companies: companies ?? this.companies,
       branches: branches ?? this.branches,
@@ -106,6 +110,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final customerId = await getSavedCustomerId();
       final driverId = await getSavedDriverId();
       final userName = await getSavedUserName();
+      final email = await getEmail();
       final outletId = await getSavedOutletId();
       if (token != null && baseUrl != null) {
         _applyAuthConfig(baseUrl, token);
@@ -116,6 +121,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           customerId: customerId,
           driverId: driverId,
           userName: userName,
+          email: email,
           outletId: outletId,
         );
         return;
@@ -402,6 +408,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final userId = step5Data['UserId'] as String?;
 
     String? userName;
+    String? email;
     if (userId != null && userId.isNotEmpty) {
       try {
         final profileData = await _authRepo.getProfile(
@@ -413,6 +420,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         final lastName = profileData['LastName'] as String? ?? '';
         userName = '$firstName $lastName'.trim();
         if (userName.isEmpty) userName = null;
+        email = profileData['Email'] as String?;
       } catch (_) {}
     }
 
@@ -422,6 +430,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       customerId: userId,
       driverId: userId,
       userName: userName,
+      email : email,
       outletId: outletId,
     );
     _applyAuthConfig(baseUrl, finalToken);
@@ -434,6 +443,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       customerId: userId,
       driverId: userId,
       userName: userName,
+      email:email,
       outletId: outletId,
     );
 
