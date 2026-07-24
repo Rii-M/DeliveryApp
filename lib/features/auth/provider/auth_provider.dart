@@ -7,6 +7,7 @@ import '../../../features/sync/provider/sync_provider.dart';
 import '../../../repositories/auth_repository.dart';
 import '../models/selection_option.dart';
 import '../../location/location_provider.dart';
+import '../../dashboard/provider/dashboard_provider.dart';
 
 enum AuthStatus { uninitialized, unauthenticated, authenticated }
 
@@ -447,7 +448,11 @@ class AuthNotifier extends StateNotifier<AuthState> {
       outletId: outletId,
     );
 
-    Future.microtask(() => _ref.read(syncProvider.notifier).syncAll());
+    // Future.microtask(() => _ref.read(syncProvider.notifier).syncAll());
+    Future.microtask(() async {
+     await _ref.read(syncProvider.notifier).syncAll();
+     await _ref.read(dashboardProvider.notifier).refresh();
+    });
   }
 
   void _applyAuthConfig(String baseUrl, String token) {
