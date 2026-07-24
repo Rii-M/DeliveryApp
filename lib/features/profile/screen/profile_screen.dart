@@ -128,6 +128,12 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   Widget _buildProfileHeader(String displayName, String displayEmail, ThemeData theme) {
+   final startColor = theme.colorScheme.primaryContainer;
+   final endColor = Color.lerp(
+    theme.colorScheme.primaryContainer,
+    theme.colorScheme.surface,
+    0.7,)!;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -135,10 +141,7 @@ class ProfileScreen extends ConsumerWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            theme.colorScheme.primaryContainer,
-            theme.colorScheme.primaryContainer.withOpacity(0.5),
-          ],
+          colors: [startColor,endColor],
         ),
       ),
       child: Row(
