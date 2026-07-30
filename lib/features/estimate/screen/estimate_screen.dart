@@ -933,7 +933,7 @@ class _PaymentModalSheet extends ConsumerWidget {
                 if (hasUnsetPaymode) {
                 ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                    content: Text('Please select paymode'),
+                    content: Text(AppLocalizations.of(context)!.pleaseEnterPaymode),
                     backgroundColor: Theme.of(context).colorScheme.error,
                   ),
                );

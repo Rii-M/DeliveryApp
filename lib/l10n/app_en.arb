@@ -196,5 +196,6 @@
   "invoiceNumber": "Invoice #{id}",
   "pleaseMakeFullPayment": "Please make full payment",
   "pleaseEnterReason":"Please add return reason",
-  "pleaseEnterPaymode":"Please add payment entry"
+  "pleaseEnterPaymode":"Please add payment entry",
+  "preferences":"preferences"
 }

@@ -694,16 +694,12 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     );
   }
 
-  void _openCart(BuildContext context) {
-    Navigator.push<bool>(
-      context,
-      MaterialPageRoute(builder: (_) => const CartScreen()),
-    ).then((continueToBilling) {
-      if (continueToBilling == true && context.mounted) {
-        _continueToBilling(context);
-      }
-    });
+ void _openCart(BuildContext context) async {
+  final continueToBilling = await GoRouter.of(context).push<bool>('/delivery/cart');
+  if (continueToBilling == true && context.mounted) {
+    _continueToBilling(context);
   }
+  } 
 
   Future<void> _continueToBilling(BuildContext context) async {
     if (!ref.read(deliveryFormProvider).isValid) {

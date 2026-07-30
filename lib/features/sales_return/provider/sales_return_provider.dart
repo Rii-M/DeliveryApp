@@ -203,6 +203,7 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
 
   SalesReturnState _copyWithAll({
     Customer? selectedCustomer,
+    bool clearSelectedCustomer = false, 
     Product? pendingProduct,
     bool clearPendingProduct = false,
     double? pendingQuantity,
@@ -225,7 +226,7 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
     String? error,
   }) {
     return SalesReturnState(
-      selectedCustomer: selectedCustomer ?? state.selectedCustomer,
+      selectedCustomer: clearSelectedCustomer ? null : (selectedCustomer ?? state.selectedCustomer),
       pendingProduct: clearPendingProduct ? null : (pendingProduct ?? state.pendingProduct),
       pendingQuantity: pendingQuantity ?? state.pendingQuantity,
       pendingRate: pendingRate ?? state.pendingRate,
@@ -249,7 +250,10 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
   }
 
   void selectCustomer(Customer? customer) {
-    state = _copyWithAll(selectedCustomer: customer);
+    state = _copyWithAll(
+    selectedCustomer: customer,
+    clearSelectedCustomer: customer == null, 
+  );
   }
 
   void setPendingProduct(Product? product) {
@@ -257,6 +261,7 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
       pendingProduct: product,
       pendingRate: product?.unitPrice ?? 0,
       pendingUnit: product?.unit,
+      clearPendingProduct: product == null, 
     );
   }
 
@@ -454,12 +459,7 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
   String? validate(AppLocalizations l10n) {
     if (state.selectedCustomer == null) {return l10n.selectCustomer;}
     if (state.items.isEmpty) {return l10n.selectProduct;}
-    if (state.reason == null || state.reason!.trim().isEmpty) {return l10n.pleaseEnterReason;}
-    if (state.paymentEntries.isEmpty) {return l10n.pleaseEnterPaymode;}
     for (final entry in state.paymentEntries) {
-      if (entry.paymentModeId == null || entry.paymentModeId!.isEmpty) {
-        return 'Please select a payment mode for all entries';
-      }
       if (entry.amount <= 0) return 'Payment amount must be greater than 0';
     }
     return null;
@@ -571,10 +571,26 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
       totalNetAmount -= state.discountAmount;
 
       // Build payment entries
+            // Auto-add Cash payment if none exists
+      final cashMode = state.paymentModes
+          .where((m) => m.name.toLowerCase() == 'cash')
+          .firstOrNull;
+
+      final paymentsToUse = state.paymentEntries.isEmpty
+          ? [
+              PaymentEntry(
+                paymentModeId: cashMode?.serverId ?? ApiConfig.emptyGuid,
+                paymentModeName: cashMode?.name ?? 'Cash',
+                amount: state.netTotalIncTax,
+              ),
+            ]
+          : state.paymentEntries;
+
+      // Build payment entries
       final salesInvoicePayments = <SalesInvoicePaymentRequest>[];
-      for (final entry in state.paymentEntries) {
-        final payModeName = entry.paymentModeName ?? 'Cash';
-        final payModeId = entry.paymentModeId ?? ApiConfig.emptyGuid;
+      for (final entry in paymentsToUse) {
+        final payModeName = entry.paymentModeName ?? cashMode?.name ?? 'Cash';
+        final payModeId = entry.paymentModeId ?? cashMode?.serverId ?? ApiConfig.emptyGuid;
         salesInvoicePayments.add(SalesInvoicePaymentRequest(
           payMode: payModeName,
           paymentId: payModeId,
@@ -584,9 +600,9 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
 
       // Determine payMode for header (use first payment mode or 'Mix')
       String payModeHeader = 'Cash';
-      if (state.paymentEntries.isNotEmpty) {
-        if (state.paymentEntries.length == 1) {
-          payModeHeader = state.paymentEntries.first.paymentModeName ?? 'Cash';
+      if (paymentsToUse.isNotEmpty) {
+        if (paymentsToUse.length == 1) {
+          payModeHeader = paymentsToUse.first.paymentModeName ?? 'Cash';
         } else {
           payModeHeader = 'Mix';
         }

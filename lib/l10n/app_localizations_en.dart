@@ -576,4 +576,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pleaseEnterPaymode => 'Please add payment entry';
+
+  @override
+  String get preferences => 'preferences';
 }
