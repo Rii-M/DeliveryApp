@@ -19,6 +19,7 @@ import '../../features/sales_return/screen/sales_return_screen.dart';
 import '../../features/sync/screen/sync_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../features/delivery/screen/cart_screen.dart';
+import '../../features/sales_return/screen/sales_return_cart_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -68,11 +69,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               );
             },
           ),
+          // GoRoute(
+          //   path: '/sales-return',
+          //   pageBuilder: (context, state) =>
+          //       const NoTransitionPage(child: SalesReturnScreen()),
+          // ),
           GoRoute(
-            path: '/sales-return',
-            pageBuilder: (context, state) =>
-                const NoTransitionPage(child: SalesReturnScreen()),
-          ),
+             path: '/sales-return',
+             pageBuilder: (context, state) =>
+                 const NoTransitionPage(child: SalesReturnScreen()),
+                 routes: [
+                    GoRoute(
+                      path: 'cart',
+                      builder: (context, state) => const SalesReturnCartScreen(),
+                    ),
+                  ],
+           ),
           GoRoute(
             path: '/sync',
             pageBuilder: (context, state) =>

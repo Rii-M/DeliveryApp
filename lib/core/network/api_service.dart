@@ -15,7 +15,8 @@ abstract class ApiService {
     required String transactionDate,
   });
   Future<List<Map<String, dynamic>>> fetchPaymentModes();
-
+  Future<List<Map<String, dynamic>>> fetchAssignedCategories();
+  
   Future<SalesInvoiceResponse> createSalesInvoice(SalesInvoiceRequest request);
   Future<bool> createSalesReturn(Map<String, dynamic> data);
   Future<bool> createSalesReturnV2(SalesReturnRequest request);

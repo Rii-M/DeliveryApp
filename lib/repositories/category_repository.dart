@@ -91,4 +91,27 @@ class CategoryRepository {
 
     return categories;
   }
+
+  Future<List<Category>> getAssignedCategories() async {
+  try {
+    final data = await _apiService.fetchAssignedCategories();
+    return data.map((json) {
+      final cat = Category();
+      cat.serverId = json['categoryId']?.toString() ?? '';
+      cat.name = json['name']?.toString() ?? '';
+      cat.japaneseName = json['japaneseName']?.toString();
+      final image = json['imagePath']?.toString();
+      if (image != null && image.isNotEmpty) {
+        cat.imageUrl = image;
+        cat.imageList = [image];
+      }
+      return cat;
+    }).toList();
+  } catch (e) {
+    // Offline fallback: use whatever the last sync cached, so delivery/sync
+    // behavior is untouched and this never throws.
+    return getCachedCategories();
+  }
+}
+
 }

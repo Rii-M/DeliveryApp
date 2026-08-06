@@ -19,7 +19,9 @@ import '../../../repositories/product_repository.dart';
 import '../../../repositories/sales_return_repository.dart';
 import '../../../features/auth/provider/auth_provider.dart';
 import '../../location/location_provider.dart';
-
+import '../../../core/services/image_prefetch_service.dart';
+import '../../../models/category.dart';
+import '../../../repositories/category_repository.dart';
 class SalesReturnState {
   final Customer? selectedCustomer;
   final Product? pendingProduct;
@@ -41,6 +43,9 @@ class SalesReturnState {
   final bool isValid;
   final bool saved;
   final String? error;
+  final List<Category> categories;      // default const []
+  final Category? selectedCategory;     // default null
+  final String productSearchQuery;      // default ''
 
   SalesReturnState({
     this.selectedCustomer,
@@ -63,6 +68,9 @@ class SalesReturnState {
     this.isValid = true,
     this.saved = false,
     this.error,
+    this.categories = const [],
+    this.selectedCategory,
+    this.productSearchQuery = '',
   });
 
   double get grossTotal =>
@@ -123,11 +131,29 @@ class SalesReturnState {
   }
 
   double get netTotalIncTax => totalGrossAmountIncTax - totalProductDiscountIncTax - discountAmount;
+
+  List<Product> get displayedProducts {
+  if (selectedCategory == null) return products;
+  return products.where((p) => p.categoryId == selectedCategory!.serverId).toList();
+}
+
+List<Product> get filteredProducts {
+  if (productSearchQuery.isEmpty) return displayedProducts;
+  final query = productSearchQuery.toLowerCase();
+  return displayedProducts.where((p) =>
+      p.name.toLowerCase().contains(query) ||
+      (p.japaneseName ?? '').toLowerCase().contains(query)).toList();
+}
+
+double itemQuantityOf(String productId) => items
+    .where((i) => i.productId == productId)
+    .fold<double>(0, (sum, i) => sum + i.quantity);
 }
 
 final salesReturnProvider =
     StateNotifierProvider.autoDispose<SalesReturnNotifier, SalesReturnState>((ref) {
   return SalesReturnNotifier(
+    categoryRepo: ref.read(categoryRepositoryProvider),
     customerRepo: ref.read(customerRepositoryProvider),
     productRepo: ref.read(productRepositoryProvider),
     salesReturnRepo: ref.read(salesReturnRepositoryProvider),
@@ -140,6 +166,7 @@ final salesReturnProvider =
 });
 
 class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
+  final CategoryRepository _categoryRepo;
   final CustomerRepository _customerRepo;
   final ProductRepository _productRepo;
   final SalesReturnRepository _salesReturnRepo;
@@ -150,6 +177,7 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
   final String _outletId;
 
   SalesReturnNotifier({
+    required this._categoryRepo,
     required this._customerRepo,
     required ProductRepository productRepo,
     required this._salesReturnRepo,
@@ -171,11 +199,14 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
       final customers = await _customerRepo.getCachedCustomers();
       final products = await _productRepo.getCachedAllProducts();
       final paymentModes = await _paymentModeRepo.getPaymentModes();
+      final categories = await _loadCategories();
+    _prefetchProductImages(products);
 
       state = SalesReturnState(
         customers: customers,
         products: products,
         paymentModes: paymentModes,
+        categories: categories,
         isLoading: false,
       );
 
@@ -186,10 +217,30 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
         customers: await _customerRepo.getCachedCustomers(),
         products: await _productRepo.getCachedAllProducts(),
         paymentModes: await _paymentModeRepo.getPaymentModes(),
+        categories: await _loadCategories(),
         isLoading: false,
       );
     }
   }
+
+  Future<List<Category>> _loadCategories() async {
+  try {
+    return await _categoryRepo.getAssignedCategories();
+  } catch (e) {
+    print('[SalesReturn] category load failed: $e');
+    return await _categoryRepo.getCachedCategories();
+  }
+}
+
+void _prefetchProductImages(List<Product> products) {
+  final urls = products
+      .where((p) => p.firstImageUrl != null && p.firstImageUrl!.isNotEmpty)
+      .map((p) => p.firstImageUrl!)
+      .toList();
+  if (urls.isNotEmpty) {
+    ImagePrefetchService().prefetchImages(urls);
+  }
+ }
 
   Future<void> _refreshProductsInBackground() async {
     try {
@@ -202,6 +253,10 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
   }
 
   SalesReturnState _copyWithAll({
+    List<Category>? categories,
+    Category? selectedCategory,
+    bool clearSelectedCategory = false,
+    String? productSearchQuery,
     Customer? selectedCustomer,
     bool clearSelectedCustomer = false, 
     Product? pendingProduct,
@@ -226,6 +281,9 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
     String? error,
   }) {
     return SalesReturnState(
+      categories: categories ?? state.categories,
+      selectedCategory: clearSelectedCategory ? null : (selectedCategory ?? state.selectedCategory),
+      productSearchQuery: productSearchQuery ?? state.productSearchQuery,
       selectedCustomer: clearSelectedCustomer ? null : (selectedCustomer ?? state.selectedCustomer),
       pendingProduct: clearPendingProduct ? null : (pendingProduct ?? state.pendingProduct),
       pendingQuantity: pendingQuantity ?? state.pendingQuantity,
@@ -248,6 +306,30 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
       error: error,
     );
   }
+
+  void selectCategory(Category? category) {
+  state = _copyWithAll(
+    selectedCategory: category,
+    clearSelectedCategory: category == null,
+  );
+}
+
+void setProductSearchQuery(String query) {
+  state = _copyWithAll(productSearchQuery: query);
+}
+
+void addProduct(Product product, {String languageCode = 'en'}) {
+  state = _copyWithAll(
+    pendingProduct: product,
+    pendingRate: product.unitPrice,
+    pendingUnit: product.unit,
+  );
+  addItem(languageCode: languageCode); // existing merge/save logic reused
+}
+
+void clearItems() {
+  state = _copyWithAll(items: [], discountAmount: 0, paymentEntries: []);
+}
 
   void selectCustomer(Customer? customer) {
     state = _copyWithAll(
@@ -724,6 +806,7 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
       customers: state.customers,
       products: state.products,
       paymentModes: state.paymentModes,
+       categories: state.categories,
     );
   }
 }
