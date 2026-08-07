@@ -61,7 +61,7 @@ class RealApiService implements ApiService {
 
   @override
 Future<List<Map<String, dynamic>>> fetchAssignedCategories() async {
-  final response = await _dio.get(ApiConfig.categoryEndpoint);
+  final response = await _dio.get(ApiConfig.allCategoryEndpoint);
   final body = response.data as Map<String, dynamic>;
   final success = body['success'] ?? body['Status'] ?? false;
   if (success != true) {
