@@ -182,7 +182,7 @@ class _CartItemCardState extends State<_CartItemCard> {
   late TextEditingController _qtyController;
   late TextEditingController _discountController;
   bool _isQtyFocused = false;
-  bool _isDiscountFocused = false;
+  final bool _isDiscountFocused = false;
 
   @override
   void initState() {
@@ -264,37 +264,38 @@ class _CartItemCardState extends State<_CartItemCard> {
             const SizedBox(height: 8),
             Row(
               children: [
-                GestureDetector(
-                  onTap: () => _showPriceEditor(context, theme),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Rs. ${widget.item.unitPrice.toStringAsFixed(2)}',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          Icons.edit,
-                          size: 12,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                // Commented out: rate/price edit disabled for now.
+                // GestureDetector(
+                //   onTap: () => _showPriceEditor(context, theme),
+                //   child: Container(
+                //     padding: const EdgeInsets.symmetric(
+                //       horizontal: 8,
+                //       vertical: 4,
+                //     ),
+                //     decoration: BoxDecoration(
+                //       color: theme.colorScheme.surfaceContainerHighest,
+                //       borderRadius: BorderRadius.circular(6),
+                //     ),
+                //     child: Row(
+                //       mainAxisSize: MainAxisSize.min,
+                //       children: [
+                //         Text(
+                //           'Rs. ${widget.item.unitPrice.toStringAsFixed(2)}',
+                //           style: theme.textTheme.bodySmall?.copyWith(
+                //             fontWeight: FontWeight.w600,
+                //             color: theme.colorScheme.primary,
+                //           ),
+                //         ),
+                //         const SizedBox(width: 4),
+                //         Icon(
+                //           Icons.edit,
+                //           size: 12,
+                //           color: theme.colorScheme.primary,
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
                 const Spacer(),
                 if (widget.units.length > 1)
                   Container(
@@ -366,45 +367,46 @@ class _CartItemCardState extends State<_CartItemCard> {
             const SizedBox(height: 8),
             Row(
               children: [
-                SizedBox(
-                  width: 120,
-                  child: Focus(
-                    onFocusChange: (focused) {
-                      setState(() => _isDiscountFocused = focused);
-                    },
-                    child: TextField(
-                    controller: _discountController,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d*\.?\d{0,2}'),
-                      ),
-                    ],
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 8,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      isDense: true,
-                      labelText: l10n.discount,
-                      prefixText: 'Rs. ',
-                    ),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.error,
-                    ),
-                    onChanged: (value) {
-                      final discount = double.tryParse(value) ?? 0;
-                      widget.onDiscountChanged(discount);
-                    },
-                  ),
-                  ),
-                ),
+                // Commented out: discount input disabled for now.
+                // SizedBox(
+                //   width: 120,
+                //   child: Focus(
+                //     onFocusChange: (focused) {
+                //       setState(() => _isDiscountFocused = focused);
+                //     },
+                //     child: TextField(
+                //     controller: _discountController,
+                //     keyboardType: const TextInputType.numberWithOptions(
+                //       decimal: true,
+                //     ),
+                //     inputFormatters: [
+                //       FilteringTextInputFormatter.allow(
+                //         RegExp(r'^\d*\.?\d{0,2}'),
+                //       ),
+                //     ],
+                //     decoration: InputDecoration(
+                //       contentPadding: const EdgeInsets.symmetric(
+                //         vertical: 8,
+                //         horizontal: 8,
+                //       ),
+                //       border: OutlineInputBorder(
+                //         borderRadius: BorderRadius.circular(8),
+                //       ),
+                //       isDense: true,
+                //       labelText: l10n.discount,
+                //       prefixText: 'Rs. ',
+                //     ),
+                //     style: theme.textTheme.bodySmall?.copyWith(
+                //       fontWeight: FontWeight.w600,
+                //       color: theme.colorScheme.error,
+                //     ),
+                //     onChanged: (value) {
+                //       final discount = double.tryParse(value) ?? 0;
+                //       widget.onDiscountChanged(discount);
+                //     },
+                //   ),
+                //   ),
+                // ),
                 const Spacer(),
                 Text(
                   l10n.lineTotal,
@@ -428,46 +430,47 @@ class _CartItemCardState extends State<_CartItemCard> {
     );
   }
 
-  void _showPriceEditor(BuildContext context, ThemeData theme) {
-    final controller = TextEditingController(
-      text: widget.item.unitPrice.toStringAsFixed(2),
-    );
-    final l10n = AppLocalizations.of(context)!;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('${l10n.editPrice}: ${widget.item.productName}'),
-        content: TextField(
-          controller: controller,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-          ],
-          decoration: InputDecoration(
-            labelText: l10n.unitPrice,
-            prefixText: 'Rs. ',
-            border: const OutlineInputBorder(),
-          ),
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () {
-              final price = double.tryParse(controller.text) ?? 0;
-              if (price > 0) {
-                widget.onUnitPriceChanged(price);
-              }
-              Navigator.pop(ctx);
-            },
-            child: Text(l10n.save),
-          ),
-        ],
-      ),
-    );
-  }
+  // Commented out: rate/price editor disabled for now.
+  // void _showPriceEditor(BuildContext context, ThemeData theme) {
+  //   final controller = TextEditingController(
+  //     text: widget.item.unitPrice.toStringAsFixed(2),
+  //   );
+  //   final l10n = AppLocalizations.of(context)!;
+  //
+  //   showDialog(
+  //     context: context,
+  //     builder: (ctx) => AlertDialog(
+  //       title: Text('${l10n.editPrice}: ${widget.item.productName}'),
+  //       content: TextField(
+  //         controller: controller,
+  //         keyboardType: const TextInputType.numberWithOptions(decimal: true),
+  //         inputFormatters: [
+  //           FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+  //         ],
+  //         decoration: InputDecoration(
+  //           labelText: l10n.unitPrice,
+  //           prefixText: 'Rs. ',
+  //           border: const OutlineInputBorder(),
+  //         ),
+  //         autofocus: true,
+  //       ),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.pop(ctx),
+  //           child: Text(l10n.cancel),
+  //         ),
+  //         FilledButton(
+  //           onPressed: () {
+  //             final price = double.tryParse(controller.text) ?? 0;
+  //             if (price > 0) {
+  //               widget.onUnitPriceChanged(price);
+  //             }
+  //             Navigator.pop(ctx);
+  //           },
+  //           child: Text(l10n.save),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 }

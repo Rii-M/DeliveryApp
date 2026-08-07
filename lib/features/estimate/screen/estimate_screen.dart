@@ -319,15 +319,16 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
-                        if (item.discountAmount > 0) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                        'Discount: -Rs. ${item.discountAmount.toStringAsFixed(2)}',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.error,
-                            ),
-                          ),
-                        ],
+                        // Commented out: discount display disabled for now.
+                        // if (item.discountAmount > 0) ...[
+                        //   const SizedBox(height: 2),
+                        //   Text(
+                        // 'Discount: -Rs. ${item.discountAmount.toStringAsFixed(2)}',
+                        //     style: theme.textTheme.bodySmall?.copyWith(
+                        //       color: theme.colorScheme.error,
+                        //     ),
+                        //   ),
+                        // ],
                       ],
                     ),
                   ),
@@ -367,120 +368,122 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: DropdownButtonFormField<String>(
-                        isExpanded: true,
-                        initialValue: state.discountType,
-                        decoration: InputDecoration(
-                          labelText: l10n.discountType,
-                          border: const OutlineInputBorder(),
-                          isDense: true,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 10,
-                          ),
-                        ),
-                        items: [
-                          DropdownMenuItem(value: null, child: Text(l10n.none)),
-                          DropdownMenuItem(
-                            value: 'amount',
-                            child: Text(l10n.amountRs),
-                          ),
-                          DropdownMenuItem(
-                            value: 'percent',
-                            child: Text(l10n.percent),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          ref
-                              .read(estimateProvider.notifier)
-                              .setDiscountType(value);
-                        },
-                      ),
-                    ),
-                    if (state.discountType != null) ...[
-                      const SizedBox(width: 8),
-                      Expanded(
-                        flex: 2,
-                        child: TextField(
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(
-                              RegExp(r'^\d+\.?\d{0,2}'),
-                            ),
-                          ],
-                          decoration: InputDecoration(
-                            labelText: state.discountType == 'percent'
-                                ? l10n.percent
-                                : l10n.amountRs,
-                            border: const OutlineInputBorder(),
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 10,
-                            ),
-                            suffixText: state.discountType == 'percent'
-                                ? '%'
-                                : 'Rs.',
-                          ),
-                          onChanged: (value) {
-                            final val = double.tryParse(value) ?? 0;
-                            ref
-                                .read(estimateProvider.notifier)
-                                .setDiscountValue(val);
-                          },
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-                if (state.totalProductDiscount > 0) ...[
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        l10n.productDiscount,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.error,
-                        ),
-                      ),
-                      Text(
-                        '- Rs. ${state.totalProductDiscount.toStringAsFixed(2)}',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.error,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-                if (state.discountAmount > 0) ...[
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        l10n.discount,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.error,
-                        ),
-                      ),
-                      Text(
-                        '- Rs. ${state.discountAmount.toStringAsFixed(2)}',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.error,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                // Commented out: volume discount input disabled for now.
+                // Row(
+                //   children: [
+                //     Expanded(
+                //       flex: 3,
+                //       child: DropdownButtonFormField<String>(
+                //         isExpanded: true,
+                //         initialValue: state.discountType,
+                //         decoration: InputDecoration(
+                //           labelText: l10n.discountType,
+                //           border: const OutlineInputBorder(),
+                //           isDense: true,
+                //           contentPadding: EdgeInsets.symmetric(
+                //             horizontal: 8,
+                //             vertical: 10,
+                //           ),
+                //         ),
+                //         items: [
+                //           DropdownMenuItem(value: null, child: Text(l10n.none)),
+                //           DropdownMenuItem(
+                //             value: 'amount',
+                //             child: Text(l10n.amountRs),
+                //           ),
+                //           DropdownMenuItem(
+                //             value: 'percent',
+                //             child: Text(l10n.percent),
+                //           ),
+                //         ],
+                //         onChanged: (value) {
+                //           ref
+                //               .read(estimateProvider.notifier)
+                //               .setDiscountType(value);
+                //         },
+                //       ),
+                //     ),
+                //     if (state.discountType != null) ...[
+                //       const SizedBox(width: 8),
+                //       Expanded(
+                //         flex: 2,
+                //         child: TextField(
+                //           keyboardType: const TextInputType.numberWithOptions(
+                //             decimal: true,
+                //           ),
+                //           inputFormatters: [
+                //             FilteringTextInputFormatter.allow(
+                //               RegExp(r'^\d+\.?\d{0,2}'),
+                //             ),
+                //           ],
+                //           decoration: InputDecoration(
+                //             labelText: state.discountType == 'percent'
+                //                 ? l10n.percent
+                //                 : l10n.amountRs,
+                //             border: const OutlineInputBorder(),
+                //             isDense: true,
+                //             contentPadding: const EdgeInsets.symmetric(
+                //               horizontal: 8,
+                //               vertical: 10,
+                //             ),
+                //             suffixText: state.discountType == 'percent'
+                //                 ? '%'
+                //                 : 'Rs.',
+                //           ),
+                //           onChanged: (value) {
+                //             final val = double.tryParse(value) ?? 0;
+                //             ref
+                //                 .read(estimateProvider.notifier)
+                //                 .setDiscountValue(val);
+                //           },
+                //         ),
+                //       ),
+                //     ],
+                //   ],
+                // ),
+                // Commented out: discount display rows disabled for now.
+                // if (state.totalProductDiscount > 0) ...[
+                //   const SizedBox(height: 8),
+                //   Row(
+                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //     children: [
+                //       Text(
+                //         l10n.productDiscount,
+                //         style: theme.textTheme.bodyMedium?.copyWith(
+                //           color: theme.colorScheme.error,
+                //         ),
+                //       ),
+                //       Text(
+                //         '- Rs. ${state.totalProductDiscount.toStringAsFixed(2)}',
+                //         style: theme.textTheme.bodyMedium?.copyWith(
+                //           fontWeight: FontWeight.w600,
+                //           color: theme.colorScheme.error,
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ],
+                // if (state.discountAmount > 0) ...[
+                //   const SizedBox(height: 8),
+                //   Row(
+                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //     children: [
+                //       Text(
+                //         l10n.discount,
+                //         style: theme.textTheme.bodyMedium?.copyWith(
+                //           color: theme.colorScheme.error,
+                //         ),
+                //       ),
+                //       Text(
+                //         '- Rs. ${state.discountAmount.toStringAsFixed(2)}',
+                //         style: theme.textTheme.bodyMedium?.copyWith(
+                //           fontWeight: FontWeight.w600,
+                //           color: theme.colorScheme.error,
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ],
                 if (state.totalTax > 0) ...[
                   const SizedBox(height: 8),
                   Row(

@@ -16,11 +16,12 @@ class SalesReturnCartScreen extends ConsumerStatefulWidget {
 }
 
 class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
-  final _discountValueController = TextEditingController();
+  // Commented out: discount value controller disabled for now.
+  // final _discountValueController = TextEditingController();
 
   @override
   void dispose() {
-    _discountValueController.dispose();
+    // _discountValueController.dispose();
     super.dispose();
   }
 
@@ -74,7 +75,8 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
                 const SizedBox(height: 24),
                 _buildItemsSection(state, theme, l10n),
                 const SizedBox(height: 16),
-                _buildHeaderDiscountSection(state, theme, l10n),
+                // Commented out: volume discount section disabled for now.
+                // _buildHeaderDiscountSection(state, theme, l10n),
                 const SizedBox(height: 16),
                 _buildTotalsCard(state, theme, l10n),
                 const SizedBox(height: 24),
@@ -247,24 +249,25 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
               theme,
               null,
             ),
-            if (state.totalProductDiscountIncTax > 0) ...[
-              const SizedBox(height: 4),
-              _totalRow(
-                l10n.productDiscount,
-                -state.totalProductDiscountIncTax,
-                theme,
-                theme.colorScheme.error,
-              ),
-            ],
-            if (state.discountAmount > 0) ...[
-              const SizedBox(height: 4),
-              _totalRow(
-                l10n.discount,
-                -state.discountAmount,
-                theme,
-                theme.colorScheme.error,
-              ),
-            ],
+            // Commented out: discount display rows disabled for now.
+            // if (state.totalProductDiscountIncTax > 0) ...[
+            //   const SizedBox(height: 4),
+            //   _totalRow(
+            //     l10n.productDiscount,
+            //     -state.totalProductDiscountIncTax,
+            //     theme,
+            //     theme.colorScheme.error,
+            //   ),
+            // ],
+            // if (state.discountAmount > 0) ...[
+            //   const SizedBox(height: 4),
+            //   _totalRow(
+            //     l10n.discount,
+            //     -state.discountAmount,
+            //     theme,
+            //     theme.colorScheme.error,
+            //   ),
+            // ],
             if (state.totalTaxAmount > 0) ...[
               const SizedBox(height: 4),
               _totalRow(
@@ -341,91 +344,92 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
     );
   }
 
-  Widget _buildHeaderDiscountSection(
-    SalesReturnState state,
-    ThemeData theme,
-    AppLocalizations l10n,
-  ) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              l10n.volumeDiscount,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    controller: _discountValueController,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d*\.?\d{0,2}'),
-                      ),
-                    ],
-                    decoration: InputDecoration(
-                      labelText: l10n.value,
-                      hintText: '0',
-                      border: const OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    onChanged: (value) {
-                      final val = double.tryParse(value) ?? 0;
-                      ref
-                          .read(salesReturnProvider.notifier)
-                          .setDiscountValue(val);
-                    },
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: DropdownButtonFormField<String?>(
-                    isExpanded: true,
-                    initialValue: state.discountType,
-                    decoration: InputDecoration(
-                      labelText: l10n.discountType,
-                      border: const OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    items: [
-                      DropdownMenuItem(value: null, child: Text(l10n.none)),
-                      DropdownMenuItem(
-                        value: 'amount',
-                        child: Text(l10n.amountRs),
-                      ),
-                      DropdownMenuItem(
-                        value: 'percent',
-                        child: Text(l10n.percent),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      ref
-                          .read(salesReturnProvider.notifier)
-                          .setDiscountType(value);
-                      if (value == null) {
-                        _discountValueController.clear();
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Commented out: volume discount section disabled for now.
+  // Widget _buildHeaderDiscountSection(
+  //   SalesReturnState state,
+  //   ThemeData theme,
+  //   AppLocalizations l10n,
+  // ) {
+  //   return Card(
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(16),
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.stretch,
+  //         children: [
+  //           Text(
+  //             l10n.volumeDiscount,
+  //             style: theme.textTheme.titleSmall?.copyWith(
+  //               fontWeight: FontWeight.w600,
+  //               color: theme.colorScheme.onSurfaceVariant,
+  //             ),
+  //           ),
+  //           const SizedBox(height: 12),
+  //           Row(
+  //             children: [
+  //               Expanded(
+  //                 flex: 2,
+  //                 child: TextField(
+  //                   controller: _discountValueController,
+  //                   keyboardType:
+  //                       const TextInputType.numberWithOptions(decimal: true),
+  //                   inputFormatters: [
+  //                     FilteringTextInputFormatter.allow(
+  //                       RegExp(r'^\d*\.?\d{0,2}'),
+  //                     ),
+  //                   ],
+  //                   decoration: InputDecoration(
+  //                     labelText: l10n.value,
+  //                     hintText: '0',
+  //                     border: const OutlineInputBorder(),
+  //                     isDense: true,
+  //                   ),
+  //                   onChanged: (value) {
+  //                     final val = double.tryParse(value) ?? 0;
+  //                     ref
+  //                         .read(salesReturnProvider.notifier)
+  //                         .setDiscountValue(val);
+  //                   },
+  //                 ),
+  //               ),
+  //               const SizedBox(width: 12),
+  //               Expanded(
+  //                 flex: 2,
+  //                 child: DropdownButtonFormField<String?>(
+  //                   isExpanded: true,
+  //                   initialValue: state.discountType,
+  //                   decoration: InputDecoration(
+  //                     labelText: l10n.discountType,
+  //                     border: const OutlineInputBorder(),
+  //                     isDense: true,
+  //                   ),
+  //                   items: [
+  //                     DropdownMenuItem(value: null, child: Text(l10n.none)),
+  //                     DropdownMenuItem(
+  //                       value: 'amount',
+  //                       child: Text(l10n.amountRs),
+  //                     ),
+  //                     DropdownMenuItem(
+  //                       value: 'percent',
+  //                       child: Text(l10n.percent),
+  //                     ),
+  //                   ],
+  //                   onChanged: (value) {
+  //                     ref
+  //                         .read(salesReturnProvider.notifier)
+  //                         .setDiscountType(value);
+  //                     if (value == null) {
+  //                       _discountValueController.clear();
+  //                     }
+  //                   },
+  //                 ),
+  //               ),
+  //             ],
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   void _showPaymentModal(BuildContext context) {
     showModalBottomSheet(
@@ -686,26 +690,27 @@ class _ItemDetailSheet extends ConsumerStatefulWidget {
 }
 
 class _ItemDetailSheetState extends ConsumerState<_ItemDetailSheet> {
-  late final TextEditingController _discCtrl;
-  late final TextEditingController _rateCtrl;
-  late String? _selectedType;
+  // Commented out: per-item discount fields disabled for now.
+  // late final TextEditingController _discCtrl;
+  // late final TextEditingController _rateCtrl;
+  // late String? _selectedType;
 
   @override
   void initState() {
     super.initState();
-    _discCtrl = TextEditingController(
-      text: widget.item.discountValue > 0
-          ? widget.item.discountValue.toString()
-          : '',
-    );
-    _rateCtrl = TextEditingController(text: widget.item.rate.toStringAsFixed(2));
-    _selectedType = widget.item.discountType;
+    // _discCtrl = TextEditingController(
+    //   text: widget.item.discountValue > 0
+    //       ? widget.item.discountValue.toString()
+    //       : '',
+    // );
+    // _rateCtrl = TextEditingController(text: widget.item.rate.toStringAsFixed(2));
+    // _selectedType = widget.item.discountType;
   }
 
   @override
   void dispose() {
-    _discCtrl.dispose();
-    _rateCtrl.dispose();
+    // _discCtrl.dispose();
+    // _rateCtrl.dispose();
     super.dispose();
   }
 
@@ -785,27 +790,28 @@ class _ItemDetailSheetState extends ConsumerState<_ItemDetailSheet> {
                   onPressed: () => notifier.incrementItemQuantity(widget.index),
                 ),
                 const Spacer(),
-                Expanded(
-                  child: TextField(
-                    controller: _rateCtrl,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d*\.?\d{0,2}'),
-                      ),
-                    ],
-                    decoration: InputDecoration(
-                      labelText: l10n.rate,
-                      border: const OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    onChanged: (v) => notifier.setItemRate(
-                      widget.index,
-                      double.tryParse(v) ?? 0,
-                    ),
-                  ),
-                ),
+                // Commented out: rate edit disabled for now.
+                // Expanded(
+                //   child: TextField(
+                //     controller: _rateCtrl,
+                //     keyboardType:
+                //         const TextInputType.numberWithOptions(decimal: true),
+                //     inputFormatters: [
+                //       FilteringTextInputFormatter.allow(
+                //         RegExp(r'^\d*\.?\d{0,2}'),
+                //       ),
+                //     ],
+                //     decoration: InputDecoration(
+                //       labelText: l10n.rate,
+                //       border: const OutlineInputBorder(),
+                //       isDense: true,
+                //     ),
+                //     onChanged: (v) => notifier.setItemRate(
+                //       widget.index,
+                //       double.tryParse(v) ?? 0,
+                //     ),
+                //   ),
+                // ),
               ],
             ),
             const SizedBox(height: 12),
@@ -817,64 +823,65 @@ class _ItemDetailSheetState extends ConsumerState<_ItemDetailSheet> {
                   style: theme.textTheme.bodyMedium,
                 ),
               ),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _discCtrl,
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d*\.?\d{0,2}'),
-                      ),
-                    ],
-                    decoration: InputDecoration(
-                      labelText: l10n.discountValue,
-                      hintText: '0',
-                      border: const OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    onChanged: (v) => notifier.setItemDiscount(
-                      widget.index,
-                      _selectedType,
-                      double.tryParse(v) ?? 0,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: DropdownButtonFormField<String?>(
-                    isExpanded: true,
-                    initialValue: _selectedType,
-                    decoration: InputDecoration(
-                      labelText: l10n.discountType,
-                      border: const OutlineInputBorder(),
-                      isDense: true,
-                    ),
-                    items: [
-                      DropdownMenuItem(value: null, child: Text(l10n.none)),
-                      DropdownMenuItem(
-                        value: 'amount',
-                        child: Text(l10n.amountRs),
-                      ),
-                      DropdownMenuItem(
-                        value: 'percent',
-                        child: Text(l10n.percent),
-                      ),
-                    ],
-                    onChanged: (v) {
-                      setState(() => _selectedType = v);
-                      notifier.setItemDiscount(
-                        widget.index,
-                        v,
-                        double.tryParse(_discCtrl.text) ?? 0,
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
+            // Commented out: per-item discount input disabled for now.
+            // Row(
+            //   children: [
+            //     Expanded(
+            //       child: TextField(
+            //         controller: _discCtrl,
+            //         keyboardType:
+            //             const TextInputType.numberWithOptions(decimal: true),
+            //         inputFormatters: [
+            //           FilteringTextInputFormatter.allow(
+            //             RegExp(r'^\d*\.?\d{0,2}'),
+            //           ),
+            //         ],
+            //         decoration: InputDecoration(
+            //           labelText: l10n.discountValue,
+            //           hintText: '0',
+            //           border: const OutlineInputBorder(),
+            //           isDense: true,
+            //         ),
+            //         onChanged: (v) => notifier.setItemDiscount(
+            //           widget.index,
+            //           _selectedType,
+            //           double.tryParse(v) ?? 0,
+            //         ),
+            //       ),
+            //     ),
+            //     const SizedBox(width: 12),
+            //     Expanded(
+            //       child: DropdownButtonFormField<String?>(
+            //         isExpanded: true,
+            //         initialValue: _selectedType,
+            //         decoration: InputDecoration(
+            //           labelText: l10n.discountType,
+            //           border: const OutlineInputBorder(),
+            //           isDense: true,
+            //         ),
+            //         items: [
+            //           DropdownMenuItem(value: null, child: Text(l10n.none)),
+            //           DropdownMenuItem(
+            //             value: 'amount',
+            //             child: Text(l10n.amountRs),
+            //           ),
+            //           DropdownMenuItem(
+            //             value: 'percent',
+            //             child: Text(l10n.percent),
+            //           ),
+            //         ],
+            //         onChanged: (v) {
+            //           setState(() => _selectedType = v);
+            //           notifier.setItemDiscount(
+            //             widget.index,
+            //             v,
+            //             double.tryParse(_discCtrl.text) ?? 0,
+            //           );
+            //         },
+            //       ),
+            //     ),
+            //   ],
+            // ),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
