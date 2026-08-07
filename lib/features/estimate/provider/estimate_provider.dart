@@ -147,6 +147,7 @@ final estimateProvider =
         paymentModeRepo: ref.read(paymentModeRepositoryProvider),
         estimateRepo: ref.read(estimateRepositoryProvider),
         outletId: ref.read(authProvider).outletId ?? ApiConfig.emptyGuid,
+        driverId: ref.read(authProvider).driverId ?? '',
       );
     });
 
@@ -157,6 +158,7 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
   final PaymentModeRepository _paymentModeRepo;
   final EstimateRepository _estimateRepo;
   final String _outletId;
+  final String _driverId;
 
   EstimateNotifier({
     required this._deliveryRepo,
@@ -165,8 +167,10 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
     required this._paymentModeRepo,
     required this._estimateRepo,
     required String outletId,
+    required String driverId,
   }) : _customerRepo = customerRepo,
        _outletId = outletId,
+      _driverId = driverId,
        super(EstimateState(isLoadingDelivery: true));
 
   void initializeFromDeliveryForm({
@@ -737,6 +741,7 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
         customerId: state.customer!.serverId,
         customerName: state.customer!.name,
         outletId: _outletId,
+        deliveryBoyId: _driverId,
         totalQuantity: totalQty,
         totalGrossAmount: totalgrossAmountExcTax,
         totalGrossAmountIncludingTax: totalgrossAmountIncTax,

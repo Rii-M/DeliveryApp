@@ -36,6 +36,8 @@ class SalesInvoiceRequest {
   final dynamic orderDate;
   final String currencyId;
   final String remarks;
+  final String deliveryBoyId;
+  final String deliveryBoyName;
 
   SalesInvoiceRequest({
     required this.transactionDate,
@@ -75,6 +77,8 @@ class SalesInvoiceRequest {
     this.orderDate,
     required this.currencyId,
     this.remarks='',
+    this.deliveryBoyId = '',
+    this.deliveryBoyName = '',
   });
 
   Map<String, dynamic> toJson() {
@@ -118,6 +122,8 @@ class SalesInvoiceRequest {
       'OrderDate': orderDate,
       'CurrencyId': currencyId,
       'Remarks':remarks,
+      'DeliveryBoyId': deliveryBoyId,
+      'DeliveryBoyName': deliveryBoyName,
     };
   }
 }

@@ -10,6 +10,7 @@ import '../core/network/network_checker.dart';
 import '../core/network/providers.dart';
 import '../core/utils/tax_calculator.dart';
 import '../dto/sales_invoice_request.dart';
+import '../core/auth/auth_storage.dart';
 import '../dto/sales_return_request.dart';
 import '../models/estimate.dart';
 import '../models/sales_return.dart';
@@ -140,6 +141,7 @@ class SyncRepository {
       );
       return;
     }
+    final driverId = await getSavedDriverId() ?? '';
     final estimate = Estimate.fromMap(estimateMaps.first);
     final customerId = deliveryMaps.first['customer_id'] as String?;
 
@@ -264,6 +266,7 @@ class SyncRepository {
       customerId: customerId,
       customerName: customerName,
       outletId: _outletId,
+      deliveryBoyId: driverId,
       totalQuantity: totalQty,
       totalGrossAmount: totalGrossAmountExcTax,
       totalGrossAmountIncludingTax: totalGrossAmountIncTax,
@@ -343,6 +346,7 @@ class SyncRepository {
       return;
     }
     final sr = SalesReturn.fromMap(maps.first);
+    final driverId = await getSavedDriverId() ?? '';
 
     final itemMaps = await _db.query('sales_return_item',
         where: 'sales_return_id = ?', whereArgs: [sr.id]);
@@ -485,6 +489,7 @@ class SyncRepository {
       customerName: customerName,
       remarks: sr.reason ?? sr.remarks ?? '',
       outletId: _outletId,
+      deliveryBoyId: driverId,
       totalQuantity: totalQty,
       totalGrossAmount: totalGrossAmount,
       totalGrossAmountIncludingTax: totalGrossAmountIncTax,

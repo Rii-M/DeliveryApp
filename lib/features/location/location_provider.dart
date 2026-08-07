@@ -87,7 +87,7 @@ class LocationStateNotifier extends StateNotifier<LocationState> {
   }) : _driverId = initialDriverId,
        _baseUrl = initialBaseUrl,
        _token = initialToken,
-       super(const LocationState()) {
+       super(LocationState(driverId: initialDriverId)) {
     _init();
   }
 
