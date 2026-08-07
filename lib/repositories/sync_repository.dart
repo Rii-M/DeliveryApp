@@ -142,6 +142,7 @@ class SyncRepository {
       return;
     }
     final driverId = await getSavedDriverId() ?? '';
+    final driverName = await getSavedDriverName() ?? '';  // first name
     final estimate = Estimate.fromMap(estimateMaps.first);
     final customerId = deliveryMaps.first['customer_id'] as String?;
 
@@ -267,6 +268,7 @@ class SyncRepository {
       customerName: customerName,
       outletId: _outletId,
       deliveryBoyId: driverId,
+      deliveryBoyName: driverName,
       totalQuantity: totalQty,
       totalGrossAmount: totalGrossAmountExcTax,
       totalGrossAmountIncludingTax: totalGrossAmountIncTax,
@@ -347,6 +349,7 @@ class SyncRepository {
     }
     final sr = SalesReturn.fromMap(maps.first);
     final driverId = await getSavedDriverId() ?? '';
+    final driverName = await getSavedDriverName() ?? '';
 
     final itemMaps = await _db.query('sales_return_item',
         where: 'sales_return_id = ?', whereArgs: [sr.id]);
@@ -490,6 +493,7 @@ class SyncRepository {
       remarks: sr.reason ?? sr.remarks ?? '',
       outletId: _outletId,
       deliveryBoyId: driverId,
+      deliveryBoyName: driverName,
       totalQuantity: totalQty,
       totalGrossAmount: totalGrossAmount,
       totalGrossAmountIncludingTax: totalGrossAmountIncTax,

@@ -7,6 +7,7 @@ const _driverIdKey = 'auth_driver_id';
 const _userNameKey = 'auth_user_name';
 const _outletIdKey = 'auth_outlet_id';
 const _emailKey = 'auth_email';
+const _driverNameKey = 'auth_driver_name';
 
 const _storage = FlutterSecureStorage();
 
@@ -26,6 +27,10 @@ Future<String?> getSavedDriverId() async {
   return _storage.read(key: _driverIdKey);
 }
 
+Future<String?> getSavedDriverName() async {
+  return _storage.read(key: _driverNameKey);
+}
+
 Future<String?> getSavedUserName() async {
   return _storage.read(key: _userNameKey);
 }
@@ -43,6 +48,7 @@ Future<void> saveAuthData({
   required String baseUrl,
   String? customerId,
   String? driverId,
+  String? driverName,
   String? userName,
   String? email,
   String? outletId,
@@ -54,6 +60,9 @@ Future<void> saveAuthData({
   }
   if (driverId != null) {
     await _storage.write(key: _driverIdKey, value: driverId);
+  }
+  if (driverName != null) {
+    await _storage.write(key: _driverNameKey, value: driverName);
   }
   if (userName != null) {
     await _storage.write(key: _userNameKey, value: userName);
@@ -71,6 +80,7 @@ Future<void> clearAuthData() async {
   await _storage.delete(key: _baseUrlKey);
   await _storage.delete(key: _customerIdKey);
   await _storage.delete(key: _driverIdKey);
+  await _storage.delete(key: _driverNameKey);
   await _storage.delete(key: _userNameKey);
   await _storage.delete(key: _outletIdKey);
 }

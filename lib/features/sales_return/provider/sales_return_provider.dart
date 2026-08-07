@@ -160,6 +160,7 @@ final salesReturnProvider =
     paymentModeRepo: ref.read(paymentModeRepositoryProvider),
     apiService: ref.read(apiServiceProvider),
     locationState: ref.read(locationStateProvider),
+    driverName: ref.read(authProvider).driverName ?? '',   
     networkChecker: ref.read(networkCheckerProvider),
     outletId: ref.read(authProvider).outletId ?? ApiConfig.emptyGuid,
   );
@@ -173,6 +174,7 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
   final PaymentModeRepository _paymentModeRepo;
   final ApiService _apiService;
   final LocationState _locationState;
+  final String _driverName;
   final NetworkChecker _networkChecker;
   final String _outletId;
 
@@ -184,10 +186,12 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
     required this._paymentModeRepo,
     required this._apiService,
     required this._locationState,
+   required String driverName,
     required this._networkChecker,
     required String outletId,
   })  : _productRepo = productRepo,
         _outletId = outletId,
+        _driverName = driverName,
         super(SalesReturnState()) {
     _loadInitialData();
   }
@@ -698,7 +702,7 @@ void clearItems() {
 
       // Get delivery boy ID from location provider
       final deliveryBoyId = _locationState.driverId ?? '';
-
+      final deliveryBoyName = _driverName;
       // Build the request
       final request = SalesReturnRequest(
         transactionDate: transactionDate,
@@ -736,6 +740,7 @@ void clearItems() {
         currencyId: ApiConfig.defaultCurrencyId,
         volumeDiscount: state.discountAmount,
         deliveryBoyId: deliveryBoyId,
+        deliveryBoyName: deliveryBoyName,
       );
 
       // Determine payment mode string for local storage
