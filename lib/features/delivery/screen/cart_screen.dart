@@ -233,21 +233,13 @@ class _CartItemCardState extends State<_CartItemCard> {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Expanded(
-                  child: Text(
-                    widget.item.productName,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
                 IconButton(
                   icon: Icon(
                     Icons.close,
@@ -261,42 +253,17 @@ class _CartItemCardState extends State<_CartItemCard> {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Row(
               children: [
-                // Commented out: rate/price edit disabled for now.
-                // GestureDetector(
-                //   onTap: () => _showPriceEditor(context, theme),
-                //   child: Container(
-                //     padding: const EdgeInsets.symmetric(
-                //       horizontal: 8,
-                //       vertical: 4,
-                //     ),
-                //     decoration: BoxDecoration(
-                //       color: theme.colorScheme.surfaceContainerHighest,
-                //       borderRadius: BorderRadius.circular(6),
-                //     ),
-                //     child: Row(
-                //       mainAxisSize: MainAxisSize.min,
-                //       children: [
-                //         Text(
-                //           'Rs. ${widget.item.unitPrice.toStringAsFixed(2)}',
-                //           style: theme.textTheme.bodySmall?.copyWith(
-                //             fontWeight: FontWeight.w600,
-                //             color: theme.colorScheme.primary,
-                //           ),
-                //         ),
-                //         const SizedBox(width: 4),
-                //         Icon(
-                //           Icons.edit,
-                //           size: 12,
-                //           color: theme.colorScheme.primary,
-                //         ),
-                //       ],
-                //     ),
-                //   ),
-                // ),
-                const Spacer(),
+                Expanded(
+                  child: Text(
+                    widget.item.productName,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
                 if (widget.units.length > 1)
                   Container(
                     margin: const EdgeInsets.only(right: 8),
@@ -322,8 +289,25 @@ class _CartItemCardState extends State<_CartItemCard> {
                       ),
                     ),
                   ),
+                IconButton(
+                  icon: Icon(
+                    Icons.remove_circle_outline,
+                    size: 20,
+                    color: theme.colorScheme.error,
+                  ),
+                  onPressed: () {
+                    if (widget.item.quantity <= 1) {
+                      widget.onRemove();
+                    } else {
+                      widget.onQuantityChanged(widget.item.quantity - 1);
+                    }
+                  },
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
                 SizedBox(
-                  width: 80,
+                  width: 48,
                   child: Focus(
                     onFocusChange: (focused) {
                       if (!focused) _applyQty();
@@ -342,8 +326,8 @@ class _CartItemCardState extends State<_CartItemCard> {
                       textAlign: TextAlign.center,
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 8,
+                          vertical: 4,
+                          horizontal: 4,
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
@@ -362,51 +346,29 @@ class _CartItemCardState extends State<_CartItemCard> {
                     ),
                   ),
                 ),
+                IconButton(
+                  icon: Icon(
+                    Icons.add_circle_outline,
+                    size: 20,
+                    color: theme.colorScheme.primary,
+                  ),
+                  onPressed: () =>
+                      widget.onQuantityChanged(widget.item.quantity + 1),
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
               ],
             ),
             const SizedBox(height: 8),
             Row(
               children: [
-                // Commented out: discount input disabled for now.
-                // SizedBox(
-                //   width: 120,
-                //   child: Focus(
-                //     onFocusChange: (focused) {
-                //       setState(() => _isDiscountFocused = focused);
-                //     },
-                //     child: TextField(
-                //     controller: _discountController,
-                //     keyboardType: const TextInputType.numberWithOptions(
-                //       decimal: true,
-                //     ),
-                //     inputFormatters: [
-                //       FilteringTextInputFormatter.allow(
-                //         RegExp(r'^\d*\.?\d{0,2}'),
-                //       ),
-                //     ],
-                //     decoration: InputDecoration(
-                //       contentPadding: const EdgeInsets.symmetric(
-                //         vertical: 8,
-                //         horizontal: 8,
-                //       ),
-                //       border: OutlineInputBorder(
-                //         borderRadius: BorderRadius.circular(8),
-                //       ),
-                //       isDense: true,
-                //       labelText: l10n.discount,
-                //       prefixText: 'Rs. ',
-                //     ),
-                //     style: theme.textTheme.bodySmall?.copyWith(
-                //       fontWeight: FontWeight.w600,
-                //       color: theme.colorScheme.error,
-                //     ),
-                //     onChanged: (value) {
-                //       final discount = double.tryParse(value) ?? 0;
-                //       widget.onDiscountChanged(discount);
-                //     },
-                //   ),
-                //   ),
-                // ),
+                Text(
+                  'Rs. ${widget.item.unitPrice.toStringAsFixed(2)}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
                 const Spacer(),
                 Text(
                   l10n.lineTotal,
