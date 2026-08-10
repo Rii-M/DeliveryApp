@@ -717,11 +717,9 @@ class _PaymentEntryRowState extends ConsumerState<_PaymentEntryRow> {
         _isTyping = false;
         final current = double.tryParse(_amountController.text) ?? 0;
         if (current > 0) {
-          final maxAllowed = widget.payment.amount + ref.read(estimateProvider).remainingAmount;
-          final clamped = current > maxAllowed ? maxAllowed : current;
-          _amountController.text = clamped.toStringAsFixed(2);
+           _amountController.text = current.toStringAsFixed(2);
           ref.read(estimateProvider.notifier)
-              .updatePaymentEntryAmount(widget.index, clamped);
+              .updatePaymentEntryAmount(widget.index, current);
         }
       } else {
         _isTyping = true;
@@ -807,11 +805,8 @@ class _PaymentEntryRowState extends ConsumerState<_PaymentEntryRow> {
                       .updatePaymentEntryAmount(widget.index, 0);
                   return;
                 }
-                final maxAllowed = widget.payment.amount +
-                    ref.read(estimateProvider).remainingAmount;
-                final clamped = parsed > maxAllowed ? maxAllowed : parsed;
                 ref.read(estimateProvider.notifier)
-                    .updatePaymentEntryAmount(widget.index, clamped);
+                    .updatePaymentEntryAmount(widget.index, parsed);
               },
             ),
           ),
