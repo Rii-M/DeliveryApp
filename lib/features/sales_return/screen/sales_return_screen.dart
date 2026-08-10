@@ -100,59 +100,61 @@ class _SalesReturnScreenState extends ConsumerState<SalesReturnScreen> {
               ),
             ),
             const Spacer(),
-            if (state.selectedCategory != null)
-              TextButton.icon(
-                onPressed: () => ref
-                    .read(salesReturnProvider.notifier)
-                    .selectCategory(null),
-                icon: const Icon(Icons.clear, size: 16),
-                label: Text(l10n.clearFilter),
-              ),
+            // Commented out: category filter clear button disabled for now.
+            // if (state.selectedCategory != null)
+            //   TextButton.icon(
+            //     onPressed: () => ref
+            //         .read(salesReturnProvider.notifier)
+            //         .selectCategory(null),
+            //     icon: const Icon(Icons.clear, size: 16),
+            //     label: Text(l10n.clearFilter),
+            //   ),
           ],
         ),
-        const SizedBox(height: 8),
-        SizedBox(
-          height: 50,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: state.categories.length + 1,
-            separatorBuilder: (_, _) => const SizedBox(width: 8),
-            itemBuilder: (context, index) {
-              if (index == 0) {
-                final isSelected = state.selectedCategory == null;
-                return FilterChip(
-                  label: Text(l10n.all),
-                  selected: isSelected,
-                  onSelected: (_) => ref
-                      .read(salesReturnProvider.notifier)
-                      .selectCategory(null),
-                );
-              }
-              final cat = state.categories[index - 1];
-              final isSelected =
-                  state.selectedCategory?.serverId == cat.serverId;
-              return FilterChip(
-                avatar: cat.firstImageUrl != null
-                    ? ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: cat.firstImageUrl!,
-                          width: 24,
-                          height: 24,
-                          fit: BoxFit.cover,
-                          placeholder: (_, __) => const SizedBox.shrink(),
-                          errorWidget: (_, __, ___) => const SizedBox.shrink(),
-                        ),
-                      )
-                    : null,
-                label: Text(cat.localizedName(langCode)),
-                selected: isSelected,
-                onSelected: (_) => ref
-                    .read(salesReturnProvider.notifier)
-                    .selectCategory(isSelected ? null : cat),
-              );
-            },
-          ),
-        ),
+        // Commented out: category filter chips disabled for now.
+        // const SizedBox(height: 8),
+        // SizedBox(
+        //   height: 50,
+        //   child: ListView.separated(
+        //     scrollDirection: Axis.horizontal,
+        //     itemCount: state.categories.length + 1,
+        //     separatorBuilder: (_, _) => const SizedBox(width: 8),
+        //     itemBuilder: (context, index) {
+        //       if (index == 0) {
+        //         final isSelected = state.selectedCategory == null;
+        //         return FilterChip(
+        //           label: Text(l10n.all),
+        //           selected: isSelected,
+        //           onSelected: (_) => ref
+        //               .read(salesReturnProvider.notifier)
+        //               .selectCategory(null),
+        //         );
+        //       }
+        //       final cat = state.categories[index - 1];
+        //       final isSelected =
+        //           state.selectedCategory?.serverId == cat.serverId;
+        //       return FilterChip(
+        //         avatar: cat.firstImageUrl != null
+        //             ? ClipOval(
+        //                 child: CachedNetworkImage(
+        //                   imageUrl: cat.firstImageUrl!,
+        //                   width: 24,
+        //                   height: 24,
+        //                   fit: BoxFit.cover,
+        //                   placeholder: (_, __) => const SizedBox.shrink(),
+        //                   errorWidget: (_, __, ___) => const SizedBox.shrink(),
+        //                 ),
+        //               )
+        //             : null,
+        //         label: Text(cat.localizedName(langCode)),
+        //         selected: isSelected,
+        //         onSelected: (_) => ref
+        //             .read(salesReturnProvider.notifier)
+        //             .selectCategory(isSelected ? null : cat),
+        //       );
+        //     },
+        //   ),
+        // ),
         const SizedBox(height: 12),
         TextField(
           decoration: InputDecoration(
