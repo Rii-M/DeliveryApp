@@ -138,7 +138,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 24),
                   SizedBox(
-                    height: 48,
+                    height: 52,
                     child: ElevatedButton(
                       onPressed: state.isLoading
                           ? null
