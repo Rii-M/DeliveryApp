@@ -147,7 +147,7 @@ class DeliveryFormState {
 }
 
 final deliveryFormProvider =
-    StateNotifierProvider.autoDispose<DeliveryFormNotifier, DeliveryFormState>((
+    StateNotifierProvider<DeliveryFormNotifier, DeliveryFormState>((
       ref,
     ) {
       return DeliveryFormNotifier(

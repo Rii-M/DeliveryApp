@@ -19,6 +19,16 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
   // Commented out: discount value controller disabled for now.
   // final _discountValueController = TextEditingController();
 
+@override
+void initState() {
+  super.initState();
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (ref.read(salesReturnProvider).saved) {
+      ref.read(salesReturnProvider.notifier).reset();
+    }
+  });
+}
+
   @override
   void dispose() {
     // _discountValueController.dispose();

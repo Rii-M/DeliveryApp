@@ -29,7 +29,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
         ref
             .read(deliveryFormProvider.notifier)
             .loadExistingDelivery(widget.deliveryId!);
-      } else {
+      } else if (ref.read(deliveryFormProvider).delivery != null)  {
         ref.read(deliveryFormProvider.notifier).resetForm();
       }
     });

@@ -151,7 +151,7 @@ double itemQuantityOf(String productId) => items
 }
 
 final salesReturnProvider =
-    StateNotifierProvider.autoDispose<SalesReturnNotifier, SalesReturnState>((ref) {
+    StateNotifierProvider<SalesReturnNotifier, SalesReturnState>((ref) {
   return SalesReturnNotifier(
     categoryRepo: ref.read(categoryRepositoryProvider),
     customerRepo: ref.read(customerRepositoryProvider),
