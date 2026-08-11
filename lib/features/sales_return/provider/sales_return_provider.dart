@@ -774,7 +774,8 @@ void clearItems() {
             isSynced: true,
           );
 
-          state = _copyWithAll(saved: true, isSaving: false);
+          // state = _copyWithAll(saved: true, isSaving: false);
+          _finishSuccessfulSave();
           return true;
         } else {
           throw Exception('Failed to save sales return to server');
@@ -794,7 +795,8 @@ void clearItems() {
           // skipSync: true,
         );
 
-        state = _copyWithAll(saved: true, isSaving: false);
+        // state = _copyWithAll(saved: true, isSaving: false);
+        _finishSuccessfulSave();
         return true;
       }
     } catch (e) {
@@ -814,4 +816,14 @@ void clearItems() {
        categories: state.categories,
     );
   }
+
+  void _finishSuccessfulSave() {
+  state = SalesReturnState(
+    customers: state.customers,
+    products: state.products,
+    paymentModes: state.paymentModes,
+    categories: state.categories,
+    saved: true,
+  );
+}
 }
