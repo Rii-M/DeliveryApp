@@ -35,7 +35,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isAuthenticated = authState.status == AuthStatus.authenticated;
       final isLoginRoute = state.matchedLocation == '/login';
       if (!isAuthenticated && !isLoginRoute) return '/login';
-      if (isAuthenticated && isLoginRoute) return '/dashboard';
+      if (isAuthenticated && isLoginRoute) return '/sales-return';
       return null;
     },
     routes: [
