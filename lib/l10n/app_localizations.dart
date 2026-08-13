@@ -938,6 +938,24 @@ abstract class AppLocalizations {
   /// **'Search customer...'**
   String get searchCustomer;
 
+  /// No description provided for @changeCustomerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change customer?'**
+  String get changeCustomerTitle;
+
+  /// No description provided for @changeCustomerMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will clear {count} items already in the cart.'**
+  String changeCustomerMessage(Object count);
+
+  /// No description provided for @clearAndContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear & continue'**
+  String get clearAndContinue;
+
   /// No description provided for @selectCategory.
   ///
   /// In en, this message translates to:

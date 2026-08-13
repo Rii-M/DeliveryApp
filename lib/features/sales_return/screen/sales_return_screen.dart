@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/customer_picker_sheet.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../models/customer.dart';
 import '../provider/sales_return_provider.dart';
 
 class SalesReturnScreen extends ConsumerStatefulWidget {
@@ -14,6 +16,104 @@ class SalesReturnScreen extends ConsumerStatefulWidget {
 }
 
 class _SalesReturnScreenState extends ConsumerState<SalesReturnScreen> {
+  bool _customerPickerOpen = false;
+  bool _autoOpenScheduled = false;
+
+  void _openCustomerPicker() {
+    if (_customerPickerOpen) return;
+    setState(() => _customerPickerOpen = true);
+  }
+
+  void _handleCustomerSelected(Customer customer) {
+    setState(() => _customerPickerOpen = false);
+    ref.read(salesReturnProvider.notifier).selectCustomer(customer);
+  }
+
+  Widget _buildCustomerPickerOverlay() {
+    final state = ref.read(salesReturnProvider);
+    return ColoredBox(
+      color: Colors.black54,
+      child: SafeArea(
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: CustomerPickerSheet(
+            customers: state.customers,
+            selectedCustomer: state.selectedCustomer,
+            onCustomerSelected: _handleCustomerSelected,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleTitleTap() async {
+    final l10n = AppLocalizations.of(context)!;
+    final state = ref.read(salesReturnProvider);
+    final itemCount = state.items.length;
+
+    if (itemCount > 0) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(l10n.changeCustomerTitle),
+          content: Text(l10n.changeCustomerMessage(itemCount)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(l10n.clearAndContinue),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+      ref.read(salesReturnProvider.notifier).clearItems();
+    }
+
+    _openCustomerPicker();
+  }
+
+  Widget _buildAppBarTitle(SalesReturnState state, ThemeData theme) {
+    final customer = state.selectedCustomer;
+    final appLocalizations = AppLocalizations.of(context)!;
+    if (customer == null) {
+      return Text(appLocalizations.salesReturn);
+    }
+    return InkWell(
+      onTap: _handleTitleTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                customer.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: _customerPickerOpen ? theme.colorScheme.primary : null,
+                ),
+              ),
+            ),
+            const SizedBox(width: 2),
+            Icon(
+              _customerPickerOpen
+                  ? Icons.keyboard_arrow_up
+                  : Icons.keyboard_arrow_down,
+              size: 22,
+              color: _customerPickerOpen ? theme.colorScheme.primary : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(salesReturnProvider);
@@ -21,28 +121,48 @@ class _SalesReturnScreenState extends ConsumerState<SalesReturnScreen> {
     final l10n = AppLocalizations.of(context)!;
     final langCode = Localizations.localeOf(context).languageCode;
 
+    if (!state.isLoading &&
+        !state.saved &&
+        state.selectedCustomer == null &&
+        !_customerPickerOpen &&
+        !_autoOpenScheduled) {
+      _autoOpenScheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _autoOpenScheduled = false;
+        if (mounted && !_customerPickerOpen) {
+          _openCustomerPicker();
+        }
+      });
+    }
+
     final totalQty = state.items.fold<double>(0, (sum, i) => sum + i.quantity);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.salesReturn),
-        actions: [
-          if (state.items.isNotEmpty)
-            IconButton(
-              icon: Badge(
-                label: Text(totalQty.toStringAsFixed(0)),
-                isLabelVisible: true,
-                child: const Icon(Icons.shopping_cart_outlined),
-              ),
-              onPressed: () => _openCart(context),
-            ),
-        ],
-      ),
-      body: state.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : state.saved
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            title: _buildAppBarTitle(state, theme),
+            actions: [
+              if (state.items.isNotEmpty)
+                IconButton(
+                  icon: Badge(
+                    label: Text(totalQty.toStringAsFixed(0)),
+                    isLabelVisible: true,
+                    child: const Icon(Icons.shopping_cart_outlined),
+                  ),
+                  onPressed: () => _openCart(context),
+                ),
+            ],
+          ),
+          body: state.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : state.saved
               ? _buildSuccessState(theme, l10n)
               : _buildProductBrowser(state, theme, l10n, langCode),
+        ),
+        if (_customerPickerOpen)
+          Positioned.fill(child: _buildCustomerPickerOverlay()),
+      ],
     );
   }
 
@@ -51,11 +171,7 @@ class _SalesReturnScreenState extends ConsumerState<SalesReturnScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.check_circle,
-            size: 72,
-            color: theme.colorScheme.primary,
-          ),
+          Icon(Icons.check_circle, size: 72, color: theme.colorScheme.primary),
           const SizedBox(height: 16),
           Text(l10n.salesReturnSaved, style: theme.textTheme.titleLarge),
           const SizedBox(height: 8),
@@ -88,7 +204,8 @@ class _SalesReturnScreenState extends ConsumerState<SalesReturnScreen> {
     AppLocalizations l10n,
     String langCode,
   ) {
-    return ListView(
+    final hasCustomer = state.selectedCustomer != null;
+    final list = ListView(
       padding: const EdgeInsets.all(16),
       children: [
         Row(
@@ -182,6 +299,10 @@ class _SalesReturnScreenState extends ConsumerState<SalesReturnScreen> {
         const SizedBox(height: 12),
         _buildProductGrid(state, theme, l10n, langCode),
       ],
+    );
+    return AbsorbPointer(
+      absorbing: !hasCustomer,
+      child: Opacity(opacity: hasCustomer ? 1 : 0.5, child: list),
     );
   }
 

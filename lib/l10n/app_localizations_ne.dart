@@ -449,6 +449,17 @@ class AppLocalizationsNe extends AppLocalizations {
   String get searchCustomer => 'ग्राहक खोज्नुहोस्...';
 
   @override
+  String get changeCustomerTitle => 'ग्राहक परिवर्तन गर्नुहोस्?';
+
+  @override
+  String changeCustomerMessage(Object count) {
+    return 'यसले कार्टमा रहेका $count वस्तुहरू हटाउनेछ।';
+  }
+
+  @override
+  String get clearAndContinue => 'हटाएर जारी राख्नुहोस्';
+
+  @override
   String get selectCategory => 'कोटी चयन गर्नुहोस्';
 
   @override

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../models/sales_return.dart';
-import '../../delivery/widgets/customer_dropdown.dart';
 import '../provider/sales_return_provider.dart';
 
 class SalesReturnCartScreen extends ConsumerStatefulWidget {
@@ -19,15 +18,15 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
   // Commented out: discount value controller disabled for now.
   // final _discountValueController = TextEditingController();
 
-@override
-void initState() {
-  super.initState();
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (ref.read(salesReturnProvider).saved) {
-      ref.read(salesReturnProvider.notifier).reset();
-    }
-  });
-}
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (ref.read(salesReturnProvider).saved) {
+        ref.read(salesReturnProvider.notifier).reset();
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -73,15 +72,7 @@ void initState() {
                   ),
                 ),
                 const SizedBox(height: 12),
-                CustomerDropdown(
-                  customers: state.customers,
-                  selectedCustomer: state.selectedCustomer,
-                  onChanged: (customer) {
-                    ref
-                        .read(salesReturnProvider.notifier)
-                        .selectCustomer(customer);
-                  },
-                ),
+                _buildSelectedCustomerCard(state, theme),
                 const SizedBox(height: 24),
                 _buildItemsSection(state, theme, l10n),
                 const SizedBox(height: 16),
@@ -108,9 +99,9 @@ void initState() {
                             border: const OutlineInputBorder(),
                           ),
                           onChanged: (value) {
-                            ref.read(salesReturnProvider.notifier).setReason(
-                              value.isEmpty ? null : value,
-                            );
+                            ref
+                                .read(salesReturnProvider.notifier)
+                                .setReason(value.isEmpty ? null : value);
                           },
                         ),
                       ],
@@ -141,6 +132,31 @@ void initState() {
                 ),
               ],
             ),
+    );
+  }
+
+  Widget _buildSelectedCustomerCard(SalesReturnState state, ThemeData theme) {
+    final customer = state.selectedCustomer;
+    final initial = (customer != null && customer.name.isNotEmpty)
+        ? customer.name[0].toUpperCase()
+        : '?';
+    return Card(
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: theme.colorScheme.primaryContainer,
+          child: Text(
+            initial,
+            style: TextStyle(
+              color: theme.colorScheme.onPrimaryContainer,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        title: Text(customer?.name ?? ''),
+        subtitle: customer?.address != null && customer!.address!.isNotEmpty
+            ? Text(customer.address!)
+            : null,
+      ),
     );
   }
 
@@ -191,8 +207,9 @@ void initState() {
                   backgroundColor: theme.colorScheme.primaryContainer,
                   child: Text(
                     '${index + 1}',
-                    style: theme.textTheme.labelSmall
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 title: Text(item.productName, overflow: TextOverflow.ellipsis),
@@ -231,11 +248,7 @@ void initState() {
     );
   }
 
-  void _showItemDetails(
-    BuildContext context,
-    int index,
-    SalesReturnItem item,
-  ) {
+  void _showItemDetails(BuildContext context, int index, SalesReturnItem item) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -340,14 +353,16 @@ void initState() {
             amount >= 0
                 ? 'Rs. ${amount.toStringAsFixed(2)}'
                 : '- Rs. ${(-amount).toStringAsFixed(2)}',
-            style: (bold
-                    ? theme.textTheme.bodyMedium
-                        ?.copyWith(fontWeight: FontWeight.w600)
-                    : theme.textTheme.bodyMedium)
-                ?.copyWith(
-              color: color,
-              fontWeight: bold ? FontWeight.w600 : null,
-            ),
+            style:
+                (bold
+                        ? theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          )
+                        : theme.textTheme.bodyMedium)
+                    ?.copyWith(
+                      color: color,
+                      fontWeight: bold ? FontWeight.w600 : null,
+                    ),
           ),
         ],
       ),
@@ -485,8 +500,9 @@ class _PaymentModalSheetState extends ConsumerState<_PaymentModalSheet> {
   void initState() {
     super.initState();
     final state = ref.read(salesReturnProvider);
-    final paymentEntry =
-        state.paymentEntries.isNotEmpty ? state.paymentEntries.first : null;
+    final paymentEntry = state.paymentEntries.isNotEmpty
+        ? state.paymentEntries.first
+        : null;
     final paymentAmount = paymentEntry?.amount ?? state.netTotalIncTax;
     _amountController = TextEditingController(
       text: paymentAmount > 0 ? paymentAmount.toStringAsFixed(2) : '',
@@ -505,14 +521,16 @@ class _PaymentModalSheetState extends ConsumerState<_PaymentModalSheet> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    final paymentEntry =
-        state.paymentEntries.isNotEmpty ? state.paymentEntries.first : null;
+    final paymentEntry = state.paymentEntries.isNotEmpty
+        ? state.paymentEntries.first
+        : null;
     final paymentModeId = paymentEntry?.paymentModeId ?? '';
     final paymentAmount = paymentEntry?.amount ?? state.netTotalIncTax;
 
     final currentText = _amountController.text;
-    final expectedText =
-        paymentAmount > 0 ? paymentAmount.toStringAsFixed(2) : '';
+    final expectedText = paymentAmount > 0
+        ? paymentAmount.toStringAsFixed(2)
+        : '';
     if (currentText != expectedText && !_amountController.selection.isValid) {
       _amountController.text = expectedText;
     }
@@ -534,8 +552,9 @@ class _PaymentModalSheetState extends ConsumerState<_PaymentModalSheet> {
                 Expanded(
                   child: Text(
                     l10n.paymentDetails,
-                    style: theme.textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 IconButton(
@@ -574,7 +593,9 @@ class _PaymentModalSheetState extends ConsumerState<_PaymentModalSheet> {
             ),
             const SizedBox(height: 12),
             TextField(
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
               ],
@@ -609,8 +630,9 @@ class _PaymentModalSheetState extends ConsumerState<_PaymentModalSheet> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest
-                    .withValues(alpha: 0.3),
+                color: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.3,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -620,13 +642,15 @@ class _PaymentModalSheetState extends ConsumerState<_PaymentModalSheet> {
                     children: [
                       Text(
                         '${l10n.total}:',
-                        style: theme.textTheme.bodyMedium
-                            ?.copyWith(fontWeight: FontWeight.w600),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       Text(
                         'Rs. ${state.netTotalIncTax.toStringAsFixed(2)}',
-                        style: theme.textTheme.bodyMedium
-                            ?.copyWith(fontWeight: FontWeight.w600),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ],
                   ),
@@ -756,8 +780,9 @@ class _ItemDetailSheetState extends ConsumerState<_ItemDetailSheet> {
                 Expanded(
                   child: Text(
                     item.productName,
-                    style: theme.textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w600),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 IconButton(
@@ -772,8 +797,9 @@ class _ItemDetailSheetState extends ConsumerState<_ItemDetailSheet> {
               children: [
                 Text(
                   l10n.quantity,
-                  style: theme.textTheme.labelMedium
-                      ?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 IconButton(
@@ -789,8 +815,9 @@ class _ItemDetailSheetState extends ConsumerState<_ItemDetailSheet> {
                 ),
                 Text(
                   qtyText,
-                  style: theme.textTheme.bodyLarge
-                      ?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 IconButton(
                   icon: Icon(
@@ -898,8 +925,9 @@ class _ItemDetailSheetState extends ConsumerState<_ItemDetailSheet> {
               children: [
                 Text(
                   'Amount: Rs. ${item.lineTotal.toStringAsFixed(2)}',
-                  style: theme.textTheme.titleMedium
-                      ?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 FilledButton.tonal(
                   style: FilledButton.styleFrom(

@@ -449,6 +449,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchCustomer => 'Search customer...';
 
   @override
+  String get changeCustomerTitle => 'Change customer?';
+
+  @override
+  String changeCustomerMessage(Object count) {
+    return 'This will clear $count items already in the cart.';
+  }
+
+  @override
+  String get clearAndContinue => 'Clear & continue';
+
+  @override
   String get selectCategory => 'Select Category';
 
   @override
