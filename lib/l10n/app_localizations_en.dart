@@ -267,6 +267,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noEstimatesForToday => 'No estimates for today';
 
   @override
+  String get goToSalesReturn => 'Go to Sales Return';
+
+  @override
+  String get goToDelivery => 'Go to Delivery';
+
+  @override
   String get salesReturnSaved => 'Sales Return Saved';
 
   @override

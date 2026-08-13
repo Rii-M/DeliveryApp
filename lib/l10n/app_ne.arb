@@ -95,6 +95,7 @@
   "salesReturnSaved": "सेल्स रिटर्न सुरक्षित भयो",
   "successfullyRecorded": "सफलतापूर्वक रेकर्ड गरियो",
   "newSalesReturn": "नयाँ सेल्स रिटर्न",
+  "newDelivery":"नयाँ डेलिभरी",
   "product": "उत्पादन",
   "products": "उत्पादनहरू",
   "quantity": "मात्रा",
@@ -143,6 +144,8 @@
   "addPayment": "भुक्तानी थप्नुहोस्",
   "makePayment": "भुक्तानी गर्नुहोस्",
   "volumeDiscount": "भोल्युम छुट",
+  "goToSalesReturn": "सेल्स रिटर्नमा जानुहोस्",
+  "goToDelivery": "डेलिभरीमा जानुहोस्",
 
   "logout": "लग आउट",
   "confirmLogout": "के तपाईं लग आउट गर्न चाहनुहुन्छ?",

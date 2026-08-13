@@ -202,8 +202,8 @@ class _SalesReturnScreenState extends ConsumerState<SalesReturnScreen> {
           ),
           const SizedBox(height: 12),
           OutlinedButton(
-            onPressed: () => context.go('/dashboard'),
-            child: Text(l10n.backToDashboard),
+            onPressed: () => context.go('/delivery'),
+            child: Text(l10n.goToDelivery),
           ),
         ],
       ),

@@ -97,9 +97,12 @@
   "todaysEstimates": "Today's Estimates",
   "noEstimatesForToday": "No estimates for today",
 
+  "goToSalesReturn": "Go to Sales Return",
+  "goToDelivery": "Go to Delivery",
   "salesReturnSaved": "Sales Return Saved",
   "successfullyRecorded": "Successfully recorded",
   "newSalesReturn": "New Sales Return",
+  "newDelivery": "New Delivery",
   "product": "Product",
   "products": "Products",
   "quantity": "Quantity",

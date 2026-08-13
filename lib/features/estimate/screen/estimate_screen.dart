@@ -141,7 +141,15 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
                   ref.read(estimateProvider.notifier).reset();
                   context.pop();
                 },
-                child: Text(l10n.backToDelivery),
+                child: Text(l10n.newDelivery),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: () {
+                  ref.read(estimateProvider.notifier).reset();
+                  context.go('/sales-return');
+                },
+                child: Text(l10n.goToSalesReturn),
               ),
             ],
           ),

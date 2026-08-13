@@ -602,6 +602,18 @@ abstract class AppLocalizations {
   /// **'No estimates for today'**
   String get noEstimatesForToday;
 
+  /// No description provided for @goToSalesReturn.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Sales Return'**
+  String get goToSalesReturn;
+
+  /// No description provided for @goToDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Delivery'**
+  String get goToDelivery;
+
   /// No description provided for @salesReturnSaved.
   ///
   /// In en, this message translates to:

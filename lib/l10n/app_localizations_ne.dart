@@ -267,6 +267,12 @@ class AppLocalizationsNe extends AppLocalizations {
   String get noEstimatesForToday => 'आजको लागि कुनै अनुमान छैन';
 
   @override
+  String get goToSalesReturn => 'सेल्स रिटर्नमा जानुहोस्';
+
+  @override
+  String get goToDelivery => 'डेलिभरीमा जानुहोस्';
+
+  @override
   String get salesReturnSaved => 'सेल्स रिटर्न सुरक्षित भयो';
 
   @override
