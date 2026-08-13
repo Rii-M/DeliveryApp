@@ -33,6 +33,15 @@ class _SalesReturnScreenState extends ConsumerState<SalesReturnScreen> {
     setState(() => _customerPickerOpen = false);
     ref.read(salesReturnProvider.notifier).selectCustomer(customer);
   }
+  @override
+void initState() {
+  super.initState();
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (ref.read(salesReturnProvider).saved) {
+      ref.read(salesReturnProvider.notifier).reset();
+    }
+  });
+}
 
   Widget _buildCustomerPickerOverlay() {
     final state = ref.read(salesReturnProvider);
@@ -202,7 +211,11 @@ class _SalesReturnScreenState extends ConsumerState<SalesReturnScreen> {
           ),
           const SizedBox(height: 12),
           OutlinedButton(
-            onPressed: () => context.go('/delivery'),
+            onPressed: () 
+            {
+              ref.read(salesReturnProvider.notifier).reset();
+               context.go('/delivery');
+            },
             child: Text(l10n.goToDelivery),
           ),
         ],
