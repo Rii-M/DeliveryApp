@@ -25,13 +25,15 @@ class CustomerPickerSheet extends StatefulWidget {
 }
 
 class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
+  static const int _initialVisibleCount = 5;
+
   final _searchController = TextEditingController();
   late List<Customer> _filtered;
 
   @override
   void initState() {
     super.initState();
-    _filtered = List.of(widget.customers);
+    _filtered = widget.customers.take(_initialVisibleCount).toList();
   }
 
   @override
@@ -44,7 +46,7 @@ class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
     final query = value.trim().toLowerCase();
     setState(() {
       if (query.isEmpty) {
-        _filtered = List.of(widget.customers);
+        _filtered = widget.customers.take(_initialVisibleCount).toList();
       } else {
         _filtered = widget.customers
             .where(
