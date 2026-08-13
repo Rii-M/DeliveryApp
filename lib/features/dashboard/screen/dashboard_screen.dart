@@ -33,9 +33,35 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
+    final displayName = authState.userName ?? state.driverName;
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.dashboard),
+        toolbarHeight: 64,
+        centerTitle: false,
+        titleSpacing: 0,
+        title:Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              l10n.welcomeBack,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            Text(
+              displayName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+         ),
+        ),
         actions: [
           IconButton(
             icon: Icon(
@@ -57,11 +83,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            _buildDriverHeader(state, authState, theme, l10n),
-            const SizedBox(height: 16),
             _buildLocationTrackingSection(locationState, theme, l10n),
-            const SizedBox(height: 20),
-            _buildStatsRow(state, theme, l10n),
             const SizedBox(height: 20),
             Text(
               l10n.quickActions,
@@ -71,57 +93,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
             const SizedBox(height: 12),
             _buildQuickActions(context, l10n),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDriverHeader(
-    DashboardState state,
-    AuthState authState,
-    ThemeData theme,
-    AppLocalizations l10n,
-  ) {
-    final displayName = authState.userName ?? state.driverName;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: theme.colorScheme.primaryContainer,
-              child: Text(
-                displayName.isNotEmpty
-                    ? displayName[0].toUpperCase()
-                    : 'R',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: theme.colorScheme.onPrimaryContainer,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.welcomeBack,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  Text(
-                    displayName,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            const SizedBox(height: 20),
+            _buildStatsRow(state, theme, l10n),
           ],
         ),
       ),
