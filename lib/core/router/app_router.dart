@@ -181,21 +181,22 @@ class AppShell extends StatelessWidget {
   int _currentIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
     if (location.startsWith('/delivery')) return 1;
-    if (location.startsWith('/sales-return')) return 2;
-    if (location.startsWith('/sync')) return 3;
+    if (location.startsWith('/sales-return')) return 0;
+    if (location.startsWith('/sync')) return 2;
+    if (location.startsWith('/dashboard')) return 3;
     return 0;
   }
 
   void _onTap(BuildContext context, int index) {
     switch (index) {
       case 0:
-        context.go('/dashboard');
+        context.go('/sales-return');
       case 1:
         context.go('/delivery');
       case 2:
-        context.go('/sales-return');
-      case 3:
         context.go('/sync');
+      case 3:
+        context.go('/dashboard');
     }
   }
 
@@ -212,9 +213,9 @@ class AppShell extends StatelessWidget {
         indicatorColor: colorScheme.primaryContainer,
         destinations: [
           NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: l10n.dashboard,
+            icon: Icon(Icons.assignment_return_outlined),
+            selectedIcon: Icon(Icons.assignment_return),
+            label: l10n.salesReturn,
           ),
           NavigationDestination(
             icon: Icon(Icons.local_shipping_outlined),
@@ -222,14 +223,14 @@ class AppShell extends StatelessWidget {
             label: l10n.delivery,
           ),
           NavigationDestination(
-            icon: Icon(Icons.assignment_return_outlined),
-            selectedIcon: Icon(Icons.assignment_return),
-            label: l10n.salesReturn,
-          ),
-          NavigationDestination(
             icon: Icon(Icons.sync_outlined),
             selectedIcon: Icon(Icons.sync),
             label: l10n.sync,
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.dashboard_outlined),
+            selectedIcon: Icon(Icons.dashboard),
+            label: l10n.dashboard,
           ),
         ],
       ),
