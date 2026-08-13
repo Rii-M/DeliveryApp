@@ -24,6 +24,11 @@ class _SalesReturnScreenState extends ConsumerState<SalesReturnScreen> {
     setState(() => _customerPickerOpen = true);
   }
 
+  void _closeCustomerPicker() {
+    if (!_customerPickerOpen) return;
+    setState(() => _customerPickerOpen = false);
+  }
+
   void _handleCustomerSelected(Customer customer) {
     setState(() => _customerPickerOpen = false);
     ref.read(salesReturnProvider.notifier).selectCustomer(customer);
@@ -31,15 +36,22 @@ class _SalesReturnScreenState extends ConsumerState<SalesReturnScreen> {
 
   Widget _buildCustomerPickerOverlay() {
     final state = ref.read(salesReturnProvider);
-    return ColoredBox(
-      color: Colors.black54,
-      child: SafeArea(
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: CustomerPickerSheet(
-            customers: state.customers,
-            selectedCustomer: state.selectedCustomer,
-            onCustomerSelected: _handleCustomerSelected,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _closeCustomerPicker,
+      child: ColoredBox(
+        color: Colors.black54,
+        child: SafeArea(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: GestureDetector(
+              onTap: () {},
+              child: CustomerPickerSheet(
+                customers: state.customers,
+                selectedCustomer: state.selectedCustomer,
+                onCustomerSelected: _handleCustomerSelected,
+              ),
+            ),
           ),
         ),
       ),
