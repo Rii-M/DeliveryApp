@@ -180,16 +180,18 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
   void initializeFromDeliveryForm({
     required List<EstimateItemView> items,
     required List<PaymentMode> paymentModes,
+    Customer? customer,
   }) {
     final netAfterProductDiscount = items.fold<double>(
       0,
       (sum, i) => sum + i.lineTotal,
     );
     final draftDelivery = Delivery()
-      ..customerId = ''
+      ..customerId = customer?.serverId ?? ''
       ..createdDate = DateTime.now();
     state = EstimateState(
       delivery: draftDelivery,
+      customer: customer,
       items: items,
       paymentModes: paymentModes,
       discountAmount: _calcDiscountAmount(null, 0, netAfterProductDiscount),

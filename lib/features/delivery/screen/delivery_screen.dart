@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/extensions.dart';
 import '../../../core/utils/tax_calculator.dart';
+import '../../../core/widgets/customer_picker_sheet.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../models/customer.dart';
 import '../models/cart_item.dart';
 import '../provider/delivery_provider.dart';
 import 'cart_screen.dart';
@@ -20,6 +22,9 @@ class DeliveryScreen extends ConsumerStatefulWidget {
 }
 
 class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
+  bool _customerPickerOpen = false;
+  bool _autoOpenScheduled = false;
+
   @override
   void initState() {
     super.initState();
@@ -29,10 +34,113 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
         ref
             .read(deliveryFormProvider.notifier)
             .loadExistingDelivery(widget.deliveryId!);
-      } else if (ref.read(deliveryFormProvider).delivery != null)  {
+      } else if (ref.read(deliveryFormProvider).delivery != null) {
         ref.read(deliveryFormProvider.notifier).resetForm();
       }
     });
+  }
+
+  void _openCustomerPicker() {
+    if (_customerPickerOpen) return;
+    setState(() => _customerPickerOpen = true);
+  }
+
+  void _handleCustomerSelected(Customer customer) {
+    setState(() => _customerPickerOpen = false);
+    ref.read(deliveryFormProvider.notifier).selectCustomer(customer);
+  }
+
+  Widget _buildCustomerPickerOverlay() {
+    final state = ref.read(deliveryFormProvider);
+    return ColoredBox(
+      color: Colors.black54,
+      child: SafeArea(
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: CustomerPickerSheet(
+            customers: state.customers,
+            selectedCustomer: state.selectedCustomer,
+            onCustomerSelected: _handleCustomerSelected,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleTitleTap() async {
+    final l10n = AppLocalizations.of(context)!;
+    final state = ref.read(deliveryFormProvider);
+    final itemCount = state.cart.values.fold<int>(
+      0,
+      (sum, q) => sum + q.toInt(),
+    );
+
+    if (itemCount > 0) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Text(l10n.changeCustomerTitle),
+          content: Text(l10n.changeCustomerMessage(itemCount)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(l10n.clearAndContinue),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+      ref.read(deliveryFormProvider.notifier).clearCart();
+    }
+
+    _openCustomerPicker();
+  }
+
+  Widget _buildAppBarTitle(DeliveryFormState state, ThemeData theme) {
+    final appLocalizations = AppLocalizations.of(context)!;
+    if (state.isReadOnly) {
+      return Text(
+        appLocalizations.deliveryNumber(widget.deliveryId.toString()),
+      );
+    }
+    final customer = state.selectedCustomer;
+    if (customer == null) {
+      return Text(appLocalizations.addProducts);
+    }
+    return InkWell(
+      onTap: _handleTitleTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                customer.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: _customerPickerOpen ? theme.colorScheme.primary : null,
+                ),
+              ),
+            ),
+            const SizedBox(width: 2),
+            Icon(
+              _customerPickerOpen
+                  ? Icons.keyboard_arrow_up
+                  : Icons.keyboard_arrow_down,
+              size: 22,
+              color: _customerPickerOpen ? theme.colorScheme.primary : null,
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -55,32 +163,46 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
       );
     }).toList();
 
-    final title = state.isReadOnly
-        ? l10n.deliveryNumber(widget.deliveryId.toString())
-        : state.editingDeliveryId != null
-        ? l10n.editDelivery
-        : l10n.addProducts;
+    if (!state.isLoadingCustomers &&
+        !state.isReadOnly &&
+        state.selectedCustomer == null &&
+        !_customerPickerOpen &&
+        !_autoOpenScheduled) {
+      _autoOpenScheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _autoOpenScheduled = false;
+        if (mounted && !_customerPickerOpen) {
+          _openCustomerPicker();
+        }
+      });
+    }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        actions: [
-          if (!state.isReadOnly && state.cart.isNotEmpty)
-            IconButton(
-              icon: Badge(
-                label: Text(
-                  '${cartItems.fold<int>(0, (sum, item) => sum + item.quantity.toInt())}',
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            title: _buildAppBarTitle(state, theme),
+            actions: [
+              if (!state.isReadOnly && state.cart.isNotEmpty)
+                IconButton(
+                  icon: Badge(
+                    label: Text(
+                      '${cartItems.fold<int>(0, (sum, item) => sum + item.quantity.toInt())}',
+                    ),
+                    isLabelVisible: true,
+                    child: const Icon(Icons.shopping_cart_outlined),
+                  ),
+                  onPressed: () => _openCart(context),
                 ),
-                isLabelVisible: true,
-                child: const Icon(Icons.shopping_cart_outlined),
-              ),
-              onPressed: () => _openCart(context),
-            ),
-        ],
-      ),
-      body: state.isLoadingCustomers
-          ? const Center(child: CircularProgressIndicator())
-          : _buildBody(state, cartItems, theme, l10n, langCode),
+            ],
+          ),
+          body: state.isLoadingCustomers
+              ? const Center(child: CircularProgressIndicator())
+              : _buildBody(state, cartItems, theme, l10n, langCode),
+        ),
+        if (_customerPickerOpen)
+          Positioned.fill(child: _buildCustomerPickerOverlay()),
+      ],
     );
   }
 
@@ -202,7 +324,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                   const SizedBox(height: 4),
                   Text(state.customerName!, style: theme.textTheme.bodyMedium),
                 ],
-                                if (state.paymentEntries.isNotEmpty) ...[
+                if (state.paymentEntries.isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Text(
                     l10n.paymentMode,
@@ -211,14 +333,16 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  ...state.paymentEntries.map((e) => Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text(
-                      '${e.paymentModeName ?? 'Cash'} - Rs. ${e.amount.toStringAsFixed(2)}',
-                      style: theme.textTheme.bodyMedium,
+                  ...state.paymentEntries.map(
+                    (e) => Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        '${e.paymentModeName ?? 'Cash'} - Rs. ${e.amount.toStringAsFixed(2)}',
+                        style: theme.textTheme.bodyMedium,
+                      ),
                     ),
-                  )),
-                ], 
+                  ),
+                ],
               ],
             ),
           ),
@@ -400,7 +524,8 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     AppLocalizations l10n,
     String langCode,
   ) {
-    return ListView(
+    final hasCustomer = state.selectedCustomer != null;
+    final list = ListView(
       padding: const EdgeInsets.all(16),
       children: [
         Row(
@@ -529,6 +654,10 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
         else
           _buildProductGrid(context, ref, state, theme, l10n, langCode),
       ],
+    );
+    return AbsorbPointer(
+      absorbing: !hasCustomer,
+      child: Opacity(opacity: hasCustomer ? 1 : 0.5, child: list),
     );
   }
 
@@ -694,12 +823,14 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     );
   }
 
- void _openCart(BuildContext context) async {
-  final continueToBilling = await GoRouter.of(context).push<bool>('/delivery/cart');
-  if (continueToBilling == true && context.mounted) {
-    _continueToBilling(context);
+  void _openCart(BuildContext context) async {
+    final continueToBilling = await GoRouter.of(
+      context,
+    ).push<bool>('/delivery/cart');
+    if (continueToBilling == true && context.mounted) {
+      _continueToBilling(context);
+    }
   }
-  } 
 
   Future<void> _continueToBilling(BuildContext context) async {
     if (!ref.read(deliveryFormProvider).isValid) {

@@ -64,6 +64,7 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
         .initializeFromDeliveryForm(
           items: items,
           paymentModes: deliveryForm.paymentModes,
+          customer: deliveryForm.selectedCustomer,
         );
     ref.read(estimateProvider.notifier).loadCustomers();
   }
@@ -192,12 +193,6 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
                           ),
                       ],
                     ),
-                  ),
-                  TextButton(
-                    onPressed: () => ref
-                        .read(estimateProvider.notifier)
-                        .selectCustomer(null),
-                    child: Text(l10n.change),
                   ),
                 ],
               ),

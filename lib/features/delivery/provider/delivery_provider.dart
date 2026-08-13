@@ -26,6 +26,8 @@ class DeliveryFormState {
   final Map<String, double> customPrices;
   final Map<String, double> productDiscounts;
   final Map<String, String> selectedUnitIds;
+  final Customer? selectedCustomer;
+  final List<Customer> customers;
   final String? customerName;
   final String productSearchQuery;
   final int? editingDeliveryId;
@@ -51,6 +53,8 @@ class DeliveryFormState {
     this.customPrices = const {},
     this.productDiscounts = const {},
     this.selectedUnitIds = const {},
+    this.selectedCustomer,
+    this.customers = const [],
     this.customerName,
     this.productSearchQuery = '',
     this.editingDeliveryId,
@@ -114,10 +118,12 @@ class DeliveryFormState {
     }
 
     if (product.unitId != null && product.unitId!.isNotEmpty) {
-      addUnit(ProductUnit(
-        unitId: product.unitId!,
-        unitName: product.unit ?? product.unitId!,
-      ));
+      addUnit(
+        ProductUnit(
+          unitId: product.unitId!,
+          unitName: product.unit ?? product.unitId!,
+        ),
+      );
     }
     for (final u in product.units) {
       addUnit(u);
@@ -147,9 +153,7 @@ class DeliveryFormState {
 }
 
 final deliveryFormProvider =
-    StateNotifierProvider<DeliveryFormNotifier, DeliveryFormState>((
-      ref,
-    ) {
+    StateNotifierProvider<DeliveryFormNotifier, DeliveryFormState>((ref) {
       return DeliveryFormNotifier(
         categoryRepo: ref.read(categoryRepositoryProvider),
         productRepo: ref.read(productRepositoryProvider),
@@ -175,8 +179,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
     required this._deliveryRepo,
     required this._estimateRepo,
     required this._customerRepo,
-  })  : _productRepo = productRepo,
-        super(DeliveryFormState()) {
+  }) : _productRepo = productRepo,
+       super(DeliveryFormState()) {
     _loadInitialData();
   }
 
@@ -187,6 +191,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       final categories = await _categoryRepo.getCachedCategories();
       final products = await _loadAllProducts();
       final paymentModes = await _loadAllPaymentModes();
+      final customers = await _customerRepo.getCachedCustomers();
 
       _prefetchProductImages(products);
 
@@ -194,6 +199,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
         categories: categories,
         products: products,
         paymentModes: paymentModes,
+        customers: customers,
         isLoadingCustomers: false,
         isLoadingProducts: false,
       );
@@ -202,6 +208,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
         categories: await _categoryRepo.getCachedCategories(),
         products: await _loadAllProducts(),
         paymentModes: await _loadAllPaymentModes(),
+        customers: await _customerRepo.getCachedCustomers(),
         isLoadingCustomers: false,
         isLoadingProducts: false,
       );
@@ -241,6 +248,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       productDiscounts: state.productDiscounts,
       selectedUnitIds: state.selectedUnitIds,
       customerName: state.customerName,
+      selectedCustomer: state.selectedCustomer,
+      customers: state.customers,
       productSearchQuery: state.productSearchQuery,
       editingDeliveryId: state.editingDeliveryId,
       isReadOnly: state.isReadOnly,
@@ -280,15 +289,15 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       final paymentModes = await _loadAllPaymentModes();
       final items = await _deliveryRepo.getDeliveryItems(deliveryId);
 
-      String? customerName;
+      List<Customer> loadedCustomers = const [];
+      Customer? selectedCustomer;
       if (delivery.customerId.isNotEmpty) {
         try {
-          final customers = await _customerRepo.getCachedCustomers();
-          final customer = customers.cast<Customer?>().firstWhere(
+          loadedCustomers = await _customerRepo.getCachedCustomers();
+          selectedCustomer = loadedCustomers.cast<Customer?>().firstWhere(
             (c) => c?.serverId == delivery.customerId,
             orElse: () => null,
           );
-          customerName = customer?.name;
         } catch (_) {}
       }
 
@@ -305,8 +314,12 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
         if (item.unitPrice > 0) {
           customPrices[item.productId] = item.unitPrice;
         }
-        final product = products.where((p) => p.serverId == item.productId).firstOrNull;
-        if (item.unitId != null && product != null && item.unitId != product.unitId) {
+        final product = products
+            .where((p) => p.serverId == item.productId)
+            .firstOrNull;
+        if (item.unitId != null &&
+            product != null &&
+            item.unitId != product.unitId) {
           selectedUnitIds[item.productId] = item.unitId!;
         }
       }
@@ -319,8 +332,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
           ? existingEstimates.first.paidAmount
           : 0.0;
       final paymentEntries = existingEstimates.isNotEmpty
-      ? existingEstimates.first.paymentEntries
-      : <PaymentEntry>[];
+          ? existingEstimates.first.paymentEntries
+          : <PaymentEntry>[];
 
       String? discountType;
       double discountValue = 0;
@@ -346,7 +359,9 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
         isReadOnly: isReadOnly,
         paidAmount: paidAmount,
         paymentEntries: paymentEntries,
-        customerName: customerName,
+        customerName: selectedCustomer?.name,
+        customers: loadedCustomers,
+        selectedCustomer: selectedCustomer,
         categories: categories,
         products: products,
         paymentModes: paymentModes,
@@ -366,6 +381,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
         categories: await _categoryRepo.getCachedCategories(),
         products: await _loadAllProducts(),
         paymentModes: await _loadAllPaymentModes(),
+        customers: await _customerRepo.getCachedCustomers(),
         isLoadingCustomers: false,
         isLoadingProducts: false,
       );
@@ -385,6 +401,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       customPrices: state.customPrices,
       productDiscounts: state.productDiscounts,
       productSearchQuery: '',
+      selectedCustomer: state.selectedCustomer,
+      customers: state.customers,
       customerName: state.customerName,
       editingDeliveryId: state.editingDeliveryId,
       isReadOnly: state.isReadOnly,
@@ -404,7 +422,35 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       customPrices: state.customPrices,
       productDiscounts: state.productDiscounts,
       productSearchQuery: state.productSearchQuery,
+      selectedCustomer: state.selectedCustomer,
+      customers: state.customers,
       customerName: state.customerName,
+    );
+  }
+
+  void selectCustomer(Customer? customer) {
+    state = DeliveryFormState(
+      delivery: state.delivery,
+      selectedCategory: state.selectedCategory,
+      categories: state.categories,
+      products: state.products,
+      paymentModes: state.paymentModes,
+      paymentEntries: state.paymentEntries,
+      selectedPaymentMode: state.selectedPaymentMode,
+      cart: state.cart,
+      customPrices: state.customPrices,
+      productDiscounts: state.productDiscounts,
+      selectedUnitIds: state.selectedUnitIds,
+      productSearchQuery: state.productSearchQuery,
+      selectedCustomer: customer,
+      customers: state.customers,
+      customerName: customer?.name,
+      editingDeliveryId: state.editingDeliveryId,
+      isReadOnly: state.isReadOnly,
+      paidAmount: state.paidAmount,
+      discountType: state.discountType,
+      discountValue: state.discountValue,
+      discountAmount: state.discountAmount,
     );
   }
 
@@ -428,6 +474,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       productDiscounts: state.productDiscounts,
       selectedUnitIds: state.selectedUnitIds,
       productSearchQuery: state.productSearchQuery,
+      selectedCustomer: state.selectedCustomer,
+      customers: state.customers,
     );
   }
 
@@ -457,6 +505,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       productDiscounts: state.productDiscounts,
       selectedUnitIds: updated,
       productSearchQuery: state.productSearchQuery,
+      selectedCustomer: state.selectedCustomer,
+      customers: state.customers,
     );
   }
 
@@ -479,6 +529,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
         productDiscounts: state.productDiscounts,
         selectedUnitIds: state.selectedUnitIds,
         productSearchQuery: state.productSearchQuery,
+        selectedCustomer: state.selectedCustomer,
+        customers: state.customers,
         stockError: 'Entered quantity exceeds today\'s available stock.',
       );
       return;
@@ -497,6 +549,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       productDiscounts: state.productDiscounts,
       selectedUnitIds: state.selectedUnitIds,
       productSearchQuery: state.productSearchQuery,
+      selectedCustomer: state.selectedCustomer,
+      customers: state.customers,
     );
   }
 
@@ -516,6 +570,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
         productDiscounts: state.productDiscounts,
         selectedUnitIds: state.selectedUnitIds,
         productSearchQuery: state.productSearchQuery,
+        selectedCustomer: state.selectedCustomer,
+        customers: state.customers,
         stockError: 'Entered quantity exceeds today\'s available stock.',
       );
       return;
@@ -539,6 +595,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       productDiscounts: state.productDiscounts,
       selectedUnitIds: state.selectedUnitIds,
       productSearchQuery: state.productSearchQuery,
+      selectedCustomer: state.selectedCustomer,
+      customers: state.customers,
     );
   }
 
@@ -561,6 +619,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       productDiscounts: updatedDiscounts,
       selectedUnitIds: updatedUnits,
       productSearchQuery: state.productSearchQuery,
+      selectedCustomer: state.selectedCustomer,
+      customers: state.customers,
     );
   }
 
@@ -584,6 +644,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       productDiscounts: updated,
       selectedUnitIds: state.selectedUnitIds,
       productSearchQuery: state.productSearchQuery,
+      selectedCustomer: state.selectedCustomer,
+      customers: state.customers,
     );
   }
 
@@ -597,6 +659,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       paymentEntries: state.paymentEntries,
       selectedPaymentMode: state.selectedPaymentMode,
       productSearchQuery: state.productSearchQuery,
+      selectedCustomer: state.selectedCustomer,
+      customers: state.customers,
     );
   }
 
@@ -611,6 +675,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       selectedPaymentMode: state.selectedPaymentMode,
       cart: state.cart,
       productSearchQuery: state.productSearchQuery,
+      selectedCustomer: state.selectedCustomer,
+      customers: state.customers,
     );
   }
 
@@ -627,6 +693,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       customPrices: state.customPrices,
       productDiscounts: state.productDiscounts,
       productSearchQuery: query,
+      selectedCustomer: state.selectedCustomer,
+      customers: state.customers,
     );
   }
 
@@ -636,6 +704,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       products: state.products,
       paymentModes: state.paymentModes,
       paymentEntries: state.paymentEntries,
+      customers: state.customers,
     );
   }
 
@@ -654,6 +723,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       customPrices: state.customPrices,
       productDiscounts: state.productDiscounts,
       selectedUnitIds: state.selectedUnitIds,
+      selectedCustomer: state.selectedCustomer,
+      customers: state.customers,
       isSaving: true,
     );
 
@@ -680,13 +751,13 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
 
         delivery = await _deliveryRepo.updateDelivery(
           state.editingDeliveryId!,
-          customerId: '',
+          customerId: state.selectedCustomer?.serverId ?? '',
           items: items,
           paymentMode: state.selectedPaymentMode?.serverId,
         );
       } else {
         delivery = await _deliveryRepo.saveDelivery(
-          customerId: '',
+          customerId: state.selectedCustomer?.serverId ?? '',
           items: items,
           paymentMode: state.selectedPaymentMode?.serverId,
         );
@@ -700,6 +771,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
         categories: state.categories,
         products: state.products,
         paymentModes: state.paymentModes,
+        customers: state.customers,
       );
 
       return DeliveryResult(success: true, deliveryId: delivery.id!);
@@ -716,6 +788,8 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
         customPrices: state.customPrices,
         productDiscounts: state.productDiscounts,
         selectedUnitIds: state.selectedUnitIds,
+        selectedCustomer: state.selectedCustomer,
+        customers: state.customers,
         isSaving: false,
       );
       return DeliveryResult(success: false, error: e.toString());
