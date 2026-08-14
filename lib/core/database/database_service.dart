@@ -24,7 +24,7 @@ class DatabaseService {
 
       _database = await openDatabase(
         path,
-        version: 19,
+        version: 22,
         onCreate: _createTables,
         onUpgrade: _onUpgrade,
       );
@@ -262,6 +262,64 @@ class DatabaseService {
       );
     } catch (_) {}
   }
+    if (oldVersion < 20) {
+      try {
+        await db.execute('ALTER TABLE customer ADD COLUMN email TEXT');
+      } catch (_) {}
+      try {
+        await db.execute('ALTER TABLE customer ADD COLUMN pan TEXT');
+      } catch (_) {}
+      try {
+        await db.execute(
+          'ALTER TABLE customer ADD COLUMN discount_group_id TEXT',
+        );
+      } catch (_) {}
+      try {
+        await db.execute('ALTER TABLE customer ADD COLUMN record_id TEXT');
+      } catch (_) {}
+      try {
+        await db.execute('ALTER TABLE customer ADD COLUMN meta_data TEXT');
+      } catch (_) {}
+      try {
+        await db.execute(
+          'ALTER TABLE customer ADD COLUMN is_active INTEGER DEFAULT 1',
+        );
+      } catch (_) {}
+      try {
+        await db.execute(
+          'ALTER TABLE customer ADD COLUMN is_allow_credit INTEGER DEFAULT 1',
+        );
+      } catch (_) {}
+      try {
+        await db.execute(
+          'ALTER TABLE customer ADD COLUMN is_synced INTEGER DEFAULT 1',
+        );
+      } catch (_) {}
+      try {
+        await db.execute(
+          'ALTER TABLE customer ADD COLUMN pending_action TEXT',
+        );
+      } catch (_) {}
+    }
+    if (oldVersion < 21) {
+      try {
+        await db.execute(
+          'ALTER TABLE sync_queue ADD COLUMN error_message TEXT',
+        );
+      } catch (_) {}
+    }
+    if (oldVersion < 22) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS customer_discount_group (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          server_id TEXT NOT NULL UNIQUE,
+          record_id TEXT,
+          name TEXT NOT NULL,
+          discount_percent REAL DEFAULT 0,
+          is_active INTEGER DEFAULT 1
+        )
+      ''');
+    }
   }
 
   Future<void> _createTables(Database db, int version) async {
@@ -283,7 +341,16 @@ class DatabaseService {
         server_id TEXT NOT NULL UNIQUE,
         name TEXT NOT NULL,
         phone TEXT,
-        address TEXT
+        address TEXT,
+        email TEXT,
+        pan TEXT,
+        discount_group_id TEXT,
+        record_id TEXT,
+        meta_data TEXT,
+        is_active INTEGER DEFAULT 1,
+        is_allow_credit INTEGER DEFAULT 1,
+        is_synced INTEGER DEFAULT 1,
+        pending_action TEXT
       )
     ''');
 
@@ -426,7 +493,8 @@ class DatabaseService {
         entity_type TEXT NOT NULL,
         entity_id INTEGER NOT NULL,
         status TEXT NOT NULL,
-        created_date TEXT NOT NULL
+        created_date TEXT NOT NULL,
+        error_message TEXT
       )
     ''');
 
@@ -453,6 +521,17 @@ class DatabaseService {
         image_url TEXT,
         units_json TEXT,
         taxable INTEGER DEFAULT 0
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE customer_discount_group (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        server_id TEXT NOT NULL UNIQUE,
+        record_id TEXT,
+        name TEXT NOT NULL,
+        discount_percent REAL DEFAULT 0,
+        is_active INTEGER DEFAULT 1
       )
     ''');
   }

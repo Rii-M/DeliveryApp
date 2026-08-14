@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../auth/provider/auth_provider.dart';
+import '../../sync/provider/sync_provider.dart';
 import '../provider/dashboard_provider.dart';
 import '../widgets/quick_action_card.dart';
 import '../widgets/stat_card.dart';
@@ -32,6 +33,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final authState = ref.watch(authProvider);
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
+
+    // Reload the dashboard (incl. customer sync status) whenever a sync run
+    // finishes so the box at the bottom reflects synced / not-synced results.
+    ref.listen(syncProvider, (previous, next) {
+      final wasSyncing = previous?.isSyncing ?? false;
+      final inSyncing = next.isSyncing;
+      if (wasSyncing && !inSyncing) {
+        ref.read(dashboardProvider.notifier).loadDashboard();
+      }
+    });
 
     final displayName = authState.userName ?? state.driverName;
     return Scaffold(
@@ -314,12 +325,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         const SizedBox(width: 12),
         SizedBox(
           width: double.infinity,
-              child: StatCard(
-                title: l10n.customers,
-                value: state.assignedCustomersCount.toString(),
-                icon: Icons.people,
-                onTap: () => context.push('/customers'),
-              ),
+          child: StatCard(
+            title: l10n.customers,
+            value: state.assignedCustomersCount.toString(),
+            icon: Icons.people,
+            onTap: () => context.push('/customer-sync-status'),
+          ),
         ),
       ],
     );
@@ -329,11 +340,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return Column(
       children: [
         QuickActionCard(
-          title: l10n.addCustomer,
-          subtitle: l10n.addNewCustomer,
-          icon: Icons.person_add_alt_1,
+          title: l10n.customers,
+          subtitle: l10n.manageCustomers,
+          icon: Icons.people_outline,
           color: Theme.of(context).colorScheme.primaryContainer,
-          onTap: () => context.push('/add-customer'),
+          onTap: () => context.push('/customers'),
         ),
         const SizedBox(height: 8),
         QuickActionCard(

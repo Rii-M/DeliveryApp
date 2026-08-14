@@ -9,7 +9,6 @@ import '../../../core/widgets/customer_picker_sheet.dart';
 import '../../../features/sync/provider/sync_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/customer.dart';
-import '../../../repositories/customer_repository.dart';
 import '../models/cart_item.dart';
 import '../provider/delivery_provider.dart';
 import 'cart_screen.dart';
@@ -74,15 +73,6 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     ref.read(deliveryFormProvider.notifier).selectCustomer(customer);
   }
 
-  Future<void> _handleCustomerAdded() async {
-    try {
-      await ref.read(customerRepositoryProvider).refreshCustomers();
-      ref.read(deliveryFormProvider.notifier).refreshCustomersFromCache();
-    } catch (e) {
-      print('[Delivery] customer refresh after add failed: $e');
-    }
-  }
-
   Widget _buildCustomerPickerOverlay() {
     final state = ref.read(deliveryFormProvider);
     return GestureDetector(
@@ -99,7 +89,6 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                 customers: state.customers,
                 selectedCustomer: state.selectedCustomer,
                 onCustomerSelected: _handleCustomerSelected,
-                onCustomerAdded: _handleCustomerAdded,
               ),
             ),
           ),

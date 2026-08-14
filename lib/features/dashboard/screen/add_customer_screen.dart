@@ -3,11 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/network/providers.dart';
+import '../../../features/sync/provider/sync_provider.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../models/customer.dart';
 import '../../../models/customer_discount_group.dart';
+import '../../../repositories/customer_repository.dart';
+import '../../../repositories/discount_group_repository.dart';
 
 class AddCustomerScreen extends ConsumerStatefulWidget {
-  const AddCustomerScreen({super.key});
+  final Customer? customer;
+
+  const AddCustomerScreen({super.key, this.customer});
 
   @override
   ConsumerState<AddCustomerScreen> createState() => _AddCustomerScreenState();
@@ -19,6 +25,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
   final _mobileController = TextEditingController();
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
+  final _panController = TextEditingController();
 
   List<CustomerDiscountGroup> _discountGroups = [];
   CustomerDiscountGroup? _selectedDiscountGroup;
@@ -26,9 +33,19 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
   bool _isSaving = false;
   String? _error;
 
+  bool get _isEditing => widget.customer != null;
+
   @override
   void initState() {
     super.initState();
+    final customer = widget.customer;
+    if (customer != null) {
+      _nameController.text = customer.name;
+      _mobileController.text = customer.phone ?? '';
+      _emailController.text = customer.email ?? '';
+      _addressController.text = customer.address ?? '';
+      _panController.text = customer.pan ?? '';
+    }
     _loadOptions();
   }
 
@@ -38,6 +55,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
     _mobileController.dispose();
     _emailController.dispose();
     _addressController.dispose();
+    _panController.dispose();
     super.dispose();
   }
 
@@ -47,16 +65,47 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
       _error = null;
     });
     try {
-      final apiService = ref.read(apiServiceProvider);
-      final discountGroupData = await apiService.fetchCustomerDiscountGroups();
+      final discountGroupRepo = ref.read(discountGroupRepositoryProvider);
+
+      // Offline-first: show cached groups immediately (rendered below), and
+      // best-effort refresh from the server so new groups appear when online.
+      List<CustomerDiscountGroup> groups;
+      try {
+        groups = await discountGroupRepo.getDiscountGroups();
+      } catch (_) {
+        groups = await discountGroupRepo.getCachedDiscountGroups();
+      }
       if (!mounted) return;
       setState(() {
-        _discountGroups = discountGroupData
-            .map(CustomerDiscountGroup.fromJson)
-            .where((g) => g.isActive)
-            .toList();
+        _discountGroups = groups;
+        if (_isEditing && widget.customer!.discountGroupId != null) {
+          _selectedDiscountGroup = _discountGroups.cast<CustomerDiscountGroup?>()
+              .firstWhere(
+                (g) => g?.id == widget.customer!.discountGroupId,
+                orElse: () => null,
+              );
+        }
         _isLoading = false;
       });
+      if (groups.isNotEmpty) {
+        try {
+          await discountGroupRepo.refetch();
+          final fresh = await discountGroupRepo.getCachedDiscountGroups();
+          if (!mounted) return;
+          setState(() {
+            _discountGroups = fresh;
+            if (_selectedDiscountGroup != null) {
+              _selectedDiscountGroup = fresh.cast<CustomerDiscountGroup?>()
+                  .firstWhere(
+                    (g) => g?.id == _selectedDiscountGroup!.id,
+                    orElse: () => _selectedDiscountGroup,
+                  );
+            }
+          });
+        } catch (_) {
+          // offline - keep using cached groups
+        }
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -71,47 +120,84 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
     final l10n = AppLocalizations.of(context)!;
     setState(() => _isSaving = true);
 
-    final payload = <String, dynamic>{
-      'Name': _nameController.text.trim(),
-      'Mobile': _mobileController.text.trim(),
-      'Email': _emailController.text.trim().isEmpty
-          ? null
-          : _emailController.text.trim(),
-      'Address': _addressController.text.trim().isEmpty
-          ? null
-          : _addressController.text.trim(),
-      'CustomerDiscountGroupId': _selectedDiscountGroup!.id,
-      'AgentId': null,
-      'ClassName': null,
-      'Code': null,
-      'CreditLimit': 0,
-      'DOB': null,
-      'IsActive': true,
-      'IsAllowCredit': true,
-      'MappedBranchId': null,
-      'MappedDepartmentId': null,
-      'MetaData': '{"ContactPersons":[]}',
-      'PAN': null,
-      'ReferenceBranchId': null,
-      'ReferredBy': null,
-      'SetAsSupplier': false,
-    };
+    final customerRepo = ref.read(customerRepositoryProvider);
+    final isOnline = await ref.read(networkCheckerProvider).isConnected;
 
+    // When online, check the mobile number against the server BEFORE saving
+    // locally so a duplicate is caught immediately and the customer isn't
+    // saved. When offline we save locally (offline-first) and queue for sync.
     try {
-      final success =
-          await ref.read(apiServiceProvider).addCustomer(payload);
-      if (!mounted) return;
-      setState(() => _isSaving = false);
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.customerAddedSuccessfully)),
+      if (isOnline) {
+        final mobileTaken = await customerRepo.isMobileTakenOnServer(
+          _mobileController.text,
+          excludeCustomerId: _isEditing ? widget.customer!.serverId : null,
         );
-        context.pop(true);
+        if (mobileTaken) {
+          if (!mounted) return;
+          setState(() => _isSaving = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.customerMobileAlreadyExists)),
+          );
+          return;
+        }
+      }
+
+      final Customer? saved;
+      if (_isEditing) {
+        saved = await customerRepo.updateCustomerOffline(
+          serverId: widget.customer!.serverId,
+          name: _nameController.text.trim(),
+          mobile: _mobileController.text.trim(),
+          email: _emailController.text.trim().isEmpty
+              ? null
+              : _emailController.text.trim(),
+          address: _addressController.text.trim().isEmpty
+              ? null
+              : _addressController.text.trim(),
+          pan: _panController.text.trim().isEmpty
+              ? null
+              : _panController.text.trim(),
+          discountGroupId: _selectedDiscountGroup!.id,
+        );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.failedToAddCustomer)),
+        saved = await customerRepo.saveNewCustomerOffline(
+          name: _nameController.text.trim(),
+          mobile: _mobileController.text.trim(),
+          email: _emailController.text.trim().isEmpty
+              ? null
+              : _emailController.text.trim(),
+          address: _addressController.text.trim().isEmpty
+              ? null
+              : _addressController.text.trim(),
+          pan: _panController.text.trim().isEmpty
+              ? null
+              : _panController.text.trim(),
+          discountGroupId: _selectedDiscountGroup!.id,
         );
       }
+
+      // If online, push to server immediately (no "Sync All" needed). If
+      // offline, the customer stays queued for a later sync.
+      if (saved.id != null) {
+        try {
+          await ref.read(syncProvider.notifier).syncCustomerNow(saved.id!);
+        } catch (_) {
+          // leftovers stay queued for the next sync run
+        }
+      }
+
+      if (!mounted) return;
+      setState(() => _isSaving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _isEditing
+                ? l10n.customerUpdatedSuccessfully
+                : l10n.customerAddedSuccessfully,
+          ),
+        ),
+      );
+      context.pop(true);
     } catch (e) {
       if (!mounted) return;
       setState(() => _isSaving = false);
@@ -161,7 +247,9 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.addCustomer)),
+      appBar: AppBar(
+        title: Text(_isEditing ? l10n.editCustomer : l10n.addCustomer),
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
@@ -175,6 +263,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                       children: [
                         TextFormField(
                           controller: _nameController,
+                          readOnly: _isEditing,
                           textCapitalization: TextCapitalization.words,
                           decoration: InputDecoration(
                             labelText: l10n.customerName,
@@ -214,6 +303,20 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                             labelText: l10n.email,
                             hintText: l10n.email,
                             prefixIcon: const Icon(Icons.email_outlined),
+                            border: const OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: _panController,
+                          textCapitalization: TextCapitalization.characters,
+                          readOnly: _isEditing,
+                          decoration: InputDecoration(
+                            labelText: l10n.pan,
+                            hintText: l10n.pan,
+                            prefixIcon: const Icon(
+                              Icons.badge_outlined,
+                            ),
                             border: const OutlineInputBorder(),
                           ),
                         ),

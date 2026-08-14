@@ -1,6 +1,7 @@
 import '../../dto/sales_invoice_request.dart';
 import '../../dto/sales_invoice_response.dart';
 import '../../dto/sales_return_request.dart';
+import '../../dto/customer_operation_result.dart';
 
 abstract class ApiService {
   void updateConfig({String? baseUrl, String? token});
@@ -17,7 +18,9 @@ abstract class ApiService {
   Future<List<Map<String, dynamic>>> fetchPaymentModes();
   Future<List<Map<String, dynamic>>> fetchAssignedCategories();
   Future<List<Map<String, dynamic>>> fetchCustomerDiscountGroups();
-  Future<bool> addCustomer(Map<String, dynamic> data);
+  Future<CustomerOperationResult> addCustomer(Map<String, dynamic> data);
+  Future<CustomerOperationResult> updateCustomer(
+      Map<String, dynamic> data, String recordId);
   
   Future<SalesInvoiceResponse> createSalesInvoice(SalesInvoiceRequest request);
   Future<bool> createSalesReturn(Map<String, dynamic> data);

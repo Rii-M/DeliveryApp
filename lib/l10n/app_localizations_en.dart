@@ -634,5 +634,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get customerAddedSuccessfully => 'Customer added successfully';
 
   @override
+  String get customerUpdatedSuccessfully => 'Customer updated successfully';
+
+  @override
   String get failedToAddCustomer => 'Failed to add customer';
+
+  @override
+  String get editCustomer => 'Edit Customer';
+
+  @override
+  String get manageCustomers => 'View and manage customers';
+
+  @override
+  String get pan => 'PAN';
+
+  @override
+  String get needInternetToSaveCustomer =>
+      'An internet connection is required to add or edit a customer.';
+
+  @override
+  String get customerMobileAlreadyExists =>
+      'A customer with this mobile number already exists.';
+
+  @override
+  String get customerSyncStatus => 'Customer Sync Status';
+
+  @override
+  String get notSynced => 'Not synced';
+
+  @override
+  String get noCustomerSyncEntries => 'No customers pending sync.';
 }

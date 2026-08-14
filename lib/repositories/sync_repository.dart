@@ -10,8 +10,10 @@ import '../core/network/network_checker.dart';
 import '../core/network/providers.dart';
 import '../core/utils/tax_calculator.dart';
 import '../dto/sales_invoice_request.dart';
+import '../dto/customer_operation_result.dart';
 import '../core/auth/auth_storage.dart';
 import '../dto/sales_return_request.dart';
+import '../models/customer.dart';
 import '../models/estimate.dart';
 import '../models/sales_return.dart';
 import '../models/sync_queue.dart';
@@ -96,6 +98,8 @@ class SyncRepository {
           await _syncDeliveryEntry(entry);
         } else if (entry.entityType == 'SalesReturn') {
           await _syncSalesReturnEntry(entry);
+        } else if (entry.entityType == 'Customer') {
+          await _syncCustomerEntry(entry);
         } else {
           await _db.update(
             'sync_queue',
@@ -559,6 +563,178 @@ class SyncRepository {
         whereArgs: [entry.id],
       );
     }
+  }
+
+  /// Pushes a single queued customer to the server immediately if online.
+  /// Used right after saving a customer while connected so no manual
+  /// "Sync All" is needed. Offline saves stay queued.
+  Future<void> syncCustomerById(int customerId) async {
+    final isOnline = await _networkChecker.isConnected;
+    if (!isOnline) return;
+
+    final maps = await _db.query(
+      'sync_queue',
+      where: 'entity_type = ? AND entity_id = ? AND status != ?',
+      whereArgs: ['Customer', customerId, 'Synced'],
+    );
+    for (final map in maps) {
+      final entry = SyncQueue.fromMap(map);
+      try {
+        await _syncCustomerEntry(entry);
+      } catch (_) {}
+    }
+  }
+
+  Future<void> _syncCustomerEntry(SyncQueue entry) async {
+    final maps = await _db.query(
+      'customer',
+      where: 'id = ?',
+      whereArgs: [entry.entityId],
+    );
+    if (maps.isEmpty) {
+      await _markCustomerSyncFailed(entry, 'Customer record not found');
+      return;
+    }
+    final customer = Customer.fromMap(maps.first);
+    final isUpdate = customer.pendingAction == 'Update' &&
+        customer.recordId != null &&
+        customer.recordId!.isNotEmpty;
+
+    // Before adding, ensure the mobile number isn't already used on the server
+    // by a DIFFERENT customer. (Server only enforces name/email uniqueness.)
+    if (!isUpdate && customer.phone != null && customer.phone!.trim().isNotEmpty) {
+      final exists = await _isMobileUsedServerSide(
+        customer.phone!.trim(),
+        excludeCustomerId: isUpdate
+            ? (customer.recordId ?? customer.serverId)
+            : null,
+      );
+      if (exists) {
+        print(
+            '[Sync] Customer ${customer.name} NOT added - mobile ${customer.phone} already exists on server');
+        await _discardRejectedCustomer(
+          customer,
+          'mobile ${customer.phone} already exists on server',
+        );
+        return;
+      }
+    }
+
+    final payload = _buildCustomerPayload(customer, forUpdate: isUpdate);
+
+    final CustomerOperationResult result;
+    if (isUpdate) {
+      print('[Sync] Updating customer ${customer.name} (${customer.recordId})');
+      result = await _apiService.updateCustomer(payload, customer.recordId!);
+    } else {
+      print('[Sync] Adding customer ${customer.name}');
+      result = await _apiService.addCustomer(payload);
+    }
+
+    if (result.success) {
+      await _db.update(
+        'customer',
+        {'is_synced': 1, 'pending_action': null},
+        where: 'id = ?',
+        whereArgs: [customer.id],
+      );
+      await _db.update(
+        'sync_queue',
+        {'status': 'Synced', 'error_message': null},
+        where: 'id = ?',
+        whereArgs: [entry.id],
+      );
+    } else {
+      print('[Sync] Customer sync FAILED - server returned Status: false');
+      if (!isUpdate) {
+        await _discardRejectedCustomer(customer, result.message);
+      } else {
+        await _markCustomerSyncFailed(
+          entry,
+          result.message.isNotEmpty ? result.message : 'Customer sync failed',
+        );
+      }
+    }
+  }
+
+  /// Removes a locally-added customer that the server permanently rejected
+  /// (e.g. duplicate mobile / Status false) along with its queued sync entry so
+  /// it no longer appears anywhere in the app.
+  Future<void> _discardRejectedCustomer(
+    Customer customer,
+    String reason,
+  ) async {
+    await _db.transaction((txn) async {
+      await txn.delete('customer', where: 'id = ?', whereArgs: [customer.id]);
+      await txn.delete(
+        'sync_queue',
+        where: 'entity_type = ? AND entity_id = ?',
+        whereArgs: ['Customer', customer.id],
+      );
+    });
+    print('[Sync] Discarded rejected customer ${customer.name} - $reason');
+  }
+
+  Future<void> _markCustomerSyncFailed(SyncQueue entry, String message) async {
+    await _db.update(
+      'sync_queue',
+      {'status': 'Failed', 'error_message': message},
+      where: 'id = ?',
+      whereArgs: [entry.id],
+    );
+  }
+
+  /// Checks the server customer list for a row already using this mobile. When
+  /// [excludeCustomerId] is given, that customer is skipped so editing the same
+  /// customer doesn't false-positive.
+  Future<bool> _isMobileUsedServerSide(
+    String mobile, {
+    String? excludeCustomerId,
+  }) async {
+    final data = await _apiService.fetchCustomers();
+    for (final json in data) {
+      final serverMobile =
+          (json['Mobile'] ?? json['mobile'] ?? '').toString().trim();
+      if (serverMobile.isEmpty || serverMobile != mobile) continue;
+      final id = (json['Id'] ?? json['id'] ?? '').toString();
+      final recordId =
+          (json['RecordId'] ?? json['recordId'] ?? '').toString();
+      if (excludeCustomerId != null &&
+          (id == excludeCustomerId || recordId == excludeCustomerId)) {
+        continue;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  Map<String, dynamic> _buildCustomerPayload(
+    Customer c, {
+    required bool forUpdate,
+  }) {
+    return {
+      if (forUpdate) 'Id': c.serverId,
+      if (forUpdate) 'RecordId': c.recordId,
+      'Name': c.name,
+      'Mobile': c.phone,
+      'Email': c.email,
+      'Address': c.address,
+      'PAN': c.pan,
+      'CustomerDiscountGroupId': c.discountGroupId ?? ApiConfig.emptyGuid,
+      'AgentId': null,
+      'ClassName': null,
+      'Code': null,
+      'CreditLimit': 0,
+      'DOB': null,
+      'IsActive': c.isActive,
+      'IsAllowCredit': c.isAllowCredit,
+      'MappedBranchId': null,
+      'MappedDepartmentId': null,
+      'MetaData': c.metaData ?? '{"ContactPersons":[]}',
+      'ReferenceBranchId': null,
+      'ReferredBy': null,
+      'SetAsSupplier': false,
+    };
   }
 }
 

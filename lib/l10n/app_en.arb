@@ -217,5 +217,14 @@
   "enterCustomerMobile": "Please enter mobile number",
   "selectDiscountGroupRequired": "Please select a discount group",
   "customerAddedSuccessfully": "Customer added successfully",
-  "failedToAddCustomer": "Failed to add customer"
+  "customerUpdatedSuccessfully": "Customer updated successfully",
+  "failedToAddCustomer": "Failed to add customer",
+  "editCustomer": "Edit Customer",
+  "manageCustomers": "View and manage customers",
+  "pan": "PAN",
+  "needInternetToSaveCustomer": "An internet connection is required to add or edit a customer.",
+  "customerMobileAlreadyExists": "A customer with this mobile number already exists.",
+  "customerSyncStatus": "Customer Sync Status",
+  "notSynced": "Not synced",
+  "noCustomerSyncEntries": "No customers pending sync."
 }

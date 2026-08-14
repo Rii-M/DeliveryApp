@@ -11,6 +11,7 @@ class ApiConfig {
   static String get customerDiscountGroupEndpoint =>
       '/ap1/pos/customerdiscountgroup/index';
   static String get customerAddEndpoint => '/ap1/pos/customer/add';
+  static String get customerUpdateEndpoint => '/ap1/pos/customer/update';
   static const String allCategoryId = '00000000-0000-0000-0000-000000000000';
   static const String emptyGuid = '00000000-0000-0000-0000-000000000000';
   static const String defaultCurrencyId =

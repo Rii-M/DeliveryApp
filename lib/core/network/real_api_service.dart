@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../dto/sales_invoice_request.dart';
 import '../../dto/sales_invoice_response.dart';
 import '../../dto/sales_return_request.dart';
+import '../../dto/customer_operation_result.dart';
 import 'api_config.dart';
 import 'api_service.dart';
 
@@ -113,14 +114,35 @@ Future<List<Map<String, dynamic>>> fetchAssignedCategories() async {
   }
 
   @override
-  Future<bool> addCustomer(Map<String, dynamic> data) async {
+  Future<CustomerOperationResult> addCustomer(Map<String, dynamic> data) async {
     final response = await _dio.post(ApiConfig.customerAddEndpoint, data: data);
     final body = response.data as Map<String, dynamic>;
-    final status = body['Status'] == true || body['status'] == true;
-    if (!status) {
+    final success = body['Status'] == true || body['status'] == true;
+    final message =
+        (body['Message'] ?? body['message'] ?? '').toString();
+    if (!success) {
       print('[API] addCustomer FAILED. Response: ${response.data}');
     }
-    return status;
+    return CustomerOperationResult(success: success, message: message);
+  }
+
+  @override
+  Future<CustomerOperationResult> updateCustomer(
+    Map<String, dynamic> data,
+    String recordId,
+  ) async {
+    final response = await _dio.post(
+      '${ApiConfig.customerUpdateEndpoint}/$recordId',
+      data: data,
+    );
+    final body = response.data as Map<String, dynamic>;
+    final success = body['Status'] == true || body['status'] == true;
+    final message =
+        (body['Message'] ?? body['message'] ?? '').toString();
+    if (!success) {
+      print('[API] updateCustomer FAILED. Response: ${response.data}');
+    }
+    return CustomerOperationResult(success: success, message: message);
   }
 
   @override

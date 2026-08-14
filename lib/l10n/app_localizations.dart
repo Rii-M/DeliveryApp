@@ -1280,11 +1280,65 @@ abstract class AppLocalizations {
   /// **'Customer added successfully'**
   String get customerAddedSuccessfully;
 
+  /// No description provided for @customerUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer updated successfully'**
+  String get customerUpdatedSuccessfully;
+
   /// No description provided for @failedToAddCustomer.
   ///
   /// In en, this message translates to:
   /// **'Failed to add customer'**
   String get failedToAddCustomer;
+
+  /// No description provided for @editCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Customer'**
+  String get editCustomer;
+
+  /// No description provided for @manageCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'View and manage customers'**
+  String get manageCustomers;
+
+  /// No description provided for @pan.
+  ///
+  /// In en, this message translates to:
+  /// **'PAN'**
+  String get pan;
+
+  /// No description provided for @needInternetToSaveCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'An internet connection is required to add or edit a customer.'**
+  String get needInternetToSaveCustomer;
+
+  /// No description provided for @customerMobileAlreadyExists.
+  ///
+  /// In en, this message translates to:
+  /// **'A customer with this mobile number already exists.'**
+  String get customerMobileAlreadyExists;
+
+  /// No description provided for @customerSyncStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer Sync Status'**
+  String get customerSyncStatus;
+
+  /// No description provided for @notSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Not synced'**
+  String get notSynced;
+
+  /// No description provided for @noCustomerSyncEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'No customers pending sync.'**
+  String get noCustomerSyncEntries;
 }
 
 class _AppLocalizationsDelegate

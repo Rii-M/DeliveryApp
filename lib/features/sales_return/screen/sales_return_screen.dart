@@ -7,7 +7,6 @@ import '../../../core/widgets/customer_picker_sheet.dart';
 import '../../../features/sync/provider/sync_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/customer.dart';
-import '../../../repositories/customer_repository.dart';
 import '../provider/sales_return_provider.dart';
 
 class SalesReturnScreen extends ConsumerStatefulWidget {
@@ -37,14 +36,6 @@ class _SalesReturnScreenState extends ConsumerState<SalesReturnScreen> {
     ref.read(salesReturnProvider.notifier).selectCustomer(customer);
   }
 
-  Future<void> _handleCustomerAdded() async {
-    try {
-      await ref.read(customerRepositoryProvider).refreshCustomers();
-      ref.read(salesReturnProvider.notifier).refreshCustomersFromCache();
-    } catch (e) {
-      print('[SalesReturn] customer refresh after add failed: $e');
-    }
-  }
   @override
 void initState() {
   super.initState();
@@ -71,7 +62,6 @@ void initState() {
                 customers: state.customers,
                 selectedCustomer: state.selectedCustomer,
                 onCustomerSelected: _handleCustomerSelected,
-                onCustomerAdded: _handleCustomerAdded,
               ),
             ),
           ),

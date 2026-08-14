@@ -6,6 +6,7 @@ import '../../features/auth/provider/auth_provider.dart';
 import '../../features/auth/screen/login_screen.dart';
 import '../../features/dashboard/screen/add_customer_screen.dart';
 import '../../features/dashboard/screen/categories_screen.dart';
+import '../../features/dashboard/screen/customer_sync_status_screen.dart';
 import '../../features/dashboard/screen/customers_screen.dart';
 import '../../features/dashboard/screen/dashboard_screen.dart';
 import '../../features/dashboard/screen/products_screen.dart';
@@ -19,6 +20,7 @@ import '../../features/sales_return/screen/sales_return_history_screen.dart';
 import '../../features/sales_return/screen/sales_return_screen.dart';
 import '../../features/sync/screen/sync_screen.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/customer.dart';
 import '../../features/delivery/screen/cart_screen.dart';
 import '../../features/sales_return/screen/sales_return_cart_screen.dart';
 
@@ -180,9 +182,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const CustomersScreen(),
       ),
       GoRoute(
+        path: '/customer-sync-status',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const CustomerSyncStatusScreen(),
+      ),
+      GoRoute(
         path: '/add-customer',
         parentNavigatorKey: _rootNavigatorKey,
-        builder: (context, state) => const AddCustomerScreen(),
+        builder: (context, state) =>
+            AddCustomerScreen(customer: state.extra as Customer?),
       ),
     ],
   );

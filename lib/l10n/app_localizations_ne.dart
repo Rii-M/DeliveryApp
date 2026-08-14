@@ -634,5 +634,35 @@ class AppLocalizationsNe extends AppLocalizations {
   String get customerAddedSuccessfully => 'ग्राहक सफलतापूर्वक थपियो';
 
   @override
+  String get customerUpdatedSuccessfully =>
+      'ग्राहक सफलतापूर्वक अद्यावधिक गरियो';
+
+  @override
   String get failedToAddCustomer => 'ग्राहक थप्न असफल भयो';
+
+  @override
+  String get editCustomer => 'ग्राहक सम्पादन गर्नुहोस्';
+
+  @override
+  String get manageCustomers => 'ग्राहकहरू हेर्नुहोस् र व्यवस्थापन गर्नुहोस्';
+
+  @override
+  String get pan => 'प्यान';
+
+  @override
+  String get needInternetToSaveCustomer =>
+      'ग्राहक थप्न वा सम्पादन गर्न इन्टरनेट जडान आवश्यक छ।';
+
+  @override
+  String get customerMobileAlreadyExists =>
+      'यो मोबाइल नम्बर भएको ग्राहक पहिले नै अवस्थित छ।';
+
+  @override
+  String get customerSyncStatus => 'ग्राहक सिङ्क स्थिति';
+
+  @override
+  String get notSynced => 'सिङ्क नगरिएको';
+
+  @override
+  String get noCustomerSyncEntries => 'सिङ्क हुन बाँकी कुनै ग्राहक छैन।';
 }

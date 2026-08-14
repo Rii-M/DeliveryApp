@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../models/customer.dart';
@@ -14,14 +13,12 @@ class CustomerPickerSheet extends StatefulWidget {
   final List<Customer> customers;
   final Customer? selectedCustomer;
   final ValueChanged<Customer> onCustomerSelected;
-  final Future<void> Function()? onCustomerAdded;
 
   const CustomerPickerSheet({
     super.key,
     required this.customers,
     this.selectedCustomer,
     required this.onCustomerSelected,
-    this.onCustomerAdded,
   });
 
   @override
@@ -70,61 +67,6 @@ class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
             .toList();
       }
     });
-  }
-
-  Future<void> _openAddCustomer() async {
-    final added = await GoRouter.of(context).push<bool>('/add-customer');
-    if (added == true) {
-      await widget.onCustomerAdded?.call();
-    }
-  }
-
-  Widget _buildAddCustomerBox(ThemeData theme, AppLocalizations l10n) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: GestureDetector(
-        onTap: _openAddCustomer,
-        child: CustomPaint(
-          painter: _DottedBorderPainter(
-            color: theme.colorScheme.primary,
-            radius: 12,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.person_add_alt_1,
-                    size: 20,
-                    color: theme.colorScheme.onPrimaryContainer,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    l10n.addNewCustomer,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right,
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -214,8 +156,6 @@ class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  _buildAddCustomerBox(theme, l10n),
-                  const SizedBox(height: 8),
                   Flexible(
                     child: _filtered.isEmpty
                         ? Padding(
@@ -291,46 +231,5 @@ class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
         ),
       ),
     );
-  }
-}
-
-class _DottedBorderPainter extends CustomPainter {
-  final Color color;
-  final double radius;
-
-  static const double dashWidth = 4;
-  static const double dashSpace = 3;
-
-  _DottedBorderPainter({
-    required this.color,
-    required this.radius,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rrect = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      Radius.circular(radius),
-    );
-    final path = Path()..addRRect(rrect);
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4;
-    for (final metric in path.computeMetrics()) {
-      var distance = 0.0;
-      while (distance < metric.length) {
-        canvas.drawPath(
-          metric.extractPath(distance, distance + dashWidth),
-          paint,
-        );
-        distance += dashWidth + dashSpace;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DottedBorderPainter oldDelegate) {
-    return oldDelegate.color != color || oldDelegate.radius != radius;
   }
 }
