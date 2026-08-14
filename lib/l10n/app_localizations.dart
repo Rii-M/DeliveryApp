@@ -1207,6 +1207,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'preferences'**
   String get preferences;
+
+  /// No description provided for @addCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Customer'**
+  String get addCustomer;
+
+  /// No description provided for @addNewCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Customer'**
+  String get addNewCustomer;
+
+  /// No description provided for @customerName.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer Name'**
+  String get customerName;
+
+  /// No description provided for @customerMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile'**
+  String get customerMobile;
+
+  /// No description provided for @email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// No description provided for @address.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get address;
+
+  /// No description provided for @discountGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Discount Group'**
+  String get discountGroup;
+
+  /// No description provided for @area.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get area;
+
+  /// No description provided for @selectDiscountGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Select discount group'**
+  String get selectDiscountGroup;
+
+  /// No description provided for @selectArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Select area'**
+  String get selectArea;
+
+  /// No description provided for @enterCustomerName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter customer name'**
+  String get enterCustomerName;
+
+  /// No description provided for @enterCustomerMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter mobile number'**
+  String get enterCustomerMobile;
+
+  /// No description provided for @selectDiscountGroupRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a discount group'**
+  String get selectDiscountGroupRequired;
+
+  /// No description provided for @selectAreaRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select an area'**
+  String get selectAreaRequired;
+
+  /// No description provided for @customerAddedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer added successfully'**
+  String get customerAddedSuccessfully;
+
+  /// No description provided for @failedToAddCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add customer'**
+  String get failedToAddCustomer;
 }
 
 class _AppLocalizationsDelegate

@@ -596,4 +596,52 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get preferences => 'प्राथमिकता';
+
+  @override
+  String get addCustomer => 'ग्राहक थप्नुहोस्';
+
+  @override
+  String get addNewCustomer => 'नयाँ ग्राहक थप्नुहोस्';
+
+  @override
+  String get customerName => 'ग्राहकको नाम';
+
+  @override
+  String get customerMobile => 'मोबाइल';
+
+  @override
+  String get email => 'इमेल';
+
+  @override
+  String get address => 'ठेगाना';
+
+  @override
+  String get discountGroup => 'छुट समूह';
+
+  @override
+  String get area => 'क्षेत्र';
+
+  @override
+  String get selectDiscountGroup => 'छुट समूह चयन गर्नुहोस्';
+
+  @override
+  String get selectArea => 'क्षेत्र चयन गर्नुहोस्';
+
+  @override
+  String get enterCustomerName => 'कृपया ग्राहकको नाम लेख्नुहोस्';
+
+  @override
+  String get enterCustomerMobile => 'कृपया मोबाइल नम्बर लेख्नुहोस्';
+
+  @override
+  String get selectDiscountGroupRequired => 'कृपया छुट समूह चयन गर्नुहोस्';
+
+  @override
+  String get selectAreaRequired => 'कृपया क्षेत्र चयन गर्नुहोस्';
+
+  @override
+  String get customerAddedSuccessfully => 'ग्राहक सफलतापूर्वक थपियो';
+
+  @override
+  String get failedToAddCustomer => 'ग्राहक थप्न असफल भयो';
 }

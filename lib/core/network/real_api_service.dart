@@ -108,6 +108,27 @@ Future<List<Map<String, dynamic>>> fetchAssignedCategories() async {
   }
 
   @override
+  Future<List<Map<String, dynamic>>> fetchCustomerDiscountGroups() async {
+    return _fetchList(ApiConfig.customerDiscountGroupEndpoint);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchAreas() async {
+    return _fetchList(ApiConfig.areaEndpoint);
+  }
+
+  @override
+  Future<bool> addCustomer(Map<String, dynamic> data) async {
+    final response = await _dio.post(ApiConfig.customerAddEndpoint, data: data);
+    final body = response.data as Map<String, dynamic>;
+    final status = body['Status'] == true || body['status'] == true;
+    if (!status) {
+      print('[API] addCustomer FAILED. Response: ${response.data}');
+    }
+    return status;
+  }
+
+  @override
   Future<List<Map<String, dynamic>>> fetchAllProducts() async {
     final url = '${_dio.options.baseUrl}${ApiConfig.allProductsEndpoint}';
     print('[API] Calling AllProducts: $url');

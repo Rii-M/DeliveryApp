@@ -329,6 +329,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return Column(
       children: [
         QuickActionCard(
+          title: l10n.addCustomer,
+          subtitle: l10n.addNewCustomer,
+          icon: Icons.person_add_alt_1,
+          color: Theme.of(context).colorScheme.primaryContainer,
+          onTap: () => context.push('/add-customer'),
+        ),
+        const SizedBox(height: 8),
+        QuickActionCard(
           title: l10n.newDelivery,
           subtitle: l10n.createNewDelivery,
           icon: Icons.add_circle_outline,

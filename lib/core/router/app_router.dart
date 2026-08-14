@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/provider/auth_provider.dart';
 import '../../features/auth/screen/login_screen.dart';
+import '../../features/dashboard/screen/add_customer_screen.dart';
 import '../../features/dashboard/screen/categories_screen.dart';
 import '../../features/dashboard/screen/customers_screen.dart';
 import '../../features/dashboard/screen/dashboard_screen.dart';
@@ -169,6 +170,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/customers',
         parentNavigatorKey: _rootNavigatorKey,
         builder: (context, state) => const CustomersScreen(),
+      ),
+      GoRoute(
+        path: '/add-customer',
+        parentNavigatorKey: _rootNavigatorKey,
+        builder: (context, state) => const AddCustomerScreen(),
       ),
     ],
   );

@@ -203,5 +203,22 @@
   "pleaseMakeFullPayment": "Please make full payment",
   "pleaseEnterReason":"Please add return reason",
   "pleaseEnterPaymode":"Please add payment entry",
-  "preferences":"preferences"
+  "preferences":"preferences",
+
+  "addCustomer": "Add Customer",
+  "addNewCustomer": "Add New Customer",
+  "customerName": "Customer Name",
+  "customerMobile": "Mobile",
+  "email": "Email",
+  "address": "Address",
+  "discountGroup": "Discount Group",
+  "area": "Area",
+  "selectDiscountGroup": "Select discount group",
+  "selectArea": "Select area",
+  "enterCustomerName": "Please enter customer name",
+  "enterCustomerMobile": "Please enter mobile number",
+  "selectDiscountGroupRequired": "Please select a discount group",
+  "selectAreaRequired": "Please select an area",
+  "customerAddedSuccessfully": "Customer added successfully",
+  "failedToAddCustomer": "Failed to add customer"
 }

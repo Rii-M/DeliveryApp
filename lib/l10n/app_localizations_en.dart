@@ -596,4 +596,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get preferences => 'preferences';
+
+  @override
+  String get addCustomer => 'Add Customer';
+
+  @override
+  String get addNewCustomer => 'Add New Customer';
+
+  @override
+  String get customerName => 'Customer Name';
+
+  @override
+  String get customerMobile => 'Mobile';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get address => 'Address';
+
+  @override
+  String get discountGroup => 'Discount Group';
+
+  @override
+  String get area => 'Area';
+
+  @override
+  String get selectDiscountGroup => 'Select discount group';
+
+  @override
+  String get selectArea => 'Select area';
+
+  @override
+  String get enterCustomerName => 'Please enter customer name';
+
+  @override
+  String get enterCustomerMobile => 'Please enter mobile number';
+
+  @override
+  String get selectDiscountGroupRequired => 'Please select a discount group';
+
+  @override
+  String get selectAreaRequired => 'Please select an area';
+
+  @override
+  String get customerAddedSuccessfully => 'Customer added successfully';
+
+  @override
+  String get failedToAddCustomer => 'Failed to add customer';
 }
