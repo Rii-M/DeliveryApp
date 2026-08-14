@@ -68,16 +68,9 @@ class _CustomerSyncStatusScreenState
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    var syncedCount = 0;
-    var notSyncedCount = 0;
-    for (final e in _entries) {
-      final status = (e['status'] as String? ?? '');
-      if (status == 'Synced') {
-        syncedCount++;
-      } else {
-        notSyncedCount++;
-      }
-    }
+    final pendingEntries = _entries
+        .where((e) => (e['status'] as String? ?? '') != 'Synced')
+        .toList();
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.customerSyncStatus)),
@@ -130,28 +123,6 @@ class _CustomerSyncStatusScreenState
               ),
               const SizedBox(height: 16),
             ],
-            Row(
-              children: [
-                Expanded(
-                  child: _SyncCountChip(
-                    label: l10n.synced,
-                    count: syncedCount,
-                    icon: Icons.check_circle,
-                    color: Colors.green,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _SyncCountChip(
-                    label: l10n.notSynced,
-                    count: notSyncedCount,
-                    icon: Icons.error_outline,
-                    color: theme.colorScheme.error,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
             if (_isLoading)
               const Padding(
                 padding: EdgeInsets.only(top: 32),
@@ -174,7 +145,7 @@ class _CustomerSyncStatusScreenState
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
-                    children: _entries.map((e) {
+                    children: pendingEntries.map((e) {
                       return _CustomerSyncTile(
                         name: (e['customer_name'] as String? ?? ''),
                         phone: (e['customer_phone'] as String? ?? ''),
@@ -251,54 +222,6 @@ class _RejectedTile extends StatelessWidget {
             icon: const Icon(Icons.close, size: 18),
             color: theme.colorScheme.onErrorContainer,
             tooltip: l10n.clear,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SyncCountChip extends StatelessWidget {
-  final String label;
-  final int count;
-  final IconData icon;
-  final Color color;
-
-  const _SyncCountChip({
-    required this.label,
-    required this.count,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: color),
-          const SizedBox(width: 8),
-          Text(
-            '$count',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodySmall,
-            ),
           ),
         ],
       ),
