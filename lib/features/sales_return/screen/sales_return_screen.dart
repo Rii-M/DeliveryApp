@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/customer_picker_sheet.dart';
+import '../../../features/sync/provider/sync_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/customer.dart';
 import '../provider/sales_return_provider.dart';
@@ -22,6 +23,7 @@ class _SalesReturnScreenState extends ConsumerState<SalesReturnScreen> {
   void _openCustomerPicker() {
     if (_customerPickerOpen) return;
     setState(() => _customerPickerOpen = true);
+    ref.read(salesReturnProvider.notifier).refreshCustomersFromCache();
   }
 
   void _closeCustomerPicker() {
@@ -141,6 +143,13 @@ void initState() {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     final langCode = Localizations.localeOf(context).languageCode;
+
+    ref.listen<SyncState>(syncProvider, (prev, next) {
+      final wasSyncing = prev?.isSyncing ?? false;
+      if (wasSyncing && !next.isSyncing) {
+        ref.read(salesReturnProvider.notifier).refreshCustomersFromCache();
+      }
+    });
 
     if (!state.isLoading &&
         !state.saved &&

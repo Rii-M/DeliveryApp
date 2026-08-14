@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/utils/extensions.dart';
 import '../../../core/utils/tax_calculator.dart';
 import '../../../core/widgets/customer_picker_sheet.dart';
+import '../../../features/sync/provider/sync_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/customer.dart';
 import '../models/cart_item.dart';
@@ -43,6 +44,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
   void _openCustomerPicker() {
     if (_customerPickerOpen) return;
     setState(() => _customerPickerOpen = true);
+    ref.read(deliveryFormProvider.notifier).refreshCustomersFromCache();
   }
 
   void _closeCustomerPicker() {
@@ -174,6 +176,13 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
         discountAmount: state.productDiscounts[e.key] ?? 0,
       );
     }).toList();
+
+    ref.listen<SyncState>(syncProvider, (prev, next) {
+      final wasSyncing = prev?.isSyncing ?? false;
+      if (wasSyncing && !next.isSyncing) {
+        ref.read(deliveryFormProvider.notifier).refreshCustomersFromCache();
+      }
+    });
 
     if (!state.isLoadingCustomers &&
         !state.isReadOnly &&

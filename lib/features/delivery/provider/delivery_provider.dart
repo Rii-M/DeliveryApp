@@ -274,6 +274,38 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
     }
   }
 
+  Future<void> refreshCustomersFromCache() async {
+    try {
+      final customers = await _customerRepo.getCachedCustomers();
+      if (!mounted) return;
+      state = DeliveryFormState(
+        delivery: state.delivery,
+        selectedCategory: state.selectedCategory,
+        categories: state.categories,
+        products: state.products,
+        paymentModes: state.paymentModes,
+        paymentEntries: state.paymentEntries,
+        selectedPaymentMode: state.selectedPaymentMode,
+        cart: state.cart,
+        customPrices: state.customPrices,
+        productDiscounts: state.productDiscounts,
+        selectedUnitIds: state.selectedUnitIds,
+        productSearchQuery: state.productSearchQuery,
+        selectedCustomer: state.selectedCustomer,
+        customers: customers,
+        customerName: state.customerName,
+        editingDeliveryId: state.editingDeliveryId,
+        isReadOnly: state.isReadOnly,
+        paidAmount: state.paidAmount,
+        discountType: state.discountType,
+        discountValue: state.discountValue,
+        discountAmount: state.discountAmount,
+      );
+    } catch (e) {
+      print('[Delivery] customer refresh failed: $e');
+    }
+  }
+
   Future<void> loadExistingDelivery(int deliveryId) async {
     state = DeliveryFormState(isLoadingCustomers: true);
 

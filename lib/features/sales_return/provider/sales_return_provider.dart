@@ -256,6 +256,16 @@ void _prefetchProductImages(List<Product> products) {
     }
   }
 
+  Future<void> refreshCustomersFromCache() async {
+    try {
+      final customers = await _customerRepo.getCachedCustomers();
+      if (!mounted) return;
+      state = _copyWithAll(customers: customers);
+    } catch (e) {
+      print('[SalesReturn] customer refresh failed: $e');
+    }
+  }
+
   SalesReturnState _copyWithAll({
     List<Category>? categories,
     Category? selectedCategory,

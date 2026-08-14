@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
@@ -40,6 +41,14 @@ class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant CustomerPickerSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!listEquals(oldWidget.customers, widget.customers)) {
+      _onSearchChanged(_searchController.text);
+    }
   }
 
   void _onSearchChanged(String value) {
