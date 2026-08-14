@@ -79,7 +79,8 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
       setState(() {
         _discountGroups = groups;
         if (_isEditing && widget.customer!.discountGroupId != null) {
-          _selectedDiscountGroup = _discountGroups.cast<CustomerDiscountGroup?>()
+          _selectedDiscountGroup = _discountGroups
+              .cast<CustomerDiscountGroup?>()
               .firstWhere(
                 (g) => g?.id == widget.customer!.discountGroupId,
                 orElse: () => null,
@@ -95,7 +96,8 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
           setState(() {
             _discountGroups = fresh;
             if (_selectedDiscountGroup != null) {
-              _selectedDiscountGroup = fresh.cast<CustomerDiscountGroup?>()
+              _selectedDiscountGroup = fresh
+                  .cast<CustomerDiscountGroup?>()
                   .firstWhere(
                     (g) => g?.id == _selectedDiscountGroup!.id,
                     orElse: () => _selectedDiscountGroup,
@@ -202,9 +204,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
       if (!mounted) return;
       setState(() => _isSaving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString().replaceFirst('Exception: ', '')),
-        ),
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
       );
     }
   }
@@ -216,11 +216,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 48,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
             const SizedBox(height: 12),
             Text(
               _error!,
@@ -253,130 +249,142 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? _buildErrorView(theme, l10n)
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        TextFormField(
-                          controller: _nameController,
-                          readOnly: _isEditing,
-                          textCapitalization: TextCapitalization.words,
-                          decoration: InputDecoration(
-                            labelText: l10n.customerName,
-                            hintText: l10n.customerName,
-                            prefixIcon: const Icon(Icons.person_outline),
-                            border: const OutlineInputBorder(),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return l10n.enterCustomerName;
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _mobileController,
-                          keyboardType: TextInputType.phone,
-                          decoration: InputDecoration(
-                            labelText: l10n.customerMobile,
-                            hintText: l10n.customerMobile,
-                            prefixIcon: const Icon(Icons.phone_outlined),
-                            border: const OutlineInputBorder(),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return l10n.enterCustomerMobile;
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          decoration: InputDecoration(
-                            labelText: l10n.email,
-                            hintText: l10n.email,
-                            prefixIcon: const Icon(Icons.email_outlined),
-                            border: const OutlineInputBorder(),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _panController,
-                          textCapitalization: TextCapitalization.characters,
-                          readOnly: _isEditing,
-                          decoration: InputDecoration(
-                            labelText: l10n.pan,
-                            hintText: l10n.pan,
-                            prefixIcon: const Icon(
-                              Icons.badge_outlined,
+          ? _buildErrorView(theme, l10n)
+          : Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextFormField(
+                            controller: _nameController,
+                            readOnly: _isEditing,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: InputDecoration(
+                              labelText: l10n.customerName,
+                              hintText: l10n.customerName,
+                              prefixIcon: const Icon(Icons.person_outline),
+                              border: const OutlineInputBorder(),
                             ),
-                            border: const OutlineInputBorder(),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return l10n.enterCustomerName;
+                              }
+                              return null;
+                            },
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                        TextFormField(
-                          controller: _addressController,
-                          decoration: InputDecoration(
-                            labelText: l10n.address,
-                            hintText: l10n.address,
-                            prefixIcon: const Icon(Icons.location_on_outlined),
-                            border: const OutlineInputBorder(),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _mobileController,
+                            keyboardType: TextInputType.phone,
+                            decoration: InputDecoration(
+                              labelText: l10n.customerMobile,
+                              hintText: l10n.customerMobile,
+                              prefixIcon: const Icon(Icons.phone_outlined),
+                              border: const OutlineInputBorder(),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return l10n.enterCustomerMobile;
+                              }
+                              return null;
+                            },
                           ),
-                        ),
-                        const SizedBox(height: 12),
-                        DropdownButtonFormField<CustomerDiscountGroup>(
-                          initialValue: _selectedDiscountGroup,
-                          decoration: InputDecoration(
-                            labelText: l10n.discountGroup,
-                            hintText: l10n.selectDiscountGroup,
-                            prefixIcon: const Icon(Icons.percent),
-                            border: const OutlineInputBorder(),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              labelText: l10n.email,
+                              hintText: l10n.email,
+                              prefixIcon: const Icon(Icons.email_outlined),
+                              border: const OutlineInputBorder(),
+                            ),
                           ),
-                          items: _discountGroups
-                              .map(
-                                (g) => DropdownMenuItem(
-                                  value: g,
-                                  child: Text(g.name),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) =>
-                              setState(() => _selectedDiscountGroup = value),
-                          validator: (value) {
-                            if (value == null) {
-                              return l10n.selectDiscountGroupRequired;
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 24),
-                        FilledButton.icon(
-                          onPressed: _isSaving ? null : _save,
-                          icon: _isSaving
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _panController,
+                            textCapitalization: TextCapitalization.characters,
+                            readOnly: _isEditing,
+                            decoration: InputDecoration(
+                              labelText: l10n.pan,
+                              hintText: l10n.pan,
+                              prefixIcon: const Icon(Icons.badge_outlined),
+                              border: const OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _addressController,
+                            decoration: InputDecoration(
+                              labelText: l10n.address,
+                              hintText: l10n.address,
+                              prefixIcon: const Icon(
+                                Icons.location_on_outlined,
+                              ),
+                              border: const OutlineInputBorder(),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<CustomerDiscountGroup>(
+                            initialValue: _selectedDiscountGroup,
+                            decoration: InputDecoration(
+                              labelText: l10n.discountGroup,
+                              hintText: l10n.selectDiscountGroup,
+                              prefixIcon: const Icon(Icons.percent),
+                              border: const OutlineInputBorder(),
+                            ),
+                            items: _discountGroups
+                                .map(
+                                  (g) => DropdownMenuItem(
+                                    value: g,
+                                    child: Text(g.name),
                                   ),
                                 )
-                              : const Icon(Icons.person_add),
-                          label: Text(_isSaving ? l10n.saving : l10n.save),
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                                .toList(),
+                            onChanged: (value) =>
+                                setState(() => _selectedDiscountGroup = value),
+                            validator: (value) {
+                              if (value == null) {
+                                return l10n.selectDiscountGroupRequired;
+                              }
+                              return null;
+                            },
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
+                SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child:SizedBox( 
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                      onPressed: _isSaving ? null : _save,
+                      icon: _isSaving
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.person_add),
+                      label: Text(_isSaving ? l10n.saving : l10n.save),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                    ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }
