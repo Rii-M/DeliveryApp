@@ -97,10 +97,12 @@ class SyncNotifier extends StateNotifier<SyncState> {
   }
 
     /// Pushes a single customer (just saved locally) to the server immediately
-  /// when online, so no manual "Sync All" is needed while connected.
-  Future<void> syncCustomerNow(int customerId) async {
-    await _syncRepo.syncCustomerById(customerId);
+  /// when online, so no manual "Sync All" is needed while connected. Returns
+  /// true when the server accepted the customer.
+  Future<bool> syncCustomerNow(int customerId) async {
+    final ok = await _syncRepo.syncCustomerById(customerId);
     await refresh();
+    return ok;
   }
 
   Future<bool> syncAll() async {

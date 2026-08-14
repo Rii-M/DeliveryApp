@@ -664,4 +664,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noCustomerSyncEntries => 'No customers pending sync.';
+
+  @override
+  String get clearAll => 'Clear all';
+
+  @override
+  String get rejectedCustomers => 'Rejected customers';
+
+  @override
+  String get customerNotSaved => 'Customer not saved';
 }

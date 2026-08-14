@@ -665,4 +665,13 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get noCustomerSyncEntries => 'सिङ्क हुन बाँकी कुनै ग्राहक छैन।';
+
+  @override
+  String get clearAll => 'सबै हटाउनुहोस्';
+
+  @override
+  String get rejectedCustomers => 'अस्वीकृत ग्राहकहरू';
+
+  @override
+  String get customerNotSaved => 'ग्राहक सुरक्षित भएन';
 }

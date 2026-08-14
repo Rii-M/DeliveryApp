@@ -222,5 +222,9 @@
   "customerMobileAlreadyExists": "यो मोबाइल नम्बर भएको ग्राहक पहिले नै अवस्थित छ।",
   "customerSyncStatus": "ग्राहक सिङ्क स्थिति",
   "notSynced": "सिङ्क नगरिएको",
-  "noCustomerSyncEntries": "सिङ्क हुन बाँकी कुनै ग्राहक छैन।"
+  "noCustomerSyncEntries": "सिङ्क हुन बाँकी कुनै ग्राहक छैन।",
+
+  "clearAll": "सबै हटाउनुहोस्",
+"rejectedCustomers": "अस्वीकृत ग्राहकहरू",
+"customerNotSaved": "ग्राहक सुरक्षित भएन"
 }

@@ -226,5 +226,10 @@
   "customerMobileAlreadyExists": "A customer with this mobile number already exists.",
   "customerSyncStatus": "Customer Sync Status",
   "notSynced": "Not synced",
-  "noCustomerSyncEntries": "No customers pending sync."
+  "noCustomerSyncEntries": "No customers pending sync.",
+  
+  
+  "clearAll": "Clear all",
+  "rejectedCustomers": "Rejected customers",
+  "customerNotSaved": "Customer not saved"
 }

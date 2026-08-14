@@ -329,6 +329,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             title: l10n.customers,
             value: state.assignedCustomersCount.toString(),
             icon: Icons.people,
+            badgeCount: state.rejectedCustomers.length,
             onTap: () => context.push('/customer-sync-status'),
           ),
         ),

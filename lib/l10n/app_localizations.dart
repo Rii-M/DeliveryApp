@@ -1339,6 +1339,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No customers pending sync.'**
   String get noCustomerSyncEntries;
+
+  /// No description provided for @clearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get clearAll;
+
+  /// No description provided for @rejectedCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected customers'**
+  String get rejectedCustomers;
+
+  /// No description provided for @customerNotSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer not saved'**
+  String get customerNotSaved;
 }
 
 class _AppLocalizationsDelegate

@@ -9,6 +9,7 @@ import '../../../models/customer.dart';
 import '../../../models/customer_discount_group.dart';
 import '../../../repositories/customer_repository.dart';
 import '../../../repositories/discount_group_repository.dart';
+import '../provider/dashboard_provider.dart';
 
 class AddCustomerScreen extends ConsumerStatefulWidget {
   final Customer? customer;
@@ -181,11 +182,33 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
       // If online, push to server immediately (no "Sync All" needed). If
       // offline, the customer stays queued for a later sync.
       if (saved.id != null) {
-        try {
-          await ref.read(syncProvider.notifier).syncCustomerNow(saved.id!);
-        } catch (_) {
-          // leftovers stay queued for the next sync run
+        var synced = !isOnline;
+        if (isOnline) {
+          try {
+            synced = await ref
+                .read(syncProvider.notifier)
+                .syncCustomerNow(saved.id!);
+          } catch (_) {
+            synced = false;
+            // leftovers stay queued for the next sync run
+          }
         }
+        if (!mounted) return;
+        setState(() => _isSaving = false);
+        ref.read(dashboardProvider.notifier).loadDashboard();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              synced
+                  ? (_isEditing
+                      ? l10n.customerUpdatedSuccessfully
+                      : l10n.customerAddedSuccessfully)
+                  : l10n.customerNotSaved,
+            ),
+          ),
+        );
+        context.pop(true);
+        return;
       }
 
       if (!mounted) return;
