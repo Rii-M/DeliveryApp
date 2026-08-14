@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/network/providers.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../models/customer_area.dart';
 import '../../../models/customer_discount_group.dart';
 
 class AddCustomerScreen extends ConsumerStatefulWidget {
@@ -22,9 +21,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
   final _addressController = TextEditingController();
 
   List<CustomerDiscountGroup> _discountGroups = [];
-  List<CustomerArea> _areas = [];
   CustomerDiscountGroup? _selectedDiscountGroup;
-  CustomerArea? _selectedArea;
   bool _isLoading = true;
   bool _isSaving = false;
   String? _error;
@@ -52,16 +49,11 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
     try {
       final apiService = ref.read(apiServiceProvider);
       final discountGroupData = await apiService.fetchCustomerDiscountGroups();
-      final areaData = await apiService.fetchAreas();
       if (!mounted) return;
       setState(() {
         _discountGroups = discountGroupData
             .map(CustomerDiscountGroup.fromJson)
             .where((g) => g.isActive)
-            .toList();
-        _areas = areaData
-            .map(CustomerArea.fromJson)
-            .where((a) => a.isActive)
             .toList();
         _isLoading = false;
       });
@@ -89,7 +81,6 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
           ? null
           : _addressController.text.trim(),
       'CustomerDiscountGroupId': _selectedDiscountGroup!.id,
-      'AreaId': _selectedArea!.id,
       'AgentId': null,
       'ClassName': null,
       'Code': null,
@@ -258,32 +249,6 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                           validator: (value) {
                             if (value == null) {
                               return l10n.selectDiscountGroupRequired;
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 12),
-                        DropdownButtonFormField<CustomerArea>(
-                          initialValue: _selectedArea,
-                          decoration: InputDecoration(
-                            labelText: l10n.area,
-                            hintText: l10n.selectArea,
-                            prefixIcon: const Icon(Icons.map_outlined),
-                            border: const OutlineInputBorder(),
-                          ),
-                          items: _areas
-                              .map(
-                                (a) => DropdownMenuItem(
-                                  value: a,
-                                  child: Text(a.name),
-                                ),
-                              )
-                              .toList(),
-                          onChanged: (value) =>
-                              setState(() => _selectedArea = value),
-                          validator: (value) {
-                            if (value == null) {
-                              return l10n.selectAreaRequired;
                             }
                             return null;
                           },

@@ -208,13 +208,10 @@
   "email": "इमेल",
   "address": "ठेगाना",
   "discountGroup": "छुट समूह",
-  "area": "क्षेत्र",
   "selectDiscountGroup": "छुट समूह चयन गर्नुहोस्",
-  "selectArea": "क्षेत्र चयन गर्नुहोस्",
   "enterCustomerName": "कृपया ग्राहकको नाम लेख्नुहोस्",
   "enterCustomerMobile": "कृपया मोबाइल नम्बर लेख्नुहोस्",
   "selectDiscountGroupRequired": "कृपया छुट समूह चयन गर्नुहोस्",
-  "selectAreaRequired": "कृपया क्षेत्र चयन गर्नुहोस्",
   "customerAddedSuccessfully": "ग्राहक सफलतापूर्वक थपियो",
   "failedToAddCustomer": "ग्राहक थप्न असफल भयो"
 }

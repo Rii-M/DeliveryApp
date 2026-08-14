@@ -619,13 +619,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get discountGroup => 'Discount Group';
 
   @override
-  String get area => 'Area';
-
-  @override
   String get selectDiscountGroup => 'Select discount group';
-
-  @override
-  String get selectArea => 'Select area';
 
   @override
   String get enterCustomerName => 'Please enter customer name';
@@ -635,9 +629,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectDiscountGroupRequired => 'Please select a discount group';
-
-  @override
-  String get selectAreaRequired => 'Please select an area';
 
   @override
   String get customerAddedSuccessfully => 'Customer added successfully';
