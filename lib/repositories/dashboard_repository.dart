@@ -6,6 +6,7 @@ import '../models/category.dart';
 import '../models/driver.dart';
 import '../models/driver_stock.dart';
 import '../models/product.dart';
+import '../models/rejected_customer.dart';
 
 final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {
   return DashboardRepository(
@@ -55,6 +56,28 @@ class DashboardRepository {
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
+  Future<List<RejectedCustomer>> getRejectedCustomers() async {
+    final maps = await _db.query('rejected_customer_log',
+        orderBy: 'created_date ASC');
+    return maps.map((map) => RejectedCustomer.fromMap(map)).toList();
+  }
+
+  Future<int> getRejectedCustomersCount() async {
+    final result = await _db.rawQuery(
+      'SELECT COUNT(*) as count FROM rejected_customer_log',
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  Future<void> clearRejectedCustomer(int id) async {
+    await _db.delete('rejected_customer_log',
+        where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> clearAllRejectedCustomers() async {
+    await _db.delete('rejected_customer_log');
+  }
+
   Future<DateTime?> getLastSyncTime() async {
     final maps = await _db.rawQuery(
       "SELECT * FROM sync_queue WHERE status = 'Synced' ORDER BY created_date DESC LIMIT 1",
@@ -98,7 +121,9 @@ class DashboardRepository {
   }
 
   Future<int> getAssignedCustomersCount() async {
-    final result = await _db.rawQuery('SELECT COUNT(*) as count FROM customer');
+    final result = await _db.rawQuery(
+      'SELECT COUNT(*) as count FROM customer WHERE is_synced = 1',
+    );
     return Sqflite.firstIntValue(result) ?? 0;
   }
 

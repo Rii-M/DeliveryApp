@@ -83,7 +83,17 @@ class CustomerRepository {
   }
 
   Future<List<Customer>> getCachedCustomers() async {
-    final maps = await _db.query('customer');
+    final maps = await _db.query('customer',
+        where: 'is_synced = ?', whereArgs: [1]);
+    return maps.map((map) => Customer.fromMap(map)).toList();
+  }
+
+  /// Locally added/edited customers that have NOT yet been confirmed by the
+  /// server. These are hidden from pickers and only surfaced in the
+  /// sync-status screen until they are synced.
+  Future<List<Customer>> getPendingCustomers() async {
+    final maps = await _db.query('customer',
+        where: 'is_synced = ?', whereArgs: [0]);
     return maps.map((map) => Customer.fromMap(map)).toList();
   }
 

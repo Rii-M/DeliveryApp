@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/services/image_prefetch_service.dart';
 import '../../../models/category.dart';
+import '../../../models/rejected_customer.dart';
 import '../../../repositories/category_repository.dart';
 import '../../../repositories/dashboard_repository.dart';
 
@@ -16,6 +17,7 @@ class DashboardState {
   final int assignedProductsCount;
   final List<Map<String, dynamic>> remainingStock;
   final List<Map<String, dynamic>> customerSyncStatus;
+  final List<RejectedCustomer> rejectedCustomers;
   final String? lastSyncTime;
   final bool isLoading;
 
@@ -30,6 +32,7 @@ class DashboardState {
     this.assignedProductsCount = 0,
     this.remainingStock = const [],
     this.customerSyncStatus = const [],
+    this.rejectedCustomers = const [],
     this.lastSyncTime,
     this.isLoading = false,
   });
@@ -68,6 +71,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
     final dbLastSync = await _dashboardRepo.getLastSyncTime();
     final customerSyncStatus =
         await _dashboardRepo.getCustomerSyncStatus();
+    final rejectedCustomers = await _dashboardRepo.getRejectedCustomers();
 
     state = DashboardState(
       isLoading: !hasCache,
@@ -79,6 +83,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
       assignedCustomersCount: assignedCustomers,
       assignedProductsCount: assignedProducts,
       customerSyncStatus: customerSyncStatus,
+      rejectedCustomers: rejectedCustomers,
       lastSyncTime: dbLastSync?.toIso8601String(),
     );
 
@@ -101,6 +106,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
       final dbLastSync = await _dashboardRepo.getLastSyncTime();
       final customerSyncStatus =
           await _dashboardRepo.getCustomerSyncStatus();
+      final rejectedCustomers = await _dashboardRepo.getRejectedCustomers();
 
       state = DashboardState(
         categories: categories,
@@ -112,6 +118,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
         assignedProductsCount: assignedProductCount,
         remainingStock: remainingStock,
         customerSyncStatus: customerSyncStatus,
+        rejectedCustomers: rejectedCustomers,
         lastSyncTime: dbLastSync?.toIso8601String(),
       );
     } catch (_) {
@@ -126,6 +133,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
         assignedProductsCount: state.assignedProductsCount,
         remainingStock: state.remainingStock,
         customerSyncStatus: state.customerSyncStatus,
+        rejectedCustomers: state.rejectedCustomers,
         lastSyncTime: state.lastSyncTime,
         isLoading: false,
       );

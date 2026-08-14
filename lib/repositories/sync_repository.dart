@@ -567,25 +567,31 @@ class SyncRepository {
 
   /// Pushes a single queued customer to the server immediately if online.
   /// Used right after saving a customer while connected so no manual
-  /// "Sync All" is needed. Offline saves stay queued.
-  Future<void> syncCustomerById(int customerId) async {
+  /// "Sync All" is needed. Offline saves stay queued. Returns true when the
+  /// server accepted the customer; false when it was rejected/failed.
+  Future<bool> syncCustomerById(int customerId) async {
     final isOnline = await _networkChecker.isConnected;
-    if (!isOnline) return;
+    if (!isOnline) return false;
 
     final maps = await _db.query(
       'sync_queue',
       where: 'entity_type = ? AND entity_id = ? AND status != ?',
       whereArgs: ['Customer', customerId, 'Synced'],
     );
+    if (maps.isEmpty) return true;
+    var allOk = true;
     for (final map in maps) {
       final entry = SyncQueue.fromMap(map);
       try {
-        await _syncCustomerEntry(entry);
-      } catch (_) {}
+        if (!await _syncCustomerEntry(entry)) allOk = false;
+      } catch (_) {
+        allOk = false;
+      }
     }
+    return allOk;
   }
 
-  Future<void> _syncCustomerEntry(SyncQueue entry) async {
+  Future<bool> _syncCustomerEntry(SyncQueue entry) async {
     final maps = await _db.query(
       'customer',
       where: 'id = ?',
@@ -593,7 +599,7 @@ class SyncRepository {
     );
     if (maps.isEmpty) {
       await _markCustomerSyncFailed(entry, 'Customer record not found');
-      return;
+      return false;
     }
     final customer = Customer.fromMap(maps.first);
     final isUpdate = customer.pendingAction == 'Update' &&
@@ -616,7 +622,7 @@ class SyncRepository {
           customer,
           'mobile ${customer.phone} already exists on server',
         );
-        return;
+        return false;
       }
     }
 
@@ -644,6 +650,7 @@ class SyncRepository {
         where: 'id = ?',
         whereArgs: [entry.id],
       );
+      return true;
     } else {
       print('[Sync] Customer sync FAILED - server returned Status: false');
       if (!isUpdate) {
@@ -654,12 +661,14 @@ class SyncRepository {
           result.message.isNotEmpty ? result.message : 'Customer sync failed',
         );
       }
+      return false;
     }
   }
 
   /// Removes a locally-added customer that the server permanently rejected
   /// (e.g. duplicate mobile / Status false) along with its queued sync entry so
-  /// it no longer appears anywhere in the app.
+  /// it no longer appears anywhere in the app. A record is kept in
+  /// rejected_customer_log so the driver can see that the customer was not saved.
   Future<void> _discardRejectedCustomer(
     Customer customer,
     String reason,
@@ -671,6 +680,12 @@ class SyncRepository {
         where: 'entity_type = ? AND entity_id = ?',
         whereArgs: ['Customer', customer.id],
       );
+      await txn.insert('rejected_customer_log', {
+        'name': customer.name,
+        'phone': customer.phone,
+        'reason': reason,
+        'created_date': DateTime.now().toIso8601String(),
+      });
     });
     print('[Sync] Discarded rejected customer ${customer.name} - $reason');
   }

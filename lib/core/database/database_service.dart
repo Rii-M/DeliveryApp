@@ -24,7 +24,7 @@ class DatabaseService {
 
       _database = await openDatabase(
         path,
-        version: 22,
+        version: 23,
         onCreate: _createTables,
         onUpgrade: _onUpgrade,
       );
@@ -320,6 +320,17 @@ class DatabaseService {
         )
       ''');
     }
+    if (oldVersion < 23) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS rejected_customer_log (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          phone TEXT,
+          reason TEXT,
+          created_date TEXT NOT NULL
+        )
+      ''');
+    }
   }
 
   Future<void> _createTables(Database db, int version) async {
@@ -532,6 +543,16 @@ class DatabaseService {
         name TEXT NOT NULL,
         discount_percent REAL DEFAULT 0,
         is_active INTEGER DEFAULT 1
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE rejected_customer_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        phone TEXT,
+        reason TEXT,
+        created_date TEXT NOT NULL
       )
     ''');
   }
