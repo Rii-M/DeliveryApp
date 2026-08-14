@@ -15,6 +15,7 @@ class DashboardState {
   final int assignedCustomersCount;
   final int assignedProductsCount;
   final List<Map<String, dynamic>> remainingStock;
+  final List<Map<String, dynamic>> customerSyncStatus;
   final String? lastSyncTime;
   final bool isLoading;
 
@@ -28,6 +29,7 @@ class DashboardState {
     this.assignedCustomersCount = 0,
     this.assignedProductsCount = 0,
     this.remainingStock = const [],
+    this.customerSyncStatus = const [],
     this.lastSyncTime,
     this.isLoading = false,
   });
@@ -64,6 +66,8 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
     final assignedProducts = await _dashboardRepo.getAssignedProductsCount();
     final pendingSync = await _dashboardRepo.getPendingSyncCount();
     final dbLastSync = await _dashboardRepo.getLastSyncTime();
+    final customerSyncStatus =
+        await _dashboardRepo.getCustomerSyncStatus();
 
     state = DashboardState(
       isLoading: !hasCache,
@@ -74,6 +78,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
       pendingSync: pendingSync,
       assignedCustomersCount: assignedCustomers,
       assignedProductsCount: assignedProducts,
+      customerSyncStatus: customerSyncStatus,
       lastSyncTime: dbLastSync?.toIso8601String(),
     );
 
@@ -94,6 +99,8 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
       final remainingStock = await _dashboardRepo.getRemainingAssignedStock();
       final pendingSync = await _dashboardRepo.getPendingSyncCount();
       final dbLastSync = await _dashboardRepo.getLastSyncTime();
+      final customerSyncStatus =
+          await _dashboardRepo.getCustomerSyncStatus();
 
       state = DashboardState(
         categories: categories,
@@ -104,6 +111,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
         assignedCustomersCount: assignedCustomers,
         assignedProductsCount: assignedProductCount,
         remainingStock: remainingStock,
+        customerSyncStatus: customerSyncStatus,
         lastSyncTime: dbLastSync?.toIso8601String(),
       );
     } catch (_) {
@@ -117,6 +125,7 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
         assignedCustomersCount: state.assignedCustomersCount,
         assignedProductsCount: state.assignedProductsCount,
         remainingStock: state.remainingStock,
+        customerSyncStatus: state.customerSyncStatus,
         lastSyncTime: state.lastSyncTime,
         isLoading: false,
       );

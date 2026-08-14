@@ -4,6 +4,7 @@ class SyncQueue {
   late int entityId;
   late String status;
   late DateTime createdDate;
+  String? errorMessage;
 
   SyncQueue();
 
@@ -14,6 +15,7 @@ class SyncQueue {
       'entity_id': entityId,
       'status': status,
       'created_date': createdDate.toIso8601String(),
+      'error_message': errorMessage,
     };
   }
 
@@ -24,6 +26,7 @@ class SyncQueue {
     entry.entityId = map['entity_id'] as int;
     entry.status = map['status'] as String;
     entry.createdDate = DateTime.parse(map['created_date'] as String);
+    entry.errorMessage = map['error_message'] as String?;
     return entry;
   }
 }

@@ -143,5 +143,20 @@ class DashboardRepository {
     }
     await batch.commit(noResult: true);
   }
+
+  /// Returns the customer sync queue entries (with customer name/phone) so the
+  /// dashboard can show "synced / not synced" status along with any sync error.
+  Future<List<Map<String, dynamic>>> getCustomerSyncStatus() async {
+    final maps = await _db.rawQuery('''
+      SELECT q.id AS queue_id, q.entity_type, q.entity_id, q.status,
+             q.created_date, q.error_message,
+             c.name AS customer_name, c.phone AS customer_phone
+      FROM sync_queue q
+      LEFT JOIN customer c ON c.id = q.entity_id
+      WHERE q.entity_type = 'Customer'
+      ORDER BY q.created_date ASC
+    ''');
+    return maps;
+  }
 }
 
