@@ -65,8 +65,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               final deliveryId = int.tryParse(
                 state.uri.queryParameters['deliveryId'] ?? '',
               );
+              final customerId = state.uri.queryParameters['customerId'];
               return NoTransitionPage(
-                child: DeliveryScreen(deliveryId: deliveryId),
+                child: DeliveryScreen(
+                  deliveryId: deliveryId,
+                  customerId: customerId,
+                ),
               );
             },
           ),
@@ -107,8 +111,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               final deliveryId = int.tryParse(
                 state.uri.queryParameters['deliveryId'] ?? '',
               );
+              final customerId = state.uri.queryParameters['customerId'];
               return NoTransitionPage(
-                child: DeliveryScreen(deliveryId: deliveryId),
+                child: DeliveryScreen(
+                  deliveryId: deliveryId,
+                  customerId: customerId,
+                ),
               );
             },
             routes: [

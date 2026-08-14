@@ -233,8 +233,13 @@ void initState() {
           OutlinedButton(
             onPressed: () 
             {
+              final customer = ref.read(salesReturnProvider).selectedCustomer;
               ref.read(salesReturnProvider.notifier).reset();
-               context.go('/delivery');
+              if (customer != null) {
+                context.go('/delivery?customerId=${customer.serverId}');
+              } else {
+                context.go('/delivery');
+              }
             },
             child: Text(l10n.goToDelivery),
           ),

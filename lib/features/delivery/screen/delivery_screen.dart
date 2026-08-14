@@ -16,8 +16,9 @@ import 'cart_screen.dart';
 
 class DeliveryScreen extends ConsumerStatefulWidget {
   final int? deliveryId;
+  final String? customerId;
 
-  const DeliveryScreen({super.key, this.deliveryId});
+  const DeliveryScreen({super.key, this.deliveryId, this.customerId});
 
   @override
   ConsumerState<DeliveryScreen> createState() => _DeliveryScreenState();
@@ -26,20 +27,35 @@ class DeliveryScreen extends ConsumerStatefulWidget {
 class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
   bool _customerPickerOpen = false;
   bool _autoOpenScheduled = false;
+  bool _preselecting = false;
 
   @override
   void initState() {
     super.initState();
+    final customerId = widget.customerId;
+    if (customerId != null) _preselecting = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(deliveryFormProvider.notifier).refreshProducts();
       if (widget.deliveryId != null) {
         ref
             .read(deliveryFormProvider.notifier)
             .loadExistingDelivery(widget.deliveryId!);
-      } else if (ref.read(deliveryFormProvider).delivery != null) {
-        ref.read(deliveryFormProvider.notifier).resetForm();
+      } else if (customerId != null) {
+        _preselectCustomer(customerId);
+      } else {
+        final state = ref.read(deliveryFormProvider);
+        if (state.delivery != null) {
+          ref.read(deliveryFormProvider.notifier).resetForm();
+        } else {
+          ref.read(deliveryFormProvider.notifier).clearSelectedCustomer();
+        }
       }
     });
+  }
+
+  Future<void> _preselectCustomer(String customerId) async {
+    await ref.read(deliveryFormProvider.notifier).preselectCustomer(customerId);
+    if (mounted) setState(() => _preselecting = false);
   }
 
   void _openCustomerPicker() {
@@ -200,7 +216,8 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
         !state.isReadOnly &&
         state.selectedCustomer == null &&
         !_customerPickerOpen &&
-        !_autoOpenScheduled) {
+        !_autoOpenScheduled &&
+        !_preselecting) {
       _autoOpenScheduled = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _autoOpenScheduled = false;

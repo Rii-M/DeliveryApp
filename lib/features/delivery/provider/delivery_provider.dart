@@ -171,6 +171,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
   final DeliveryRepository _deliveryRepo;
   final EstimateRepository _estimateRepo;
   final CustomerRepository _customerRepo;
+  Future<void>? _initialLoad;
 
   DeliveryFormNotifier({
     required this._categoryRepo,
@@ -181,7 +182,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
     required this._customerRepo,
   }) : _productRepo = productRepo,
        super(DeliveryFormState()) {
-    _loadInitialData();
+    _initialLoad = _loadInitialData();
   }
 
   Future<void> _loadInitialData() async {
@@ -516,6 +517,28 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       discountValue: state.discountValue,
       discountAmount: state.discountAmount,
     );
+  }
+
+  void clearSelectedCustomer() {
+    if (state.selectedCustomer == null && state.customerName == null) return;
+    selectCustomer(null);
+  }
+
+  /// Pre-selects a customer (e.g. carried over from a saved sales return)
+  /// after the initial data load has finished, so the load never wipes it.
+  Future<void> preselectCustomer(String customerId) async {
+    if (_initialLoad != null) {
+      await _initialLoad;
+    }
+    if (state.customers.isEmpty) {
+      await refreshCustomersFromCache();
+    }
+    final customer = state.customers
+        .where((c) => c.serverId == customerId)
+        .firstOrNull;
+    if (customer != null) {
+      selectCustomer(customer);
+    }
   }
 
   void setCustomPrice(String productId, double price) {

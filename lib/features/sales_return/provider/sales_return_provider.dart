@@ -833,6 +833,7 @@ void clearItems() {
     products: state.products,
     paymentModes: state.paymentModes,
     categories: state.categories,
+    selectedCustomer: state.selectedCustomer,
     saved: true,
   );
 }
