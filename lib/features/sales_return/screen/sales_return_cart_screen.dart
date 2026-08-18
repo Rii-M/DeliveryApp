@@ -163,9 +163,24 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
             ],
           ],
         ),
-        subtitle: customer?.address != null && customer!.address!.isNotEmpty
-            ? Text(customer.address!)
-            : null,
+        subtitle: customer == null ||
+                ((customer.address?.isNotEmpty ?? false) == false &&
+                    (customer.phone?.isNotEmpty ?? false) == false)
+            ? null
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (customer.phone != null && customer.phone!.isNotEmpty)
+                    Text(customer.phone!),
+                  if (customer.phone != null &&
+                          customer.phone!.isNotEmpty &&
+                          customer.address != null &&
+                          customer.address!.isNotEmpty)
+                    const SizedBox(height: 2),
+                  if (customer.address != null && customer.address!.isNotEmpty)
+                    Text(customer.address!),
+                ],
+              ),
       ),
     );
   }

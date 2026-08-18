@@ -208,6 +208,14 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
                               color: theme.colorScheme.onPrimaryContainer,
                             ),
                           ),
+                        if (state.customer!.address != null &&
+                            state.customer!.address!.isNotEmpty)
+                          Text(
+                            state.customer!.address!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onPrimaryContainer,
+                            ),
+                          ),
                       ],
                     ),
                   ),
