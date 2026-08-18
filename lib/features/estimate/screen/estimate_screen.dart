@@ -379,7 +379,7 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
                       ),
                     ),
                     Text(
-                      'Rs. ${state.grossTotal.toStringAsFixed(2)}',
+                      'Rs. ${state.totalGrossAmountIncTax.toStringAsFixed(2)}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),

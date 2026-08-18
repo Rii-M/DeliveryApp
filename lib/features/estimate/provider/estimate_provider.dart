@@ -109,6 +109,9 @@ class EstimateState {
   double get totalGrossAmount =>
       items.fold<double>(0, (sum, item) => sum + item.grossAmount);
 
+  double get totalGrossAmountIncTax =>
+      items.fold<double>(0, (sum, item) => sum + item.grossAmountIncTax);
+
   double get totalProductDiscount =>
       items.fold<double>(0, (sum, item) => sum + item.discountAmount);
 
