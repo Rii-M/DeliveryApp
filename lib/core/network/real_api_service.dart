@@ -114,6 +114,11 @@ Future<List<Map<String, dynamic>>> fetchAssignedCategories() async {
   }
 
   @override
+  Future<List<Map<String, dynamic>>> fetchAreas() async {
+    return _fetchList(ApiConfig.areaEndpoint);
+  }
+
+  @override
   Future<List<Map<String, dynamic>>> fetchCategoryWiseDiscounts() async {
     return _fetchList(ApiConfig.categoryWiseDiscountEndpoint);
   }
