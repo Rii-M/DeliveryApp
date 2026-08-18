@@ -327,25 +327,16 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
               theme,
               null,
             ),
-            // Commented out: discount display rows disabled for now.
-            // if (state.totalProductDiscountIncTax > 0) ...[
-            //   const SizedBox(height: 4),
-            //   _totalRow(
-            //     l10n.productDiscount,
-            //     -state.totalProductDiscountIncTax,
-            //     theme,
-            //     theme.colorScheme.error,
-            //   ),
-            // ],
-            // if (state.discountAmount > 0) ...[
-            //   const SizedBox(height: 4),
-            //   _totalRow(
-            //     l10n.discount,
-            //     -state.discountAmount,
-            //     theme,
-            //     theme.colorScheme.error,
-            //   ),
-            // ],
+            if (state.totalProductDiscountIncTax + state.discountAmount > 0)
+              ...[
+                const SizedBox(height: 4),
+                _totalRow(
+                  l10n.discount,
+                  -(state.totalProductDiscountIncTax + state.discountAmount),
+                  theme,
+                  theme.colorScheme.error,
+                ),
+              ],
             if (state.totalTaxAmount > 0) ...[
               const SizedBox(height: 4),
               _totalRow(

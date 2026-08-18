@@ -460,49 +460,27 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
                 //     ],
                 //   ],
                 // ),
-                // Commented out: discount display rows disabled for now.
-                // if (state.totalProductDiscount > 0) ...[
-                //   const SizedBox(height: 8),
-                //   Row(
-                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //     children: [
-                //       Text(
-                //         l10n.productDiscount,
-                //         style: theme.textTheme.bodyMedium?.copyWith(
-                //           color: theme.colorScheme.error,
-                //         ),
-                //       ),
-                //       Text(
-                //         '- Rs. ${state.totalProductDiscount.toStringAsFixed(2)}',
-                //         style: theme.textTheme.bodyMedium?.copyWith(
-                //           fontWeight: FontWeight.w600,
-                //           color: theme.colorScheme.error,
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ],
-                // if (state.discountAmount > 0) ...[
-                //   const SizedBox(height: 8),
-                //   Row(
-                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //     children: [
-                //       Text(
-                //         l10n.discount,
-                //         style: theme.textTheme.bodyMedium?.copyWith(
-                //           color: theme.colorScheme.error,
-                //         ),
-                //       ),
-                //       Text(
-                //         '- Rs. ${state.discountAmount.toStringAsFixed(2)}',
-                //         style: theme.textTheme.bodyMedium?.copyWith(
-                //           fontWeight: FontWeight.w600,
-                //           color: theme.colorScheme.error,
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ],
+                if (state.totalProductDiscount + state.discountAmount > 0) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n.discount,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.error,
+                        ),
+                      ),
+                      Text(
+                        '- Rs. ${(state.totalProductDiscount + state.discountAmount).toStringAsFixed(2)}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.error,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 if (state.totalTax > 0) ...[
                   const SizedBox(height: 8),
                   Row(
