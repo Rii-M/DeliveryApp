@@ -1375,6 +1375,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Customer not saved'**
   String get customerNotSaved;
+
+  /// No description provided for @rs.
+  ///
+  /// In en, this message translates to:
+  /// **'Rs.'**
+  String get rs;
 }
 
 class _AppLocalizationsDelegate

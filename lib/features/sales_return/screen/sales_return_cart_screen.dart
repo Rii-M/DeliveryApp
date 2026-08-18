@@ -273,13 +273,13 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Qty: ${item.quantity.toStringAsFixed(item.quantity == item.quantity.roundToDouble() ? 0 : 1)}'
+                      '${l10n.qty}: ${item.quantity.toStringAsFixed(item.quantity == item.quantity.roundToDouble() ? 0 : 1)}'
                       '${item.unit != null && item.unit!.isNotEmpty ? ' ${item.unit}' : ''}'
-                      '  •  Rs.${item.rate.toStringAsFixed(2)}',
+                      '  •  ${l10n.rs}${item.rate.toStringAsFixed(2)}',
                     ),
                     if (item.discountAmount > 0)
                       Text(
-                        '${l10n.discount}: -Rs. ${item.discountAmount.toStringAsFixed(2)}',
+                        '${l10n.discount}: -${l10n.rs}. ${item.discountAmount.toStringAsFixed(2)}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.error,
                           fontWeight: FontWeight.w600,
@@ -291,7 +291,7 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Rs.${item.lineTotal.toStringAsFixed(2)}',
+                      '${l10n.rs}${item.lineTotal.toStringAsFixed(2)}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: item.discountAmount > 0
@@ -995,7 +995,7 @@ class _ItemDetailSheetState extends ConsumerState<_ItemDetailSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Amount: Rs. ${item.lineTotal.toStringAsFixed(2)}',
+                  '${l10n.amount}: ${l10n.rs} ${item.lineTotal.toStringAsFixed(2)}',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),

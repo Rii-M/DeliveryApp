@@ -234,5 +234,6 @@
   
   "clearAll": "Clear all",
   "rejectedCustomers": "Rejected customers",
-  "customerNotSaved": "Customer not saved"
+  "customerNotSaved": "Customer not saved",
+  "rs":"Rs."
 }

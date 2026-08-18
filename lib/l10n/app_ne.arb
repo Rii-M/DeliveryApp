@@ -229,5 +229,7 @@
 
   "clearAll": "सबै हटाउनुहोस्",
 "rejectedCustomers": "अस्वीकृत ग्राहकहरू",
-"customerNotSaved": "ग्राहक सुरक्षित भएन"
+"customerNotSaved": "ग्राहक सुरक्षित भएन",
+"rs":"रु."
+
 }

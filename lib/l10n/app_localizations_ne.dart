@@ -683,4 +683,7 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get customerNotSaved => 'ग्राहक सुरक्षित भएन';
+
+  @override
+  String get rs => 'रु.';
 }

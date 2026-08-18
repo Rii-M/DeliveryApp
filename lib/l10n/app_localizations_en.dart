@@ -682,4 +682,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customerNotSaved => 'Customer not saved';
+
+  @override
+  String get rs => 'Rs.';
 }
