@@ -138,49 +138,63 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
 
   Widget _buildSelectedCustomerCard(SalesReturnState state, ThemeData theme) {
     final customer = state.selectedCustomer;
-    final initial = (customer != null && customer.name.isNotEmpty)
-        ? customer.name[0].toUpperCase()
-        : '?';
     return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: theme.colorScheme.primaryContainer,
-          child: Text(
-            initial,
-            style: TextStyle(
-              color: theme.colorScheme.onPrimaryContainer,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      color: theme.colorScheme.primaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
           children: [
-            Text(customer?.name ?? ''),
-            if (customer?.discountGroupId?.isNotEmpty ?? false) ...[
-              const SizedBox(height: 2),
-              ..._discountGroupLabel(context, customer!.discountGroupId!),
-            ],
-          ],
-        ),
-        subtitle: customer == null ||
-                ((customer.address?.isNotEmpty ?? false) == false &&
-                    (customer.phone?.isNotEmpty ?? false) == false)
-            ? null
-            : Column(
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: theme.colorScheme.primary,
+              child: Text(
+                customer != null && customer.name.isNotEmpty
+                    ? customer.name[0].toUpperCase()
+                    : '?',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: theme.colorScheme.onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (customer.phone != null && customer.phone!.isNotEmpty)
-                    Text(customer.phone!),
-                  if (customer.phone != null &&
-                          customer.phone!.isNotEmpty &&
-                          customer.address != null &&
-                          customer.address!.isNotEmpty)
+                  Text(
+                    customer?.name ?? '',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (customer?.discountGroupId?.isNotEmpty ?? false) ...[
                     const SizedBox(height: 2),
-                  if (customer.address != null && customer.address!.isNotEmpty)
-                    Text(customer.address!),
+                    ..._discountGroupLabel(context, customer!.discountGroupId!),
+                  ],
+                  if (customer != null &&
+                      customer.phone != null &&
+                      customer.phone!.isNotEmpty)
+                    Text(
+                      customer.phone!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  if (customer != null &&
+                      customer.address != null &&
+                      customer.address!.isNotEmpty)
+                    Text(
+                      customer.address!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onPrimaryContainer,
+                      ),
+                    ),
                 ],
               ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -196,7 +210,7 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: theme.textTheme.bodySmall?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
+          color: theme.colorScheme.onPrimaryContainer,
         ),
       ),
     ];
