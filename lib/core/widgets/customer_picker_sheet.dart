@@ -13,12 +13,14 @@ class CustomerPickerSheet extends StatefulWidget {
   final List<Customer> customers;
   final Customer? selectedCustomer;
   final ValueChanged<Customer> onCustomerSelected;
+  final VoidCallback? onAddCustomer;
 
   const CustomerPickerSheet({
     super.key,
     required this.customers,
     this.selectedCustomer,
     required this.onCustomerSelected,
+    this.onAddCustomer,
   });
 
   @override
@@ -67,6 +69,44 @@ class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
             .toList();
       }
     });
+  }
+
+  Widget _buildAddCustomerEntry(ThemeData theme, AppLocalizations l10n) {
+    return InkWell(
+      onTap: widget.onAddCustomer,
+      borderRadius: BorderRadius.circular(12),
+      child: CustomPaint(
+        painter: _DottedBorderPainter(
+          color: theme.colorScheme.primary,
+          radius: 12,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.person_add_alt_1,
+                color: theme.colorScheme.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  l10n.addCustomer,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -156,6 +196,12 @@ class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
                     ),
                   ),
                   const SizedBox(height: 8),
+                  if (widget.onAddCustomer != null)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                      child: _buildAddCustomerEntry(theme, l10n),
+                    ),
+                  const SizedBox(height: 8),
                   Flexible(
                     child: _filtered.isEmpty
                         ? Padding(
@@ -231,5 +277,48 @@ class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
         ),
       ),
     );
+  }
+}
+
+class _DottedBorderPainter extends CustomPainter {
+  final Color color;
+  final double radius;
+
+  _DottedBorderPainter({required this.color, required this.radius});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
+
+    const dashLength = 4.0;
+    const gapLength = 3.5;
+
+    final path = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Offset.zero & size,
+          Radius.circular(radius),
+        ),
+      );
+
+    for (final metric in path.computeMetrics()) {
+      var distance = 0.0;
+      while (distance < metric.length) {
+        canvas.drawPath(
+          metric.extractPath(distance, distance + dashLength),
+          paint,
+        );
+        distance += dashLength + gapLength;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DottedBorderPainter oldDelegate) {
+    return color != oldDelegate.color || radius != oldDelegate.radius;
   }
 }

@@ -36,6 +36,13 @@ class _SalesReturnScreenState extends ConsumerState<SalesReturnScreen> {
     ref.read(salesReturnProvider.notifier).selectCustomer(customer);
   }
 
+  Future<void> _handleAddCustomer() async {
+    final added = await context.push<bool>('/add-customer');
+    if (added == true && mounted) {
+      ref.read(salesReturnProvider.notifier).refreshCustomersFromCache();
+    }
+  }
+
   @override
 void initState() {
   super.initState();
@@ -62,6 +69,7 @@ void initState() {
                 customers: state.customers,
                 selectedCustomer: state.selectedCustomer,
                 onCustomerSelected: _handleCustomerSelected,
+                onAddCustomer: _handleAddCustomer,
               ),
             ),
           ),

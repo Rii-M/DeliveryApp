@@ -73,6 +73,13 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     ref.read(deliveryFormProvider.notifier).selectCustomer(customer);
   }
 
+  Future<void> _handleAddCustomer() async {
+    final added = await context.push<bool>('/add-customer');
+    if (added == true && mounted) {
+      ref.read(deliveryFormProvider.notifier).refreshCustomersFromCache();
+    }
+  }
+
   Widget _buildCustomerPickerOverlay() {
     final state = ref.read(deliveryFormProvider);
     return GestureDetector(
@@ -89,6 +96,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                 customers: state.customers,
                 selectedCustomer: state.selectedCustomer,
                 onCustomerSelected: _handleCustomerSelected,
+                onAddCustomer: _handleAddCustomer,
               ),
             ),
           ),
