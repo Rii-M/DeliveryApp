@@ -213,10 +213,23 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
                   ),
                 ),
                 title: Text(item.productName, overflow: TextOverflow.ellipsis),
-                subtitle: Text(
-                  'Qty: ${item.quantity.toStringAsFixed(item.quantity == item.quantity.roundToDouble() ? 0 : 1)}'
-                  '${item.unit != null && item.unit!.isNotEmpty ? ' ${item.unit}' : ''}'
-                  '  •  Rs.${item.rate.toStringAsFixed(2)}',
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Qty: ${item.quantity.toStringAsFixed(item.quantity == item.quantity.roundToDouble() ? 0 : 1)}'
+                      '${item.unit != null && item.unit!.isNotEmpty ? ' ${item.unit}' : ''}'
+                      '  •  Rs.${item.rate.toStringAsFixed(2)}',
+                    ),
+                    if (item.discountAmount > 0)
+                      Text(
+                        '${l10n.discount}: -Rs. ${item.discountAmount.toStringAsFixed(2)}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.error,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                  ],
                 ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -858,6 +871,17 @@ class _ItemDetailSheetState extends ConsumerState<_ItemDetailSheet> {
                 child: Text(
                   '${l10n.unit}: ${item.unit}',
                   style: theme.textTheme.bodyMedium,
+                ),
+              ),
+            if (item.discountAmount > 0)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  '${l10n.discount}: -Rs. ${item.discountAmount.toStringAsFixed(2)}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.error,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             // Commented out: per-item discount input disabled for now.

@@ -22,6 +22,7 @@ import '../../location/location_provider.dart';
 import '../../../core/services/image_prefetch_service.dart';
 import '../../../models/category.dart';
 import '../../../repositories/category_repository.dart';
+import '../../../repositories/category_wise_discount_repository.dart';
 class SalesReturnState {
   final Customer? selectedCustomer;
   final Product? pendingProduct;
@@ -154,6 +155,7 @@ final salesReturnProvider =
     StateNotifierProvider<SalesReturnNotifier, SalesReturnState>((ref) {
   return SalesReturnNotifier(
     categoryRepo: ref.read(categoryRepositoryProvider),
+    categoryWiseDiscountRepo: ref.read(categoryWiseDiscountRepositoryProvider),
     customerRepo: ref.read(customerRepositoryProvider),
     productRepo: ref.read(productRepositoryProvider),
     salesReturnRepo: ref.read(salesReturnRepositoryProvider),
@@ -168,6 +170,7 @@ final salesReturnProvider =
 
 class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
   final CategoryRepository _categoryRepo;
+  final CategoryWiseDiscountRepository _categoryWiseDiscountRepo;
   final CustomerRepository _customerRepo;
   final ProductRepository _productRepo;
   final SalesReturnRepository _salesReturnRepo;
@@ -180,6 +183,7 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
 
   SalesReturnNotifier({
     required this._categoryRepo,
+    required this._categoryWiseDiscountRepo,
     required this._customerRepo,
     required ProductRepository productRepo,
     required this._salesReturnRepo,
@@ -345,11 +349,52 @@ void clearItems() {
   state = _copyWithAll(items: [], discountAmount: 0, paymentEntries: []);
 }
 
-  void selectCustomer(Customer? customer) {
+  Future<void> selectCustomer(Customer? customer) async {
     state = _copyWithAll(
     selectedCustomer: customer,
     clearSelectedCustomer: customer == null, 
   );
+    await _applyCategoryDiscounts();
+  }
+
+  Future<void> _applyCategoryDiscounts() async {
+    final updated = [...state.items];
+    final customer = state.selectedCustomer;
+    if (customer != null && (customer.discountGroupId ?? '').isNotEmpty) {
+      final rules = await _categoryWiseDiscountRepo.getCachedRules();
+      final rulePercentByCategory = <String, double>{
+        for (final r in rules.where(
+            (r) => r.customerDiscountGroupId == customer.discountGroupId))
+          r.categoryId: r.discountPercent,
+      };
+      final groupDefault =
+          await _categoryWiseDiscountRepo.getGroupDefaultPercent(
+        customer.discountGroupId!,
+      );
+      for (final item in updated) {
+        final product = state.products
+            .where((p) => p.serverId == item.productId)
+            .firstOrNull;
+        final categoryId = product?.categoryId;
+        item.discountType = null;
+        item.discountValue = 0;
+        if (categoryId == null || categoryId.isEmpty) {
+          item.discountAmount = 0;
+          continue;
+        }
+        final pct = rulePercentByCategory[categoryId] ?? groupDefault;
+        item.discountAmount =
+            pct > 0 ? item.quantity * item.rate * (pct / 100) : 0;
+      }
+    } else {
+      for (final item in updated) {
+        item.discountType = null;
+        item.discountValue = 0;
+        item.discountAmount = 0;
+      }
+    }
+    state = _copyWithAll(items: updated);
+    _recalcHeaderDiscount();
   }
 
   void setPendingProduct(Product? product) {
@@ -410,7 +455,7 @@ void clearItems() {
     state = _copyWithAll(paymentEntries: updated);
   }
 
-  void addItem({String languageCode = 'en'}) {
+  Future<void> addItem({String languageCode = 'en'}) async {
     final product = state.pendingProduct;
     if (product == null || state.pendingQuantity <= 0) return;
 
@@ -446,7 +491,7 @@ void clearItems() {
         items: [...state.items, item],
       );
     }
-    _recalcHeaderDiscount();
+    await _applyCategoryDiscounts();
   }
 
   void removeItem(int index) {
@@ -457,16 +502,16 @@ void clearItems() {
     _recalcHeaderDiscount();
   }
 
-  void incrementItemQuantity(int index) {
+  Future<void> incrementItemQuantity(int index) async {
     if (index < 0 || index >= state.items.length) return;
     final updated = [...state.items];
     updated[index].quantity += 1;
 
     state = _copyWithAll(items: updated);
-    _recalcHeaderDiscount();
+    await _applyCategoryDiscounts();
   }
 
-  void decrementItemQuantity(int index) {
+  Future<void> decrementItemQuantity(int index) async {
     if (index < 0 || index >= state.items.length) return;
     final updated = [...state.items];
     if (updated[index].quantity <= 1) {
@@ -476,7 +521,7 @@ void clearItems() {
     }
 
     state = _copyWithAll(items: updated);
-    _recalcHeaderDiscount();
+    await _applyCategoryDiscounts();
   }
 
   void setReason(String? reason) {
@@ -523,18 +568,17 @@ void clearItems() {
     );
   }
 
-  void setItemRate(int index, double rate) {
+  Future<void> setItemRate(int index, double rate) async {
     if (index < 0 || index >= state.items.length) return;
     final updated = [...state.items];
     final item = updated[index];
     item.rate = rate;
-    final gross = item.quantity * item.rate;
-    item.discountAmount = item.discountType == null
-        ? 0
-        : _calcDiscountAmount(item.discountType, item.discountValue, gross);
+    item.discountType = null;
+    item.discountValue = 0;
+    item.discountAmount = 0;
 
     state = _copyWithAll(items: updated);
-    _recalcHeaderDiscount();
+    await _applyCategoryDiscounts();
   }
 
   void setItemDiscount(int index, String? type, double value) {

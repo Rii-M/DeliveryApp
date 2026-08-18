@@ -322,16 +322,15 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
-                        // Commented out: discount display disabled for now.
-                        // if (item.discountAmount > 0) ...[
-                        //   const SizedBox(height: 2),
-                        //   Text(
-                        // 'Discount: -Rs. ${item.discountAmount.toStringAsFixed(2)}',
-                        //     style: theme.textTheme.bodySmall?.copyWith(
-                        //       color: theme.colorScheme.error,
-                        //     ),
-                        //   ),
-                        // ],
+                        if (item.discountAmount > 0) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            'Discount: -Rs. ${item.discountAmount.toStringAsFixed(2)}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.error,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

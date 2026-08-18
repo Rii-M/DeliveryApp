@@ -6,6 +6,7 @@ import '../../../core/network/providers.dart';
 import '../../../core/services/image_prefetch_service.dart';
 import '../../../models/sync_queue.dart';
 import '../../../repositories/category_repository.dart';
+import '../../../repositories/category_wise_discount_repository.dart';
 import '../../../repositories/customer_repository.dart';
 import '../../../repositories/discount_group_repository.dart';
 import '../../../repositories/payment_mode_repository.dart';
@@ -61,6 +62,8 @@ final syncProvider = StateNotifierProvider<SyncNotifier, SyncState>((ref) {
     customerRepo: ref.read(customerRepositoryProvider),
     paymentModeRepo: ref.read(paymentModeRepositoryProvider),
     discountGroupRepo: ref.read(discountGroupRepositoryProvider),
+    categoryWiseDiscountRepo:
+        ref.read(categoryWiseDiscountRepositoryProvider),
   );
 });
 
@@ -72,6 +75,7 @@ class SyncNotifier extends StateNotifier<SyncState> {
   final CustomerRepository _customerRepo;
   final PaymentModeRepository _paymentModeRepo;
   final DiscountGroupRepository _discountGroupRepo;
+  final CategoryWiseDiscountRepository _categoryWiseDiscountRepo;
 
   SyncNotifier({
     required this._ref,
@@ -81,6 +85,7 @@ class SyncNotifier extends StateNotifier<SyncState> {
     required this._customerRepo,
     required this._paymentModeRepo,
     required this._discountGroupRepo,
+    required this._categoryWiseDiscountRepo,
   })  : _categoryRepo = categoryRepo,
         super(SyncState()) {
     refresh();
@@ -120,6 +125,7 @@ class SyncNotifier extends StateNotifier<SyncState> {
         'customers': const SyncStatus(label: 'Customers', success: null),
         'paymentModes': const SyncStatus(label: 'Payment Modes', success: null),
         'discountGroups': const SyncStatus(label: 'Discount Groups', success: null),
+        'categoryWiseDiscounts': const SyncStatus(label: 'Category Discounts', success: null),
       },
     );
 
@@ -135,7 +141,8 @@ class SyncNotifier extends StateNotifier<SyncState> {
         results['allProducts'] == true &&
         results['customers'] == true &&
         results['paymentModes'] == true &&
-        results['discountGroups'] == true;
+        results['discountGroups'] == true &&
+        results['categoryWiseDiscounts'] == true;
 
     if (!allOk) {
       state = SyncState(
@@ -146,6 +153,7 @@ incomingStatus: {
           'customers': SyncStatus(label: 'Customers', success: results['customers'], error: results['customers_error']),
           'paymentModes': SyncStatus(label: 'Payment Modes', success: results['paymentModes'], error: results['paymentModes_error']),
           'discountGroups': SyncStatus(label: 'Discount Groups', success: results['discountGroups'], error: results['discountGroups_error']),
+          'categoryWiseDiscounts': SyncStatus(label: 'Category Discounts', success: results['categoryWiseDiscounts'], error: results['categoryWiseDiscounts_error']),
         },
         isSyncing: true,
       );
@@ -177,6 +185,7 @@ incomingStatus: {
         'customers': SyncStatus(label: 'Customers', success: results['customers'], error: results['customers_error']),
         'paymentModes': SyncStatus(label: 'Payment Modes', success: results['paymentModes'], error: results['paymentModes_error']),
         'discountGroups': SyncStatus(label: 'Discount Groups', success: results['discountGroups'], error: results['discountGroups_error']),
+        'categoryWiseDiscounts': SyncStatus(label: 'Category Discounts', success: results['categoryWiseDiscounts'], error: results['categoryWiseDiscounts_error']),
       },
     );
 
@@ -194,7 +203,8 @@ incomingStatus: {
         results['allProducts'] == true &&
         results['customers'] == true &&
         results['paymentModes'] == true &&
-        results['discountGroups'] == true;
+        results['discountGroups'] == true &&
+        results['categoryWiseDiscounts'] == true;
 
     if (!allOk) {
       print('[AutoSync] Some master data failed to download');
@@ -284,6 +294,14 @@ incomingStatus: {
     } catch (e) {
       results['discountGroups'] = false;
       results['discountGroups_error'] = e.toString();
+    }
+
+    try {
+      await _categoryWiseDiscountRepo.refreshFromServer();
+      results['categoryWiseDiscounts'] = true;
+    } catch (e) {
+      results['categoryWiseDiscounts'] = false;
+      results['categoryWiseDiscounts_error'] = e.toString();
     }
 
     return results;

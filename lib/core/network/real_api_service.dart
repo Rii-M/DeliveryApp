@@ -114,6 +114,11 @@ Future<List<Map<String, dynamic>>> fetchAssignedCategories() async {
   }
 
   @override
+  Future<List<Map<String, dynamic>>> fetchCategoryWiseDiscounts() async {
+    return _fetchList(ApiConfig.categoryWiseDiscountEndpoint);
+  }
+
+  @override
   Future<CustomerOperationResult> addCustomer(Map<String, dynamic> data) async {
     final response = await _dio.post(ApiConfig.customerAddEndpoint, data: data);
     final body = response.data as Map<String, dynamic>;
