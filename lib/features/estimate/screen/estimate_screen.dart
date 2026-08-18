@@ -8,6 +8,7 @@ import '../../../models/payment_entry.dart';
 import '../../../models/payment_mode.dart';
 import '../../delivery/provider/delivery_provider.dart';
 import '../../sync/provider/sync_provider.dart';
+import '../../../repositories/discount_group_repository.dart';
 import '../provider/estimate_provider.dart';
 
 class EstimateScreen extends ConsumerStatefulWidget {
@@ -191,6 +192,14 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        if (state.customer!.discountGroupId?.isNotEmpty ??
+                            false) ...[
+                          const SizedBox(height: 2),
+                          ..._discountGroupLabel(
+                            context,
+                            state.customer!.discountGroupId!,
+                          ),
+                        ],
                         if (state.customer!.phone != null &&
                             state.customer!.phone!.isNotEmpty)
                           Text(
@@ -586,6 +595,23 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
         ),
       ],
     );
+  }
+
+  List<Widget> _discountGroupLabel(BuildContext context, String groupId) {
+    final name = ref.watch(discountGroupNameProvider(groupId)).valueOrNull;
+    if (name == null || name.isEmpty) return const [SizedBox.shrink()];
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    return [
+      Text(
+        '${l10n.discountGroup} - $name',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onPrimaryContainer,
+        ),
+      ),
+    ];
   }
 
   Future<void> _saveInvoice(BuildContext context) async {

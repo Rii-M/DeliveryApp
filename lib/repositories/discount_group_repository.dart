@@ -81,3 +81,12 @@ class DiscountGroupRepository {
     return groups;
   }
 }
+
+final discountGroupNameProvider = FutureProvider.family<String?, String>(
+  (ref, groupId) async {
+    final groups = await ref
+        .watch(discountGroupRepositoryProvider)
+        .getCachedDiscountGroups();
+    return groups.where((g) => g.id == groupId).firstOrNull?.name;
+  },
+);

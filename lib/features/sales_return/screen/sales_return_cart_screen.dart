@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../models/sales_return.dart';
+import '../../../repositories/discount_group_repository.dart';
 import '../provider/sales_return_provider.dart';
 
 class SalesReturnCartScreen extends ConsumerStatefulWidget {
@@ -152,12 +153,38 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
             ),
           ),
         ),
-        title: Text(customer?.name ?? ''),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(customer?.name ?? ''),
+            if (customer?.discountGroupId?.isNotEmpty ?? false) ...[
+              const SizedBox(height: 2),
+              ..._discountGroupLabel(context, customer!.discountGroupId!),
+            ],
+          ],
+        ),
         subtitle: customer?.address != null && customer!.address!.isNotEmpty
             ? Text(customer.address!)
             : null,
       ),
     );
+  }
+
+  List<Widget> _discountGroupLabel(BuildContext context, String groupId) {
+    final name = ref.watch(discountGroupNameProvider(groupId)).valueOrNull;
+    if (name == null || name.isEmpty) return const [SizedBox.shrink()];
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    return [
+      Text(
+        '${l10n.discountGroup} - $name',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+    ];
   }
 
   Widget _buildItemsSection(
