@@ -17,6 +17,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -89,10 +90,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(
-                    Icons.store,
-                    size: 80,
-                    color: theme.colorScheme.primary,
+                  Image.asset(
+                    'assets/icon/logo.png',
+                    height: 80,
+                    width: 80,
+                    fit: BoxFit.contain,
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -127,10 +129,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordController,
-                    obscureText: true,
+                    obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       labelText: l10n.password,
                       prefixIcon: Icon(Icons.lock),
+                      suffixIcon: IconButton(
+                      icon: Icon(
+                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                     ),
+                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                   ),
                       border: OutlineInputBorder(),
                     ),
                     validator: (v) =>

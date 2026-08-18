@@ -736,6 +736,7 @@ class SyncRepository {
       'Address': c.address,
       'PAN': c.pan,
       'CustomerDiscountGroupId': c.discountGroupId ?? ApiConfig.emptyGuid,
+      'AreaId': c.areaId ?? ApiConfig.emptyGuid,
       'AgentId': null,
       'ClassName': null,
       'Code': null,

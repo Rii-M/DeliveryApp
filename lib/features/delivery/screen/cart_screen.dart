@@ -82,11 +82,6 @@ class CartScreen extends ConsumerWidget {
                               .read(deliveryFormProvider.notifier)
                               .setCustomPrice(item.productId, price);
                         },
-                        onDiscountChanged: (discount) {
-                          ref
-                              .read(deliveryFormProvider.notifier)
-                              .setProductDiscount(item.productId, discount);
-                        },
                         onRemove: () {
                           ref
                               .read(deliveryFormProvider.notifier)
@@ -161,7 +156,6 @@ class _CartItemCard extends StatefulWidget {
   final ValueChanged<double> onQuantityChanged;
   final ValueChanged<String> onUnitChanged;
   final ValueChanged<double> onUnitPriceChanged;
-  final ValueChanged<double> onDiscountChanged;
   final VoidCallback onRemove;
 
   const _CartItemCard({
@@ -170,7 +164,6 @@ class _CartItemCard extends StatefulWidget {
     required this.onQuantityChanged,
     required this.onUnitChanged,
     required this.onUnitPriceChanged,
-    required this.onDiscountChanged,
     required this.onRemove,
   });
 
@@ -180,20 +173,13 @@ class _CartItemCard extends StatefulWidget {
 
 class _CartItemCardState extends State<_CartItemCard> {
   late TextEditingController _qtyController;
-  late TextEditingController _discountController;
   bool _isQtyFocused = false;
-  final bool _isDiscountFocused = false;
 
   @override
   void initState() {
     super.initState();
     _qtyController = TextEditingController(
       text: widget.item.quantity.toStringAsFixed(0),
-    );
-    _discountController = TextEditingController(
-      text: widget.item.discountAmount > 0
-          ? widget.item.discountAmount.toStringAsFixed(2)
-          : '',
     );
   }
 
@@ -203,17 +189,11 @@ class _CartItemCardState extends State<_CartItemCard> {
     if (!_isQtyFocused) {
       _qtyController.text = widget.item.quantity.toStringAsFixed(0);
     }
-    if (!_isDiscountFocused && widget.item.discountAmount != oldWidget.item.discountAmount) {
-      _discountController.text = widget.item.discountAmount > 0
-          ? widget.item.discountAmount.toStringAsFixed(2)
-          : '';
-    }
   }
 
   @override
   void dispose() {
     _qtyController.dispose();
-    _discountController.dispose();
     super.dispose();
   }
 
@@ -386,6 +366,22 @@ class _CartItemCardState extends State<_CartItemCard> {
                 ),
               ],
             ),
+            if (widget.item.discountAmount > 0)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  children: [
+                    const Spacer(),
+                    Text(
+                      '${l10n.discount}: -Rs. ${widget.item.discountAmount.toStringAsFixed(2)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.tertiary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),

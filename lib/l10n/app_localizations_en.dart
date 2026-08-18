@@ -631,6 +631,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectDiscountGroupRequired => 'Please select a discount group';
 
   @override
+  String get area => 'Area';
+
+  @override
+  String get selectArea => 'Select area';
+
+  @override
+  String get selectAreaRequired => 'Please select an area';
+
+  @override
   String get customerAddedSuccessfully => 'Customer added successfully';
 
   @override
@@ -673,4 +682,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get customerNotSaved => 'Customer not saved';
+
+  @override
+  String get rs => 'Rs.';
 }

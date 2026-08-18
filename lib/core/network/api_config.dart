@@ -10,6 +10,9 @@ class ApiConfig {
   static String get paymodeEndpoint => '/ap1/pos/posmobile/getPaymentMode';
   static String get customerDiscountGroupEndpoint =>
       '/ap1/pos/customerdiscountgroup/index';
+  static String get areaEndpoint => '/ap1/pos/area/index';
+  static String get categoryWiseDiscountEndpoint =>
+      '/ap1/pos/categorywisediscount/index';
   static String get customerAddEndpoint => '/ap1/pos/customer/add';
   static String get customerUpdateEndpoint => '/ap1/pos/customer/update';
   static const String allCategoryId = '00000000-0000-0000-0000-000000000000';

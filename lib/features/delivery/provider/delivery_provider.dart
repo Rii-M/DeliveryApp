@@ -8,6 +8,7 @@ import '../../../models/payment_mode.dart';
 import '../../../models/product.dart';
 import '../../../models/product_unit.dart';
 import '../../../repositories/category_repository.dart';
+import '../../../repositories/category_wise_discount_repository.dart';
 import '../../../repositories/customer_repository.dart';
 import '../../../repositories/delivery_repository.dart';
 import '../../../repositories/estimate_repository.dart';
@@ -161,6 +162,7 @@ final deliveryFormProvider =
         deliveryRepo: ref.read(deliveryRepositoryProvider),
         estimateRepo: ref.read(estimateRepositoryProvider),
         customerRepo: ref.read(customerRepositoryProvider),
+        discountRepo: ref.read(categoryWiseDiscountRepositoryProvider),
       );
     });
 
@@ -171,6 +173,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
   final DeliveryRepository _deliveryRepo;
   final EstimateRepository _estimateRepo;
   final CustomerRepository _customerRepo;
+  final CategoryWiseDiscountRepository _discountRepo;
   Future<void>? _initialLoad;
 
   DeliveryFormNotifier({
@@ -180,9 +183,69 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
     required this._deliveryRepo,
     required this._estimateRepo,
     required this._customerRepo,
+    required this._discountRepo,
   }) : _productRepo = productRepo,
        super(DeliveryFormState()) {
     _initialLoad = _loadInitialData();
+  }
+
+  DeliveryFormState _stateWithDiscounts(Map<String, double> productDiscounts) {
+    return DeliveryFormState(
+      delivery: state.delivery,
+      selectedCategory: state.selectedCategory,
+      categories: state.categories,
+      products: state.products,
+      paymentModes: state.paymentModes,
+      selectedPaymentMode: state.selectedPaymentMode,
+      cart: state.cart,
+      customPrices: state.customPrices,
+      productDiscounts: productDiscounts,
+      selectedUnitIds: state.selectedUnitIds,
+      selectedCustomer: state.selectedCustomer,
+      customers: state.customers,
+      customerName: state.customerName,
+      productSearchQuery: state.productSearchQuery,
+      editingDeliveryId: state.editingDeliveryId,
+      isReadOnly: state.isReadOnly,
+      isLoadingCustomers: state.isLoadingCustomers,
+      isLoadingProducts: state.isLoadingProducts,
+      isSaving: state.isSaving,
+      stockError: state.stockError,
+      paidAmount: state.paidAmount,
+      paymentEntries: state.paymentEntries,
+      discountType: state.discountType,
+      discountValue: state.discountValue,
+      discountAmount: state.discountAmount,
+    );
+  }
+
+  /// Re-derives every cart item's absolute discount from the selected
+  /// customer's discount group + product category, using the customer/group
+  /// rule when one exists (including an explicit 0%) and the group default
+  /// otherwise. Offline-only; never performs a network request.
+  Future<void> _applyCategoryDiscounts() async {
+    final customer = state.selectedCustomer;
+    final updated = <String, double>{};
+    if (customer != null && (customer.discountGroupId ?? '').isNotEmpty) {
+      final rules = await _discountRepo.getCachedRules();
+      final rulePercentByCategory = <String, double>{
+        for (final r in rules
+            .where((r) => r.customerDiscountGroupId == customer.discountGroupId))
+          r.categoryId: r.discountPercent,
+      };
+      final groupDefault =
+          await _discountRepo.getGroupDefaultPercent(customer.discountGroupId!);
+      for (final entry in state.cart.entries) {
+        final product = state.products
+            .where((p) => p.serverId == entry.key)
+            .firstOrNull;
+        if (product == null) continue;
+        final pct = rulePercentByCategory[product.categoryId] ?? groupDefault;
+        final gross = state.getUnitPrice(entry.key) * entry.value;
+        if (pct > 0) updated[entry.key] = gross * (pct / 100);
+      }
+    }
+    state = _stateWithDiscounts(updated);
   }
 
   Future<void> _loadInitialData() async {
@@ -441,6 +504,9 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
         isLoadingCustomers: false,
         isLoadingProducts: false,
       );
+      if (!isReadOnly) {
+        await _applyCategoryDiscounts();
+      }
     } catch (_) {
       state = DeliveryFormState(
         categories: await _categoryRepo.getCachedCategories(),
@@ -493,7 +559,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
     );
   }
 
-  void selectCustomer(Customer? customer) {
+  Future<void> selectCustomer(Customer? customer) async {
     state = DeliveryFormState(
       delivery: state.delivery,
       selectedCategory: state.selectedCategory,
@@ -517,6 +583,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       discountValue: state.discountValue,
       discountAmount: state.discountAmount,
     );
+    await _applyCategoryDiscounts();
   }
 
   void clearSelectedCustomer() {
@@ -541,7 +608,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
     }
   }
 
-  void setCustomPrice(String productId, double price) {
+  Future<void> setCustomPrice(String productId, double price) async {
     final updated = Map<String, double>.from(state.customPrices);
     if (price <= 0) {
       updated.remove(productId);
@@ -564,9 +631,10 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       selectedCustomer: state.selectedCustomer,
       customers: state.customers,
     );
+    await _applyCategoryDiscounts();
   }
 
-  void setSelectedUnit(String productId, String unitId) {
+  Future<void> setSelectedUnit(String productId, String unitId) async {
     final updated = Map<String, String>.from(state.selectedUnitIds);
     final product = state.products
         .where((p) => p.serverId == productId)
@@ -595,9 +663,10 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       selectedCustomer: state.selectedCustomer,
       customers: state.customers,
     );
+    await _applyCategoryDiscounts();
   }
 
-  void addToCart(String productId, double quantity) {
+  Future<void> addToCart(String productId, double quantity) async {
     if (quantity <= 0) return;
     final currentQty = state.cart[productId] ?? 0;
     final newQty = currentQty + quantity;
@@ -639,9 +708,10 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       selectedCustomer: state.selectedCustomer,
       customers: state.customers,
     );
+    await _applyCategoryDiscounts();
   }
 
-  void updateCartQuantity(String productId, double quantity) {
+  Future<void> updateCartQuantity(String productId, double quantity) async {
     final remaining = state.getRemainingQuantity(productId);
     if (quantity > remaining) {
       state = DeliveryFormState(
@@ -685,6 +755,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       selectedCustomer: state.selectedCustomer,
       customers: state.customers,
     );
+    await _applyCategoryDiscounts();
   }
 
   void removeFromCart(String productId) {
@@ -705,31 +776,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       customPrices: state.customPrices,
       productDiscounts: updatedDiscounts,
       selectedUnitIds: updatedUnits,
-      productSearchQuery: state.productSearchQuery,
-      selectedCustomer: state.selectedCustomer,
-      customers: state.customers,
-    );
-  }
-
-  void setProductDiscount(String productId, double amount) {
-    final updated = Map<String, double>.from(state.productDiscounts);
-    if (amount <= 0) {
-      updated.remove(productId);
-    } else {
-      updated[productId] = amount;
-    }
-    state = DeliveryFormState(
-      delivery: state.delivery,
-      selectedCategory: state.selectedCategory,
-      categories: state.categories,
-      products: state.products,
-      paymentModes: state.paymentModes,
-      paymentEntries: state.paymentEntries,
-      selectedPaymentMode: state.selectedPaymentMode,
-      cart: state.cart,
-      customPrices: state.customPrices,
-      productDiscounts: updated,
-      selectedUnitIds: state.selectedUnitIds,
       productSearchQuery: state.productSearchQuery,
       selectedCustomer: state.selectedCustomer,
       customers: state.customers,

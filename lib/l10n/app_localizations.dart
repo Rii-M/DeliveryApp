@@ -1274,6 +1274,24 @@ abstract class AppLocalizations {
   /// **'Please select a discount group'**
   String get selectDiscountGroupRequired;
 
+  /// No description provided for @area.
+  ///
+  /// In en, this message translates to:
+  /// **'Area'**
+  String get area;
+
+  /// No description provided for @selectArea.
+  ///
+  /// In en, this message translates to:
+  /// **'Select area'**
+  String get selectArea;
+
+  /// No description provided for @selectAreaRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select an area'**
+  String get selectAreaRequired;
+
   /// No description provided for @customerAddedSuccessfully.
   ///
   /// In en, this message translates to:
@@ -1357,6 +1375,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Customer not saved'**
   String get customerNotSaved;
+
+  /// No description provided for @rs.
+  ///
+  /// In en, this message translates to:
+  /// **'Rs.'**
+  String get rs;
 }
 
 class _AppLocalizationsDelegate

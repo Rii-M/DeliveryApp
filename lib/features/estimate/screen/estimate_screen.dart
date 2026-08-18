@@ -8,6 +8,7 @@ import '../../../models/payment_entry.dart';
 import '../../../models/payment_mode.dart';
 import '../../delivery/provider/delivery_provider.dart';
 import '../../sync/provider/sync_provider.dart';
+import '../../../repositories/discount_group_repository.dart';
 import '../provider/estimate_provider.dart';
 
 class EstimateScreen extends ConsumerStatefulWidget {
@@ -191,10 +192,26 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        if (state.customer!.discountGroupId?.isNotEmpty ??
+                            false) ...[
+                          const SizedBox(height: 2),
+                          ..._discountGroupLabel(
+                            context,
+                            state.customer!.discountGroupId!,
+                          ),
+                        ],
                         if (state.customer!.phone != null &&
                             state.customer!.phone!.isNotEmpty)
                           Text(
                             state.customer!.phone!,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onPrimaryContainer,
+                            ),
+                          ),
+                        if (state.customer!.address != null &&
+                            state.customer!.address!.isNotEmpty)
+                          Text(
+                            state.customer!.address!,
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: theme.colorScheme.onPrimaryContainer,
                             ),
@@ -322,16 +339,15 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
-                        // Commented out: discount display disabled for now.
-                        // if (item.discountAmount > 0) ...[
-                        //   const SizedBox(height: 2),
-                        //   Text(
-                        // 'Discount: -Rs. ${item.discountAmount.toStringAsFixed(2)}',
-                        //     style: theme.textTheme.bodySmall?.copyWith(
-                        //       color: theme.colorScheme.error,
-                        //     ),
-                        //   ),
-                        // ],
+                        if (item.discountAmount > 0) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            'Discount: -Rs. ${item.discountAmount.toStringAsFixed(2)}',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.error,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -363,7 +379,7 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
                       ),
                     ),
                     Text(
-                      'Rs. ${state.grossTotal.toStringAsFixed(2)}',
+                      'Rs. ${state.totalGrossAmountIncTax.toStringAsFixed(2)}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -444,49 +460,27 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
                 //     ],
                 //   ],
                 // ),
-                // Commented out: discount display rows disabled for now.
-                // if (state.totalProductDiscount > 0) ...[
-                //   const SizedBox(height: 8),
-                //   Row(
-                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //     children: [
-                //       Text(
-                //         l10n.productDiscount,
-                //         style: theme.textTheme.bodyMedium?.copyWith(
-                //           color: theme.colorScheme.error,
-                //         ),
-                //       ),
-                //       Text(
-                //         '- Rs. ${state.totalProductDiscount.toStringAsFixed(2)}',
-                //         style: theme.textTheme.bodyMedium?.copyWith(
-                //           fontWeight: FontWeight.w600,
-                //           color: theme.colorScheme.error,
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ],
-                // if (state.discountAmount > 0) ...[
-                //   const SizedBox(height: 8),
-                //   Row(
-                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //     children: [
-                //       Text(
-                //         l10n.discount,
-                //         style: theme.textTheme.bodyMedium?.copyWith(
-                //           color: theme.colorScheme.error,
-                //         ),
-                //       ),
-                //       Text(
-                //         '- Rs. ${state.discountAmount.toStringAsFixed(2)}',
-                //         style: theme.textTheme.bodyMedium?.copyWith(
-                //           fontWeight: FontWeight.w600,
-                //           color: theme.colorScheme.error,
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ],
+                if (state.totalProductDiscount + state.discountAmount > 0) ...[
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n.discount,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.error,
+                        ),
+                      ),
+                      Text(
+                        '- Rs. ${(state.totalProductDiscount + state.discountAmount).toStringAsFixed(2)}',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: theme.colorScheme.error,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 if (state.totalTax > 0) ...[
                   const SizedBox(height: 8),
                   Row(
@@ -587,6 +581,23 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
         ),
       ],
     );
+  }
+
+  List<Widget> _discountGroupLabel(BuildContext context, String groupId) {
+    final name = ref.watch(discountGroupNameProvider(groupId)).valueOrNull;
+    if (name == null || name.isEmpty) return const [SizedBox.shrink()];
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    return [
+      Text(
+        '${l10n.discountGroup} - $name',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onPrimaryContainer,
+        ),
+      ),
+    ];
   }
 
   Future<void> _saveInvoice(BuildContext context) async {

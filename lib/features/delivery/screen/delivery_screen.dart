@@ -743,7 +743,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
         crossAxisCount: 2,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: 0.75,
+        childAspectRatio: 0.6,
       ),
       itemCount: products.length,
       itemBuilder: (context, index) {

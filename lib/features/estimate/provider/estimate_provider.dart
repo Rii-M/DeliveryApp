@@ -11,6 +11,7 @@ import '../../../models/estimate.dart';
 import '../../../models/payment_entry.dart';
 import '../../../models/payment_mode.dart';
 import '../../../models/product.dart';
+import '../../../repositories/category_wise_discount_repository.dart';
 import '../../../repositories/customer_repository.dart';
 import '../../../repositories/delivery_repository.dart';
 import '../../../repositories/estimate_repository.dart';
@@ -108,6 +109,9 @@ class EstimateState {
   double get totalGrossAmount =>
       items.fold<double>(0, (sum, item) => sum + item.grossAmount);
 
+  double get totalGrossAmountIncTax =>
+      items.fold<double>(0, (sum, item) => sum + item.grossAmountIncTax);
+
   double get totalProductDiscount =>
       items.fold<double>(0, (sum, item) => sum + item.discountAmount);
 
@@ -146,6 +150,7 @@ final estimateProvider =
         productRepo: ref.read(productRepositoryProvider),
         paymentModeRepo: ref.read(paymentModeRepositoryProvider),
         estimateRepo: ref.read(estimateRepositoryProvider),
+        categoryWiseDiscountRepo: ref.read(categoryWiseDiscountRepositoryProvider),
         outletId: ref.read(authProvider).outletId ?? ApiConfig.emptyGuid,
         driverId: ref.read(authProvider).driverId ?? '',
         driverName: ref.read(authProvider).driverName ?? '',    
@@ -158,6 +163,7 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
   final ProductRepository _productRepo;
   final PaymentModeRepository _paymentModeRepo;
   final EstimateRepository _estimateRepo;
+  final CategoryWiseDiscountRepository _categoryWiseDiscountRepo;
   final String _outletId;
   final String _driverId;
   final String _driverName;
@@ -168,6 +174,7 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
     required this._productRepo,
     required this._paymentModeRepo,
     required this._estimateRepo,
+    required this._categoryWiseDiscountRepo,
     required String outletId,
     required String driverId,
     required String driverName,
@@ -220,11 +227,29 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
     );
   }
 
-  void selectCustomer(Customer? customer) {
+  Future<void> selectCustomer(Customer? customer) async {
     state = EstimateState(
       delivery: state.delivery,
       customer: customer,
       items: state.items,
+      customers: state.customers,
+      pendingDeliveries: state.pendingDeliveries,
+      paymentModes: state.paymentModes,
+      paymentMode: state.paymentMode,
+      paidAmount: state.paidAmount,
+      remarks: state.remarks,
+      discountType: state.discountType,
+      discountValue: state.discountValue,
+      discountAmount: state.discountAmount,
+      paymentEntries: state.paymentEntries,
+      isLoadingDelivery: false,
+    );
+    final products = await _productRepo.getCachedProducts();
+    final items = await _applyCategoryDiscounts(state.items, products);
+    state = EstimateState(
+      delivery: state.delivery,
+      customer: customer,
+      items: items,
       customers: state.customers,
       pendingDeliveries: state.pendingDeliveries,
       paymentModes: state.paymentModes,
@@ -304,6 +329,15 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
       );
     }).toList();
 
+    final existingEstimates = await _estimateRepo.getEstimatesByDelivery(
+      deliveryId,
+    );
+
+    var appliedItems = itemViews;
+    if (existingEstimates.isEmpty && customer != null) {
+      appliedItems = await _applyCategoryDiscounts(itemViews, products);
+    }
+
     String? paymentMode;
     double paidAmount = 0;
     String? remarks;
@@ -311,9 +345,6 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
     double discountValue = 0;
     double discountAmount = 0;
 
-    final existingEstimates = await _estimateRepo.getEstimatesByDelivery(
-      deliveryId,
-    );
     if (existingEstimates.isNotEmpty) {
       final existing = existingEstimates.first;
       paymentMode = existing.paymentMode;
@@ -323,7 +354,7 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
       discountValue = existing.discountValue;
       discountAmount = existing.discountAmount;
     } else {
-      final gross = itemViews.fold<double>(0, (sum, i) => sum + i.lineTotal);
+      final gross = appliedItems.fold<double>(0, (sum, i) => sum + i.lineTotal);
       discountAmount = _calcDiscountAmount(discountType, discountValue, gross);
     }
 
@@ -358,7 +389,7 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
     state = EstimateState(
       delivery: delivery,
       customer: customer,
-      items: itemViews,
+      items: appliedItems,
       customers: customers,
       paymentModes: paymentModes,
       paymentMode: (paymentMode ?? delivery.paymentMode)?.isNotEmpty == true
@@ -380,6 +411,47 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
       return gross * (value / 100);
     }
     return value;
+  }
+
+  Future<List<EstimateItemView>> _applyCategoryDiscounts(
+    List<EstimateItemView> items,
+    List<Product> products,
+  ) async {
+    final customer = state.customer;
+    if (customer == null || (customer.discountGroupId ?? '').isEmpty) {
+      return items;
+    }
+    final rules = await _categoryWiseDiscountRepo.getCachedRules();
+    final rulePercentByCategory = <String, double>{
+      for (final r in rules.where(
+          (r) => r.customerDiscountGroupId == customer.discountGroupId))
+        r.categoryId: r.discountPercent,
+    };
+    final groupDefault = await _categoryWiseDiscountRepo.getGroupDefaultPercent(
+      customer.discountGroupId!,
+    );
+    final categoryByProduct = <String, String>{
+      for (final p in products.where((p) => p.categoryId.isNotEmpty))
+        p.serverId: p.categoryId,
+    };
+    return items.map((item) {
+      final categoryId = categoryByProduct[item.productId];
+      if (categoryId == null) return item;
+      final pct = rulePercentByCategory[categoryId] ?? groupDefault;
+      if (pct <= 0) return item;
+      final discountAmount = item.grossAmount * (pct / 100);
+      return EstimateItemView(
+        productId: item.productId,
+        productName: item.productName,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        discountAmount: discountAmount,
+        taxableType: item.taxableType,
+        taxPercent: item.taxPercent,
+        unitId: item.unitId,
+        unitName: item.unitName,
+      );
+    }).toList();
   }
 
   Future<List<PaymentMode>> _loadAllPaymentModes() async {

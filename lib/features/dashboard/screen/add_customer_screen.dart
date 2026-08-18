@@ -7,6 +7,8 @@ import '../../../features/sync/provider/sync_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/customer.dart';
 import '../../../models/customer_discount_group.dart';
+import '../../../models/area.dart';
+import '../../../repositories/area_repository.dart';
 import '../../../repositories/customer_repository.dart';
 import '../../../repositories/discount_group_repository.dart';
 import '../provider/dashboard_provider.dart';
@@ -30,6 +32,8 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
 
   List<CustomerDiscountGroup> _discountGroups = [];
   CustomerDiscountGroup? _selectedDiscountGroup;
+  List<Area> _areas = [];
+  Area? _selectedArea;
   bool _isLoading = true;
   bool _isSaving = false;
   String? _error;
@@ -67,6 +71,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
     });
     try {
       final discountGroupRepo = ref.read(discountGroupRepositoryProvider);
+      final areaRepo = ref.read(areaRepositoryProvider);
 
       // Offline-first: show cached groups immediately (rendered below), and
       // best-effort refresh from the server so new groups appear when online.
@@ -76,6 +81,17 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
       } catch (_) {
         groups = await discountGroupRepo.getCachedDiscountGroups();
       }
+
+      // Areas follow the same offline-first pattern: use cached areas when
+      // available, otherwise fetch from the server and cache them locally so
+      // customer creation keeps working offline.
+      List<Area> areas;
+      try {
+        areas = await areaRepo.getAreas();
+      } catch (_) {
+        areas = await areaRepo.getCachedAreas();
+      }
+
       if (!mounted) return;
       setState(() {
         _discountGroups = groups;
@@ -84,6 +100,13 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
               .cast<CustomerDiscountGroup?>()
               .firstWhere(
                 (g) => g?.id == widget.customer!.discountGroupId,
+                orElse: () => null,
+              );
+        }
+        _areas = areas;
+        if (_isEditing && widget.customer!.areaId != null) {
+          _selectedArea = _areas.cast<Area?>().firstWhere(
+                (a) => a?.id == widget.customer!.areaId,
                 orElse: () => null,
               );
         }
@@ -107,6 +130,24 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
           });
         } catch (_) {
           // offline - keep using cached groups
+        }
+      }
+      if (areas.isNotEmpty) {
+        try {
+          await areaRepo.refetch();
+          final fresh = await areaRepo.getCachedAreas();
+          if (!mounted) return;
+          setState(() {
+            _areas = fresh;
+            if (_selectedArea != null) {
+              _selectedArea = fresh.cast<Area?>().firstWhere(
+                    (a) => a?.id == _selectedArea!.id,
+                    orElse: () => _selectedArea,
+                  );
+            }
+          });
+        } catch (_) {
+          // offline - keep using cached areas
         }
       }
     } catch (e) {
@@ -161,6 +202,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
               ? null
               : _panController.text.trim(),
           discountGroupId: _selectedDiscountGroup!.id,
+          areaId: _selectedArea!.id,
         );
       } else {
         saved = await customerRepo.saveNewCustomerOffline(
@@ -176,6 +218,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
               ? null
               : _panController.text.trim(),
           discountGroupId: _selectedDiscountGroup!.id,
+          areaId: _selectedArea!.id,
         );
       }
 
@@ -351,6 +394,34 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                               ),
                               border: const OutlineInputBorder(),
                             ),
+                          ),
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<Area>(
+                            initialValue: _selectedArea,
+                            decoration: InputDecoration(
+                              labelText: l10n.area,
+                              hintText: l10n.selectArea,
+                              prefixIcon: const Icon(
+                                Icons.place_outlined,
+                              ),
+                              border: const OutlineInputBorder(),
+                            ),
+                            items: _areas
+                                .map(
+                                  (a) => DropdownMenuItem(
+                                    value: a,
+                                    child: Text(a.name),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) =>
+                                setState(() => _selectedArea = value),
+                            validator: (value) {
+                              if (value == null) {
+                                return l10n.selectAreaRequired;
+                              }
+                              return null;
+                            },
                           ),
                           const SizedBox(height: 12),
                           DropdownButtonFormField<CustomerDiscountGroup>(

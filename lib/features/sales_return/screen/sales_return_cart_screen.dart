@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../models/sales_return.dart';
+import '../../../repositories/discount_group_repository.dart';
 import '../provider/sales_return_provider.dart';
 
 class SalesReturnCartScreen extends ConsumerStatefulWidget {
@@ -137,27 +138,82 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
 
   Widget _buildSelectedCustomerCard(SalesReturnState state, ThemeData theme) {
     final customer = state.selectedCustomer;
-    final initial = (customer != null && customer.name.isNotEmpty)
-        ? customer.name[0].toUpperCase()
-        : '?';
     return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: theme.colorScheme.primaryContainer,
-          child: Text(
-            initial,
-            style: TextStyle(
-              color: theme.colorScheme.onPrimaryContainer,
-              fontWeight: FontWeight.bold,
+      color: theme.colorScheme.primaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: theme.colorScheme.primary,
+              child: Text(
+                customer != null && customer.name.isNotEmpty
+                    ? customer.name[0].toUpperCase()
+                    : '?',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: theme.colorScheme.onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-          ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    customer?.name ?? '',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (customer?.discountGroupId?.isNotEmpty ?? false) ...[
+                    const SizedBox(height: 2),
+                    ..._discountGroupLabel(context, customer!.discountGroupId!),
+                  ],
+                  if (customer != null &&
+                      customer.phone != null &&
+                      customer.phone!.isNotEmpty)
+                    Text(
+                      customer.phone!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  if (customer != null &&
+                      customer.address != null &&
+                      customer.address!.isNotEmpty)
+                    Text(
+                      customer.address!,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
         ),
-        title: Text(customer?.name ?? ''),
-        subtitle: customer?.address != null && customer!.address!.isNotEmpty
-            ? Text(customer.address!)
-            : null,
       ),
     );
+  }
+
+  List<Widget> _discountGroupLabel(BuildContext context, String groupId) {
+    final name = ref.watch(discountGroupNameProvider(groupId)).valueOrNull;
+    if (name == null || name.isEmpty) return const [SizedBox.shrink()];
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    return [
+      Text(
+        '${l10n.discountGroup} - $name',
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onPrimaryContainer,
+        ),
+      ),
+    ];
   }
 
   Widget _buildItemsSection(
@@ -213,16 +269,29 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
                   ),
                 ),
                 title: Text(item.productName, overflow: TextOverflow.ellipsis),
-                subtitle: Text(
-                  'Qty: ${item.quantity.toStringAsFixed(item.quantity == item.quantity.roundToDouble() ? 0 : 1)}'
-                  '${item.unit != null && item.unit!.isNotEmpty ? ' ${item.unit}' : ''}'
-                  '  •  Rs.${item.rate.toStringAsFixed(2)}',
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${l10n.qty}: ${item.quantity.toStringAsFixed(item.quantity == item.quantity.roundToDouble() ? 0 : 1)}'
+                      '${item.unit != null && item.unit!.isNotEmpty ? ' ${item.unit}' : ''}'
+                      '  •  ${l10n.rs}${item.rate.toStringAsFixed(2)}',
+                    ),
+                    if (item.discountAmount > 0)
+                      Text(
+                        '${l10n.discount}: -${l10n.rs}. ${item.discountAmount.toStringAsFixed(2)}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.error,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                  ],
                 ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Rs.${item.lineTotal.toStringAsFixed(2)}',
+                      '${l10n.rs}${item.lineTotal.toStringAsFixed(2)}',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: item.discountAmount > 0
@@ -272,25 +341,16 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
               theme,
               null,
             ),
-            // Commented out: discount display rows disabled for now.
-            // if (state.totalProductDiscountIncTax > 0) ...[
-            //   const SizedBox(height: 4),
-            //   _totalRow(
-            //     l10n.productDiscount,
-            //     -state.totalProductDiscountIncTax,
-            //     theme,
-            //     theme.colorScheme.error,
-            //   ),
-            // ],
-            // if (state.discountAmount > 0) ...[
-            //   const SizedBox(height: 4),
-            //   _totalRow(
-            //     l10n.discount,
-            //     -state.discountAmount,
-            //     theme,
-            //     theme.colorScheme.error,
-            //   ),
-            // ],
+            if (state.totalProductDiscountIncTax + state.discountAmount > 0)
+              ...[
+                const SizedBox(height: 4),
+                _totalRow(
+                  l10n.discount,
+                  -(state.totalProductDiscountIncTax + state.discountAmount),
+                  theme,
+                  theme.colorScheme.error,
+                ),
+              ],
             if (state.totalTaxAmount > 0) ...[
               const SizedBox(height: 4),
               _totalRow(
@@ -860,6 +920,17 @@ class _ItemDetailSheetState extends ConsumerState<_ItemDetailSheet> {
                   style: theme.textTheme.bodyMedium,
                 ),
               ),
+            if (item.discountAmount > 0)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  '${l10n.discount}: -Rs. ${item.discountAmount.toStringAsFixed(2)}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.error,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             // Commented out: per-item discount input disabled for now.
             // Row(
             //   children: [
@@ -924,7 +995,7 @@ class _ItemDetailSheetState extends ConsumerState<_ItemDetailSheet> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Amount: Rs. ${item.lineTotal.toStringAsFixed(2)}',
+                  '${l10n.amount}: ${l10n.rs} ${item.lineTotal.toStringAsFixed(2)}',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
