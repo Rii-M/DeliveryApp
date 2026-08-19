@@ -28,7 +28,13 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.sync)),
+      appBar: AppBar(
+        leading: Padding(
+          padding: EdgeInsets.all(8),
+          child: Image.asset('assets/icon/logo.png', fit: BoxFit.contain),
+        ),
+        title: Text(l10n.sync),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

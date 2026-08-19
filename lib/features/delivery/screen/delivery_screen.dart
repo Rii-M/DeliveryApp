@@ -226,6 +226,10 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
       children: [
         Scaffold(
           appBar: AppBar(
+            leading: Padding(
+              padding: EdgeInsets.all(8),
+              child: Image.asset('assets/icon/logo.png', fit: BoxFit.contain),
+            ),
             title: _buildAppBarTitle(state, theme),
             actions: [
               if (!state.isReadOnly && state.cart.isNotEmpty)
