@@ -52,7 +52,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         titleSpacing: 0,
         leading: Padding(
           padding: EdgeInsets.all(8),
-          child: Image.asset('assets/icon/logo.png', fit: BoxFit.contain),
+          child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset('assets/icon/logo.png', fit: BoxFit.contain),
+              ),
         ),
         title:Padding(
           padding: const EdgeInsets.only(left: 16),
