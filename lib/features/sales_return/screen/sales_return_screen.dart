@@ -187,7 +187,7 @@ void initState() {
                   icon: Badge(
                     label: Text(totalQty.toStringAsFixed(0)),
                     isLabelVisible: true,
-                    child: const Icon(Icons.shopping_cart_outlined),
+                    child: Icon(Icons.shopping_cart_outlined, size: 28),
                   ),
                   onPressed: () => _openCart(context),
                 ),

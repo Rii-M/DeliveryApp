@@ -235,7 +235,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                       '${cartItems.fold<int>(0, (sum, item) => sum + item.quantity.toInt())}',
                     ),
                     isLabelVisible: true,
-                    child: const Icon(Icons.shopping_cart_outlined),
+                    child: Icon(Icons.shopping_cart_outlined,size: 28,),
                   ),
                   onPressed: () => _openCart(context),
                 ),
