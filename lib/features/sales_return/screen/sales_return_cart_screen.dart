@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
-import '../../../models/sales_return.dart';
 import '../../../repositories/discount_group_repository.dart';
 import '../provider/sales_return_provider.dart';
 
@@ -255,73 +254,140 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: state.items.length,
             separatorBuilder: (_, _) => const Divider(height: 1),
-            itemBuilder: (context, index) {
-              final item = state.items[index];
-              return ListTile(
-                leading: CircleAvatar(
-                  radius: 14,
-                  backgroundColor: theme.colorScheme.primaryContainer,
-                  child: Text(
-                    '${index + 1}',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                title: Text(item.productName, overflow: TextOverflow.ellipsis),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '${l10n.qty}: ${item.quantity.toStringAsFixed(item.quantity == item.quantity.roundToDouble() ? 0 : 1)}'
-                      '${item.unit != null && item.unit!.isNotEmpty ? ' ${item.unit}' : ''}'
-                      '  •  ${l10n.rs}${item.rate.toStringAsFixed(2)}',
-                    ),
-                    if (item.discountAmount > 0)
-                      Text(
-                        '${l10n.discount}: -${l10n.rs}. ${item.discountAmount.toStringAsFixed(2)}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.error,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                  ],
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${l10n.rs}${item.lineTotal.toStringAsFixed(2)}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: item.discountAmount > 0
-                            ? theme.colorScheme.error
-                            : null,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.visibility_outlined),
-                      tooltip: l10n.viewDetails,
-                      onPressed: () {
-                        _showItemDetails(context, index, item);
-                      },
-                    ),
-                  ],
-                ),
-                onTap: () => _showItemDetails(context, index, item),
-              );
-            },
+            itemBuilder: (context, index) =>
+                _buildItemCard(state, theme, l10n, index),
           ),
         ),
       ],
     );
   }
 
-  void _showItemDetails(BuildContext context, int index, SalesReturnItem item) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) => _ItemDetailSheet(index: index, item: item),
+  Widget _buildItemCard(
+    SalesReturnState state,
+    ThemeData theme,
+    AppLocalizations l10n,
+    int index,
+  ) {
+    final item = state.items[index];
+    final qtyText = item.quantity.toStringAsFixed(
+      item.quantity == item.quantity.roundToDouble() ? 0 : 1,
+    );
+    final qtyLabel = item.unit != null && item.unit!.isNotEmpty
+        ? '$qtyText ${item.unit}'
+        : qtyText;
+    final notifier = ref.read(salesReturnProvider.notifier);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 8, 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.close,
+                  size: 16,
+                  color: theme.colorScheme.error,
+                ),
+                tooltip: l10n.remove,
+                onPressed: () => notifier.removeItem(index),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  item.productName,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.remove_circle_outline,
+                  size: 20,
+                  color: theme.colorScheme.error,
+                ),
+                onPressed: () => notifier.decrementItemQuantity(index),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              Text(
+                qtyLabel,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.add_circle_outline,
+                  size: 20,
+                  color: theme.colorScheme.primary,
+                ),
+                onPressed: () => notifier.incrementItemQuantity(index),
+                visualDensity: VisualDensity.compact,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Text(
+                '${l10n.rs}${item.rate.toStringAsFixed(2)}',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: item.discountAmount > 0
+                      ? theme.colorScheme.error
+                      : null,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                l10n.lineTotal,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '${l10n.rs}${item.lineTotal.toStringAsFixed(2)}',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+          if (item.discountAmount > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Row(
+                children: [
+                  const Spacer(),
+                  Text(
+                    '${l10n.discount}: -${l10n.rs}. ${item.discountAmount.toStringAsFixed(2)}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -762,257 +828,6 @@ class _PaymentModalSheetState extends ConsumerState<_PaymentModalSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.done),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ItemDetailSheet extends ConsumerStatefulWidget {
-  final int index;
-  final SalesReturnItem item;
-
-  const _ItemDetailSheet({required this.index, required this.item});
-
-  @override
-  ConsumerState<_ItemDetailSheet> createState() => _ItemDetailSheetState();
-}
-
-class _ItemDetailSheetState extends ConsumerState<_ItemDetailSheet> {
-  // Commented out: per-item discount fields disabled for now.
-  // late final TextEditingController _discCtrl;
-  // late final TextEditingController _rateCtrl;
-  // late String? _selectedType;
-
-  @override
-  void initState() {
-    super.initState();
-    // _discCtrl = TextEditingController(
-    //   text: widget.item.discountValue > 0
-    //       ? widget.item.discountValue.toString()
-    //       : '',
-    // );
-    // _rateCtrl = TextEditingController(text: widget.item.rate.toStringAsFixed(2));
-    // _selectedType = widget.item.discountType;
-  }
-
-  @override
-  void dispose() {
-    // _discCtrl.dispose();
-    // _rateCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
-    final state = ref.watch(salesReturnProvider);
-    if (widget.index >= state.items.length) {
-      return const SizedBox.shrink();
-    }
-    final item = state.items[widget.index];
-    final notifier = ref.read(salesReturnProvider.notifier);
-
-    final qtyText = item.quantity.toStringAsFixed(
-      item.quantity == item.quantity.roundToDouble() ? 0 : 1,
-    );
-
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          top: 8,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    item.productName,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ],
-            ),
-            const Divider(),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Text(
-                  l10n.quantity,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                IconButton(
-                  icon: Icon(
-                    Icons.remove_circle_outline,
-                    color: theme.colorScheme.error,
-                  ),
-                  onPressed: () {
-                    final willRemove = item.quantity <= 1;
-                    notifier.decrementItemQuantity(widget.index);
-                    if (willRemove) Navigator.of(context).pop();
-                  },
-                ),
-                Text(
-                  qtyText,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(
-                    Icons.add_circle_outline,
-                    color: theme.colorScheme.primary,
-                  ),
-                  onPressed: () => notifier.incrementItemQuantity(widget.index),
-                ),
-                const Spacer(),
-                // Commented out: rate edit disabled for now.
-                // Expanded(
-                //   child: TextField(
-                //     controller: _rateCtrl,
-                //     keyboardType:
-                //         const TextInputType.numberWithOptions(decimal: true),
-                //     inputFormatters: [
-                //       FilteringTextInputFormatter.allow(
-                //         RegExp(r'^\d*\.?\d{0,2}'),
-                //       ),
-                //     ],
-                //     decoration: InputDecoration(
-                //       labelText: l10n.rate,
-                //       border: const OutlineInputBorder(),
-                //       isDense: true,
-                //     ),
-                //     onChanged: (v) => notifier.setItemRate(
-                //       widget.index,
-                //       double.tryParse(v) ?? 0,
-                //     ),
-                //   ),
-                // ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            if (item.unit != null && item.unit!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Text(
-                  '${l10n.unit}: ${item.unit}',
-                  style: theme.textTheme.bodyMedium,
-                ),
-              ),
-            if (item.discountAmount > 0)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Text(
-                  '${l10n.discount}: -Rs. ${item.discountAmount.toStringAsFixed(2)}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.error,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            // Commented out: per-item discount input disabled for now.
-            // Row(
-            //   children: [
-            //     Expanded(
-            //       child: TextField(
-            //         controller: _discCtrl,
-            //         keyboardType:
-            //             const TextInputType.numberWithOptions(decimal: true),
-            //         inputFormatters: [
-            //           FilteringTextInputFormatter.allow(
-            //             RegExp(r'^\d*\.?\d{0,2}'),
-            //           ),
-            //         ],
-            //         decoration: InputDecoration(
-            //           labelText: l10n.discountValue,
-            //           hintText: '0',
-            //           border: const OutlineInputBorder(),
-            //           isDense: true,
-            //         ),
-            //         onChanged: (v) => notifier.setItemDiscount(
-            //           widget.index,
-            //           _selectedType,
-            //           double.tryParse(v) ?? 0,
-            //         ),
-            //       ),
-            //     ),
-            //     const SizedBox(width: 12),
-            //     Expanded(
-            //       child: DropdownButtonFormField<String?>(
-            //         isExpanded: true,
-            //         initialValue: _selectedType,
-            //         decoration: InputDecoration(
-            //           labelText: l10n.discountType,
-            //           border: const OutlineInputBorder(),
-            //           isDense: true,
-            //         ),
-            //         items: [
-            //           DropdownMenuItem(value: null, child: Text(l10n.none)),
-            //           DropdownMenuItem(
-            //             value: 'amount',
-            //             child: Text(l10n.amountRs),
-            //           ),
-            //           DropdownMenuItem(
-            //             value: 'percent',
-            //             child: Text(l10n.percent),
-            //           ),
-            //         ],
-            //         onChanged: (v) {
-            //           setState(() => _selectedType = v);
-            //           notifier.setItemDiscount(
-            //             widget.index,
-            //             v,
-            //             double.tryParse(_discCtrl.text) ?? 0,
-            //           );
-            //         },
-            //       ),
-            //     ),
-            //   ],
-            // ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${l10n.amount}: ${l10n.rs} ${item.lineTotal.toStringAsFixed(2)}',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                FilledButton.tonal(
-                  style: FilledButton.styleFrom(
-                    foregroundColor: theme.colorScheme.error,
-                  ),
-                  onPressed: () {
-                    notifier.removeItem(widget.index);
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(l10n.remove),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
             FilledButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(l10n.done),
