@@ -742,7 +742,7 @@ class SyncRepository {
       'Code': null,
       'CreditLimit': 0,
       'DOB': null,
-      'IsActive': c.isActive,
+      'IsActive': true,
       'IsAllowCredit': c.isAllowCredit,
       'MappedBranchId': null,
       'MappedDepartmentId': null,
