@@ -133,7 +133,8 @@ class ProductRepository {
       customerId: customerId,
       transactionDate: transactionDate,
     );
-    final products = data.map((json) {
+
+    Product productFromJson(Map<String, dynamic> json) {
       final p = Product();
       p.serverId = json['ProductId'] as String;
       p.categoryId = json['CategoryId'] as String;
@@ -169,7 +170,24 @@ class ProductRepository {
       }
 
       return p;
-    }).toList();
+    }
+
+    // The API returns one row per chalan/assignment line, so the same product
+    // may appear multiple times. Merge rows that share (ProductId, Rate, UnitId)
+    // by summing their quantity; keep separate rows when the rate or unit
+    // differs so each variant can be delivered independently.
+    final merged = <String, Product>{};
+    for (final json in data) {
+      final p = productFromJson(json);
+      final key = '${p.serverId}|${p.unitPrice}|${p.unitId}';
+      final existing = merged[key];
+      if (existing == null) {
+        merged[key] = p;
+      } else {
+        existing.stock += p.stock;
+      }
+    }
+    final products = merged.values.toList();
 
     if (products.isNotEmpty) {
       await _db.transaction((txn) async {
@@ -198,38 +216,72 @@ class ProductRepository {
     return maps.map((map) => Product.fromMap(map)).toList();
   }
 
-  Future<void> restoreStock(String productId, double quantity) async {
-    final maps = await _db.query(
-      'product',
-      where: 'server_id = ?',
-      whereArgs: [productId],
-    );
+  /// Resolves the product row(s) for a server product id. When a variant
+  /// discriminator (unitPrice/unitId) is given, rows matching it are preferred;
+  /// otherwise it falls back to the first row sharing the server id so existing
+  /// callers keep working after a product is split into multiple variants.
+  Future<List<Map<String, Object?>>> _findVariants(
+    String productId, {
+    double? unitPrice,
+    String? unitId,
+  }) async {
+    var where = 'server_id = ?';
+    final args = <Object?>[productId];
+    if (unitPrice != null) {
+      where += ' AND unit_price = ?';
+      args.add(unitPrice);
+    }
+    if (unitId != null && unitId.isNotEmpty) {
+      where += ' AND unit_id = ?';
+      args.add(unitId);
+    }
+    var maps = await _db.query('product', where: where, whereArgs: args);
+    if (maps.isEmpty &&
+        (unitPrice != null || (unitId != null && unitId.isNotEmpty))) {
+      maps = await _db.query('product',
+          where: 'server_id = ?', whereArgs: [productId]);
+    }
+    return maps;
+  }
+
+  Future<void> restoreStock(
+    String productId,
+    double quantity, {
+    double? unitPrice,
+    String? unitId,
+  }) async {
+    final maps =
+        await _findVariants(productId, unitPrice: unitPrice, unitId: unitId);
     if (maps.isEmpty) return;
+    final rowId = maps.first['id'] as int;
     final currentStock = (maps.first['stock'] as num?)?.toDouble() ?? 0;
     final newStock = currentStock + quantity;
     await _db.update(
       'product',
       {'stock': newStock},
-      where: 'server_id = ?',
-      whereArgs: [productId],
+      where: 'id = ?',
+      whereArgs: [rowId],
     );
   }
 
-  Future<void> deductStock(String productId, double quantity) async {
-    final maps = await _db.query(
-      'product',
-      where: 'server_id = ?',
-      whereArgs: [productId],
-    );
+  Future<void> deductStock(
+    String productId,
+    double quantity, {
+    double? unitPrice,
+    String? unitId,
+  }) async {
+    final maps =
+        await _findVariants(productId, unitPrice: unitPrice, unitId: unitId);
     if (maps.isEmpty) return;
+    final rowId = maps.first['id'] as int;
     final currentStock = (maps.first['stock'] as num?)?.toDouble() ?? 0;
     final newStock = currentStock - quantity;
     final effectiveStock = (newStock).clamp(0, double.infinity);
     await _db.update(
       'product',
       {'stock': effectiveStock},
-      where: 'server_id = ?',
-      whereArgs: [productId],
+      where: 'id = ?',
+      whereArgs: [rowId],
     );
   }
 }

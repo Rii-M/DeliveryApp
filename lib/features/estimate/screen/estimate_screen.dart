@@ -45,11 +45,10 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
       return;
     }
 
-    final products = deliveryForm.products;
     final items = deliveryForm.cart.entries.map((e) {
-      final product = products.where((p) => p.serverId == e.key).firstOrNull;
+      final product = deliveryForm.getProductByKey(e.key);
       return EstimateItemView(
-        productId: e.key,
+        productId: product?.serverId ?? e.key.split('|').first,
         productName: product?.localizedName(langCode) ?? AppLocalizations.of(context)!.unknown,
         quantity: e.value,
         unitPrice: deliveryForm.getUnitPrice(e.key),

@@ -86,10 +86,31 @@ class DeliveryFormState {
 
   bool get isValid => cart.values.any((q) => q > 0);
 
+  /// A cart key uniquely identifies a product variant (a product assigned at a
+  /// specific rate/unit). It is stable across syncs, unlike the DB row id.
+  static String variantKey(Product p) =>
+      '${p.serverId}|${p.unitPrice}|${p.unitId}';
+
   double getUnitPrice(String productId) {
     if (customPrices.containsKey(productId)) return customPrices[productId]!;
-    final product = products.where((p) => p.serverId == productId).firstOrNull;
+    final product = getProductByKey(productId);
     return product?.unitPrice ?? 0;
+  }
+
+  /// Resolves a variant cart key back to the matching product row.
+  Product? getProductByKey(String key) {
+    final parts = key.split('|');
+    if (parts.length < 2) return null;
+    final serverId = parts[0];
+    final rate = double.tryParse(parts[1]);
+    final unitId = parts.length > 2 ? parts[2] : null;
+    for (final p in products) {
+      if (p.serverId != serverId) continue;
+      if (rate != null && p.unitPrice != rate) continue;
+      if (unitId != null && unitId.isNotEmpty && p.unitId != unitId) continue;
+      return p;
+    }
+    return null;
   }
 
   double get estimatedTotal {
@@ -104,12 +125,11 @@ class DeliveryFormState {
   }
 
   double getRemainingQuantity(String productId) {
-    return products.where((p) => p.serverId == productId).firstOrNull?.stock ??
-        0;
+    return getProductByKey(productId)?.stock ?? 0;
   }
 
   List<ProductUnit> getProductUnits(String productId) {
-    final product = products.where((p) => p.serverId == productId).firstOrNull;
+    final product = getProductByKey(productId);
     if (product == null) return [];
     final allUnits = <ProductUnit>[];
     final seen = <String>{};
@@ -135,12 +155,9 @@ class DeliveryFormState {
   String? getSelectedUnitName(String productId) {
     final unitId = selectedUnitIds[productId];
     if (unitId == null) {
-      final product = products
-          .where((p) => p.serverId == productId)
-          .firstOrNull;
-      return product?.unit;
+      return getProductByKey(productId)?.unit;
     }
-    final product = products.where((p) => p.serverId == productId).firstOrNull;
+    final product = getProductByKey(productId);
     if (product == null) return null;
     return product.units.where((u) => u.unitId == unitId).firstOrNull?.unitName;
   }
@@ -148,8 +165,7 @@ class DeliveryFormState {
   String? getSelectedUnitId(String productId) {
     final stored = selectedUnitIds[productId];
     if (stored != null) return stored;
-    final product = products.where((p) => p.serverId == productId).firstOrNull;
-    return product?.unitId;
+    return getProductByKey(productId)?.unitId;
   }
 }
 
@@ -236,9 +252,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       final groupDefault =
           await _discountRepo.getGroupDefaultPercent(customer.discountGroupId!);
       for (final entry in state.cart.entries) {
-        final product = state.products
-            .where((p) => p.serverId == entry.key)
-            .firstOrNull;
+        final product = state.getProductByKey(entry.key);
         if (product == null) continue;
         final pct = rulePercentByCategory[product.categoryId] ?? groupDefault;
         final gross = state.getUnitPrice(entry.key) * entry.value;
@@ -437,18 +451,42 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       final cart = <String, double>{};
       final customPrices = <String, double>{};
       final selectedUnitIds = <String, String>{};
+
+      // Rebuild the cart using each saved variant's composite key so that the
+      // same product assigned at different rates/units stays on separate lines.
+      String keyForItem(DeliveryItem item) {
+        Product? match;
+        for (final p in products) {
+          if (p.serverId != item.productId) continue;
+          final rateMatches =
+              item.unitPrice <= 0 || p.unitPrice == item.unitPrice;
+          final unitMatches = item.unitId == null ||
+              item.unitId!.isEmpty ||
+              p.unitId == item.unitId;
+          if (rateMatches && unitMatches) {
+            match = p;
+            break;
+          }
+        }
+        match ??= products
+            .where((p) => p.serverId == item.productId)
+            .firstOrNull;
+        return match == null ? item.productId : DeliveryFormState.variantKey(match);
+      }
+
       for (final item in items) {
-        cart[item.productId] = (cart[item.productId] ?? 0) + item.quantity;
+        final key = keyForItem(item);
+        cart[key] = (cart[key] ?? 0) + item.quantity;
         if (item.unitPrice > 0) {
-          customPrices[item.productId] = item.unitPrice;
+          customPrices[key] = item.unitPrice;
         }
         final product = products
-            .where((p) => p.serverId == item.productId)
+            .where((p) => DeliveryFormState.variantKey(p) == key)
             .firstOrNull;
         if (item.unitId != null &&
             product != null &&
             item.unitId != product.unitId) {
-          selectedUnitIds[item.productId] = item.unitId!;
+          selectedUnitIds[key] = item.unitId!;
         }
       }
 
@@ -636,9 +674,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
 
   Future<void> setSelectedUnit(String productId, String unitId) async {
     final updated = Map<String, String>.from(state.selectedUnitIds);
-    final product = state.products
-        .where((p) => p.serverId == productId)
-        .firstOrNull;
+    final product = state.getProductByKey(productId);
     if (product == null) return;
     final unit = product.units.where((u) => u.unitId == unitId).firstOrNull;
     if (unit == null && unitId != (product.unitId ?? '')) return;
@@ -863,12 +899,13 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
 
     try {
       final items = state.cart.entries.map((e) {
+        final product = state.getProductByKey(e.key);
         final item = DeliveryItem();
-        item.productId = e.key;
+        item.productId = product?.serverId ?? e.key.split('|').first;
         item.quantity = e.value;
         item.unitPrice = state.getUnitPrice(e.key);
-        item.unitId = state.getSelectedUnitId(e.key);
-        item.unit = state.getSelectedUnitName(e.key);
+        item.unitId = state.getSelectedUnitId(e.key) ?? product?.unitId;
+        item.unit = state.getSelectedUnitName(e.key) ?? product?.unit;
         return item;
       }).toList();
 
@@ -879,7 +916,12 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
           state.editingDeliveryId!,
         );
         for (final oldItem in oldItems) {
-          await _productRepo.restoreStock(oldItem.productId, oldItem.quantity);
+          await _productRepo.restoreStock(
+            oldItem.productId,
+            oldItem.quantity,
+            unitPrice: oldItem.unitPrice,
+            unitId: oldItem.unitId,
+          );
         }
 
         delivery = await _deliveryRepo.updateDelivery(
@@ -897,7 +939,13 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       }
 
       for (final entry in state.cart.entries) {
-        await _productRepo.deductStock(entry.key, entry.value);
+        final product = state.getProductByKey(entry.key);
+        await _productRepo.deductStock(
+          product?.serverId ?? entry.key.split('|').first,
+          entry.value,
+          unitPrice: product?.unitPrice,
+          unitId: product?.unitId,
+        );
       }
 
       state = DeliveryFormState(

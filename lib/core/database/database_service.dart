@@ -24,7 +24,7 @@ class DatabaseService {
 
       _database = await openDatabase(
         path,
-        version: 25,
+        version: 26,
         onCreate: _createTables,
         onUpgrade: _onUpgrade,
       );
@@ -360,6 +360,45 @@ class DatabaseService {
         );
       } catch (_) {}
     }
+    if (oldVersion < 26) {
+      // Allow the same server_id to appear more than once so that a product
+      // assigned at different rates/units (per chalan) can be stored as
+      // separate variant rows. The table is fully re-populated on every sync,
+      // so a drop + rebuild is safe.
+      try {
+        await db.execute('''
+          CREATE TABLE product_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            server_id TEXT NOT NULL,
+            category_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            japanese_name TEXT,
+            unit_price REAL NOT NULL,
+            stock REAL DEFAULT 0,
+            sold_quantity REAL DEFAULT 0,
+            unit_id TEXT,
+            unit TEXT,
+            image_url TEXT,
+            product_images TEXT,
+            description TEXT,
+            taxable INTEGER DEFAULT 0,
+            chalan_number TEXT,
+            units_json TEXT
+          )
+        ''');
+        await db.execute('''
+          INSERT INTO product_new (id, server_id, category_id, name, japanese_name,
+            unit_price, stock, sold_quantity, unit_id, unit, image_url, product_images,
+            description, taxable, chalan_number, units_json)
+          SELECT id, server_id, category_id, name, japanese_name,
+            unit_price, stock, sold_quantity, unit_id, unit, image_url, product_images,
+            description, taxable, chalan_number, units_json
+          FROM product
+        ''');
+        await db.execute('DROP TABLE product');
+        await db.execute('ALTER TABLE product_new RENAME TO product');
+      } catch (_) {}
+    }
   }
 
   Future<void> _createTables(Database db, int version) async {
@@ -411,7 +450,7 @@ class DatabaseService {
     await db.execute('''
       CREATE TABLE product (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        server_id TEXT NOT NULL UNIQUE,
+        server_id TEXT NOT NULL,
         category_id TEXT NOT NULL,
         name TEXT NOT NULL,
         japanese_name TEXT,

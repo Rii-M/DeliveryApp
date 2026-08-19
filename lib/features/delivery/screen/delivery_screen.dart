@@ -189,9 +189,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     final langCode = Localizations.localeOf(context).languageCode;
 
     final cartItems = state.cart.entries.map((e) {
-      final product = state.products
-          .where((p) => p.serverId == e.key)
-          .firstOrNull;
+      final product = state.getProductByKey(e.key);
       return CartItem(
         productId: e.key,
         productName: product?.localizedName(langCode) ?? l10n.unknown,
@@ -748,8 +746,9 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
       itemCount: products.length,
       itemBuilder: (context, index) {
         final product = products[index];
-        final inCart = state.cart[product.serverId] ?? 0;
-        final remaining = state.getRemainingQuantity(product.serverId);
+        final productKey = DeliveryFormState.variantKey(product);
+        final inCart = state.cart[productKey] ?? 0;
+        final remaining = state.getRemainingQuantity(productKey);
 
         return Card(
           clipBehavior: Clip.antiAlias,
@@ -811,7 +810,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                             ? () {
                                 ref
                                     .read(deliveryFormProvider.notifier)
-                                    .addToCart(product.serverId, 1);
+                                    .addToCart(productKey, 1);
                               }
                             : null,
                         icon: Icon(

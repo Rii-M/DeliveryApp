@@ -19,9 +19,7 @@ class CartScreen extends ConsumerWidget {
     final langCode = Localizations.localeOf(context).languageCode;
 
     final cartItems = state.cart.entries.map((e) {
-      final product = state.products
-          .where((p) => p.serverId == e.key)
-          .firstOrNull;
+      final product = state.getProductByKey(e.key);
       return CartItem(
         productId: e.key,
         productName: product?.localizedName(langCode) ?? l10n.unknown,

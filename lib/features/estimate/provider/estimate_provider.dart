@@ -870,7 +870,12 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
       );
 
       for (final item in state.items) {
-        await _productRepo.deductStock(item.productId, item.quantity);
+        await _productRepo.deductStock(
+          item.productId,
+          item.quantity,
+          unitPrice: item.unitPrice,
+          unitId: item.unitId,
+        );
       }
 
       state = EstimateState(saved: true);

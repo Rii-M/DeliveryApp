@@ -128,7 +128,8 @@ class DashboardRepository {
   }
 
   Future<int> getAssignedProductsCount() async {
-    final result = await _db.rawQuery('SELECT COUNT(*) as count FROM product');
+    final result = await _db.rawQuery(
+        'SELECT COUNT(DISTINCT server_id) as count FROM product');
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
