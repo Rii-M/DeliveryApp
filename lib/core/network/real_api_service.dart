@@ -76,10 +76,10 @@ Future<List<Map<String, dynamic>>> fetchAssignedCategories() async {
 }
 
   @override
-  Future<List<Map<String, dynamic>>> fetchCustomers() async {
+  Future<List<Map<String, dynamic>>> fetchCustomers(String deliveryBoyId) async {
     final response = await _dio.get(
       ApiConfig.customerEndpoint,
-      queryParameters: {'customernamesearch': ''},
+      queryParameters: {'deliveryBoyId': deliveryBoyId},
     );
     final body = response.data as Map<String, dynamic>;
     final status = body['Status'] ?? body['status'] ?? false;

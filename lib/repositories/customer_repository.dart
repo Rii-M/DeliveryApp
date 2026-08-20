@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../core/auth/auth_storage.dart';
 import '../core/database/providers.dart';
 import '../core/network/api_service.dart';
 import '../core/network/providers.dart';
@@ -65,7 +66,7 @@ class CustomerRepository {
   /// Downloads customers from the server into local cache, preserving any
   /// locally-created unsynced rows.
   Future<List<Customer>> refreshCustomers() async {
-    final data = await _apiService.fetchCustomers();
+    final data = await _apiService.fetchCustomers(await getSavedDriverId() ?? '');
     final customers = data.map(_customerFromJson).toList();
 
     if (customers.isNotEmpty) {
@@ -116,7 +117,7 @@ class CustomerRepository {
   }) async {
     final trimmed = mobile.trim();
     if (trimmed.isEmpty) return false;
-    final data = await _apiService.fetchCustomers();
+    final data = await _apiService.fetchCustomers(await getSavedDriverId() ?? '');
     for (final json in data) {
       final serverMobile = _getField(json, ['Mobile', 'mobile']).trim();
       if (serverMobile.isEmpty || serverMobile != trimmed) continue;

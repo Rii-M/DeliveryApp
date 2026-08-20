@@ -706,7 +706,7 @@ class SyncRepository {
     String mobile, {
     String? excludeCustomerId,
   }) async {
-    final data = await _apiService.fetchCustomers();
+    final data = await _apiService.fetchCustomers(await getSavedDriverId() ?? '');
     for (final json in data) {
       final serverMobile =
           (json['Mobile'] ?? json['mobile'] ?? '').toString().trim();

@@ -6,7 +6,7 @@ import '../../dto/customer_operation_result.dart';
 abstract class ApiService {
   void updateConfig({String? baseUrl, String? token});
   Future<List<Map<String, dynamic>>> fetchAllProducts();
-  Future<List<Map<String, dynamic>>> fetchCustomers();
+  Future<List<Map<String, dynamic>>> fetchCustomers(String deliveryBoyId);
   Future<List<Map<String, dynamic>>> fetchCategories({
     required String customerId,
     required String transactionDate,
