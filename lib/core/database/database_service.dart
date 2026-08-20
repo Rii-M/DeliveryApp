@@ -24,7 +24,7 @@ class DatabaseService {
 
       _database = await openDatabase(
         path,
-        version: 27,
+        version: 28,
         onCreate: _createTables,
         onUpgrade: _onUpgrade,
       );
@@ -414,6 +414,22 @@ class DatabaseService {
         );
       } catch (_) {}
     }
+    if (oldVersion < 28) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS customer_group (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          server_id TEXT NOT NULL UNIQUE,
+          record_id TEXT,
+          name TEXT NOT NULL,
+          is_active INTEGER DEFAULT 1
+        )
+      ''');
+      try {
+        await db.execute(
+          'ALTER TABLE customer ADD COLUMN customer_group_id TEXT',
+        );
+      } catch (_) {}
+    }
   }
 
   Future<void> _createTables(Database db, int version) async {
@@ -440,6 +456,7 @@ class DatabaseService {
         pan TEXT,
         discount_group_id TEXT,
         area_id TEXT,
+        customer_group_id TEXT,
         record_id TEXT,
         meta_data TEXT,
         is_active INTEGER DEFAULT 1,
@@ -656,6 +673,16 @@ class DatabaseService {
 
     await db.execute('''
       CREATE TABLE area (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        server_id TEXT NOT NULL UNIQUE,
+        record_id TEXT,
+        name TEXT NOT NULL,
+        is_active INTEGER DEFAULT 1
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE customer_group (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         server_id TEXT NOT NULL UNIQUE,
         record_id TEXT,

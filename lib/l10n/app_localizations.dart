@@ -1292,6 +1292,24 @@ abstract class AppLocalizations {
   /// **'Please select an area'**
   String get selectAreaRequired;
 
+  /// No description provided for @customerGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer Group'**
+  String get customerGroup;
+
+  /// No description provided for @selectCustomerGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Select customer group'**
+  String get selectCustomerGroup;
+
+  /// No description provided for @selectCustomerGroupRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a customer group'**
+  String get selectCustomerGroupRequired;
+
   /// No description provided for @customerAddedSuccessfully.
   ///
   /// In en, this message translates to:

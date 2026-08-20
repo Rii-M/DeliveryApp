@@ -8,8 +8,10 @@ import '../../../l10n/app_localizations.dart';
 import '../../../models/customer.dart';
 import '../../../models/customer_discount_group.dart';
 import '../../../models/area.dart';
+import '../../../models/customer_group.dart';
 import '../../../repositories/area_repository.dart';
 import '../../../repositories/customer_repository.dart';
+import '../../../repositories/customer_group_repository.dart';
 import '../../../repositories/discount_group_repository.dart';
 import '../provider/dashboard_provider.dart';
 
@@ -34,6 +36,8 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
   CustomerDiscountGroup? _selectedDiscountGroup;
   List<Area> _areas = [];
   Area? _selectedArea;
+  List<CustomerGroup> _customerGroups = [];
+  CustomerGroup? _selectedCustomerGroup;
   bool _isLoading = true;
   bool _isSaving = false;
   String? _error;
@@ -72,6 +76,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
     try {
       final discountGroupRepo = ref.read(discountGroupRepositoryProvider);
       final areaRepo = ref.read(areaRepositoryProvider);
+      final customerGroupRepo = ref.read(customerGroupRepositoryProvider);
 
       // Offline-first: show cached groups immediately (rendered below), and
       // best-effort refresh from the server so new groups appear when online.
@@ -92,6 +97,14 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
         areas = await areaRepo.getCachedAreas();
       }
 
+      // Customer groups follow the same offline-first pattern as areas.
+      List<CustomerGroup> customerGroups;
+      try {
+        customerGroups = await customerGroupRepo.getCustomerGroups();
+      } catch (_) {
+        customerGroups = await customerGroupRepo.getCachedCustomerGroups();
+      }
+
       if (!mounted) return;
       setState(() {
         _discountGroups = groups;
@@ -107,6 +120,15 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
         if (_isEditing && widget.customer!.areaId != null) {
           _selectedArea = _areas.cast<Area?>().firstWhere(
                 (a) => a?.id == widget.customer!.areaId,
+                orElse: () => null,
+              );
+        }
+        _customerGroups = customerGroups;
+        if (_isEditing && widget.customer!.customerGroupId != null) {
+          _selectedCustomerGroup = _customerGroups
+              .cast<CustomerGroup?>()
+              .firstWhere(
+                (g) => g?.id == widget.customer!.customerGroupId,
                 orElse: () => null,
               );
         }
@@ -148,6 +170,26 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
           });
         } catch (_) {
           // offline - keep using cached areas
+        }
+      }
+      if (customerGroups.isNotEmpty) {
+        try {
+          await customerGroupRepo.refetch();
+          final fresh = await customerGroupRepo.getCachedCustomerGroups();
+          if (!mounted) return;
+          setState(() {
+            _customerGroups = fresh;
+            if (_selectedCustomerGroup != null) {
+              _selectedCustomerGroup = fresh
+                  .cast<CustomerGroup?>()
+                  .firstWhere(
+                    (g) => g?.id == _selectedCustomerGroup!.id,
+                    orElse: () => _selectedCustomerGroup,
+                  );
+            }
+          });
+        } catch (_) {
+          // offline - keep using cached customer groups
         }
       }
     } catch (e) {
@@ -203,6 +245,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
               : _panController.text.trim(),
           discountGroupId: _selectedDiscountGroup!.id,
           areaId: _selectedArea!.id,
+          customerGroupId: _selectedCustomerGroup!.id,
         );
       } else {
         saved = await customerRepo.saveNewCustomerOffline(
@@ -219,6 +262,7 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
               : _panController.text.trim(),
           discountGroupId: _selectedDiscountGroup!.id,
           areaId: _selectedArea!.id,
+          customerGroupId: _selectedCustomerGroup!.id,
         );
       }
 
@@ -445,6 +489,32 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                             validator: (value) {
                               if (value == null) {
                                 return l10n.selectDiscountGroupRequired;
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          DropdownButtonFormField<CustomerGroup>(
+                            initialValue: _selectedCustomerGroup,
+                            decoration: InputDecoration(
+                              labelText: l10n.customerGroup,
+                              hintText: l10n.selectCustomerGroup,
+                              prefixIcon: const Icon(Icons.group_outlined),
+                              border: const OutlineInputBorder(),
+                            ),
+                            items: _customerGroups
+                                .map(
+                                  (g) => DropdownMenuItem(
+                                    value: g,
+                                    child: Text(g.name),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) => setState(
+                                () => _selectedCustomerGroup = value),
+                            validator: (value) {
+                              if (value == null) {
+                                return l10n.selectCustomerGroupRequired;
                               }
                               return null;
                             },

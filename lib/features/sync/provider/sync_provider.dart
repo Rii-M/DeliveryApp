@@ -10,6 +10,7 @@ import '../../../repositories/category_wise_discount_repository.dart';
 import '../../../repositories/area_repository.dart';
 import '../../../repositories/customer_repository.dart';
 import '../../../repositories/discount_group_repository.dart';
+import '../../../repositories/customer_group_repository.dart';
 import '../../../repositories/payment_mode_repository.dart';
 import '../../../repositories/product_repository.dart';
 import '../../../repositories/sync_repository.dart';
@@ -66,6 +67,7 @@ final syncProvider = StateNotifierProvider<SyncNotifier, SyncState>((ref) {
     categoryWiseDiscountRepo:
         ref.read(categoryWiseDiscountRepositoryProvider),
     areaRepo: ref.read(areaRepositoryProvider),
+    customerGroupRepo: ref.read(customerGroupRepositoryProvider),
   );
 });
 
@@ -79,6 +81,7 @@ class SyncNotifier extends StateNotifier<SyncState> {
   final DiscountGroupRepository _discountGroupRepo;
   final CategoryWiseDiscountRepository _categoryWiseDiscountRepo;
   final AreaRepository _areaRepo;
+  final CustomerGroupRepository _customerGroupRepo;
 
   SyncNotifier({
     required this._ref,
@@ -90,6 +93,7 @@ class SyncNotifier extends StateNotifier<SyncState> {
     required this._discountGroupRepo,
     required this._categoryWiseDiscountRepo,
     required this._areaRepo,
+    required this._customerGroupRepo,
   })  : _categoryRepo = categoryRepo,
         super(SyncState()) {
     refresh();
@@ -130,6 +134,7 @@ class SyncNotifier extends StateNotifier<SyncState> {
         'paymentModes': const SyncStatus(label: 'Payment Modes', success: null),
         'discountGroups': const SyncStatus(label: 'Discount Groups', success: null),
         'areas': const SyncStatus(label: 'Areas', success: null),
+        'customerGroups': const SyncStatus(label: 'Customer Groups', success: null),
         'categoryWiseDiscounts': const SyncStatus(label: 'Category Discounts', success: null),
       },
     );
@@ -148,6 +153,7 @@ class SyncNotifier extends StateNotifier<SyncState> {
         results['paymentModes'] == true &&
         results['discountGroups'] == true &&
         results['areas'] == true &&
+        results['customerGroups'] == true &&
         results['categoryWiseDiscounts'] == true;
 
     if (!allOk) {
@@ -160,6 +166,7 @@ incomingStatus: {
           'paymentModes': SyncStatus(label: 'Payment Modes', success: results['paymentModes'], error: results['paymentModes_error']),
           'discountGroups': SyncStatus(label: 'Discount Groups', success: results['discountGroups'], error: results['discountGroups_error']),
           'areas': SyncStatus(label: 'Areas', success: results['areas'], error: results['areas_error']),
+          'customerGroups': SyncStatus(label: 'Customer Groups', success: results['customerGroups'], error: results['customerGroups_error']),
           'categoryWiseDiscounts': SyncStatus(label: 'Category Discounts', success: results['categoryWiseDiscounts'], error: results['categoryWiseDiscounts_error']),
         },
         isSyncing: true,
@@ -193,6 +200,7 @@ incomingStatus: {
         'paymentModes': SyncStatus(label: 'Payment Modes', success: results['paymentModes'], error: results['paymentModes_error']),
         'discountGroups': SyncStatus(label: 'Discount Groups', success: results['discountGroups'], error: results['discountGroups_error']),
         'areas': SyncStatus(label: 'Areas', success: results['areas'], error: results['areas_error']),
+        'customerGroups': SyncStatus(label: 'Customer Groups', success: results['customerGroups'], error: results['customerGroups_error']),
         'categoryWiseDiscounts': SyncStatus(label: 'Category Discounts', success: results['categoryWiseDiscounts'], error: results['categoryWiseDiscounts_error']),
       },
     );
@@ -213,6 +221,7 @@ incomingStatus: {
         results['paymentModes'] == true &&
         results['discountGroups'] == true &&
         results['areas'] == true &&
+        results['customerGroups'] == true &&
         results['categoryWiseDiscounts'] == true;
 
     if (!allOk) {
@@ -311,6 +320,14 @@ incomingStatus: {
     } catch (e) {
       results['areas'] = false;
       results['areas_error'] = e.toString();
+    }
+
+    try {
+      await _customerGroupRepo.refreshFromServer();
+      results['customerGroups'] = true;
+    } catch (e) {
+      results['customerGroups'] = false;
+      results['customerGroups_error'] = e.toString();
     }
 
     try {

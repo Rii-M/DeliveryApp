@@ -8,6 +8,7 @@ class Customer {
   String? pan;
   String? discountGroupId;
   String? areaId;
+  String? customerGroupId;
   String? recordId;
   String? metaData;
   bool isActive = true;
@@ -28,6 +29,7 @@ class Customer {
       'pan': pan,
       'discount_group_id': discountGroupId,
       'area_id': areaId,
+      'customer_group_id': customerGroupId,
       'record_id': recordId,
       'meta_data': metaData,
       'is_active': isActive ? 1 : 0,
@@ -48,6 +50,7 @@ class Customer {
     customer.pan = map['pan'] as String?;
     customer.discountGroupId = map['discount_group_id'] as String?;
     customer.areaId = map['area_id'] as String?;
+    customer.customerGroupId = map['customer_group_id'] as String?;
     customer.recordId = map['record_id'] as String?;
     customer.metaData = map['meta_data'] as String?;
     customer.isActive = (map['is_active'] ?? 1) == 1;

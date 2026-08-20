@@ -640,6 +640,15 @@ class AppLocalizationsNe extends AppLocalizations {
   String get selectAreaRequired => 'कृपया क्षेत्र चयन गर्नुहोस्';
 
   @override
+  String get customerGroup => 'ग्राहक समूह';
+
+  @override
+  String get selectCustomerGroup => 'ग्राहक समूह चयन गर्नुहोस्';
+
+  @override
+  String get selectCustomerGroupRequired => 'कृपया ग्राहक समूह चयन गर्नुहोस्';
+
+  @override
   String get customerAddedSuccessfully => 'ग्राहक सफलतापूर्वक थपियो';
 
   @override

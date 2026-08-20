@@ -45,6 +45,8 @@ class CustomerRepository {
       ..discountGroupId =
           _getField(json, ['CustomerDiscountGroupId', 'discountGroupId'])
       ..areaId = _getField(json, ['AreaId', 'areaId'])
+      ..customerGroupId =
+          _getField(json, ['CustomerGroupId', 'customerGroupId'])
       ..isActive = (json['IsActive'] ?? json['isActive'] ?? true) == true
       ..isAllowCredit =
           (json['IsAllowCredit'] ?? json['isAllowCredit'] ?? true) == true
@@ -139,6 +141,7 @@ class CustomerRepository {
     String? pan,
     required String discountGroupId,
     String? areaId,
+    String? customerGroupId,
   }) async {
     final customer = Customer()
       ..serverId = _generateTempId()
@@ -149,6 +152,7 @@ class CustomerRepository {
       ..pan = pan
       ..discountGroupId = discountGroupId
       ..areaId = areaId
+      ..customerGroupId = customerGroupId
       ..metaData = '{"ContactPersons":[]}'
       ..isActive = true
       ..isAllowCredit = true
@@ -183,6 +187,7 @@ class CustomerRepository {
     String? pan,
     required String discountGroupId,
     String? areaId,
+    String? customerGroupId,
   }) async {
     final maps = await _db.query('customer',
         where: 'server_id = ?', whereArgs: [serverId], limit: 1);
@@ -199,6 +204,7 @@ class CustomerRepository {
       ..pan = pan
       ..discountGroupId = discountGroupId
       ..areaId = areaId
+      ..customerGroupId = customerGroupId
       ..isSynced = false;
     if (wasSynced) {
       existing.pendingAction = 'Update';

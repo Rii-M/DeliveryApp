@@ -640,6 +640,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectAreaRequired => 'Please select an area';
 
   @override
+  String get customerGroup => 'Customer Group';
+
+  @override
+  String get selectCustomerGroup => 'Select customer group';
+
+  @override
+  String get selectCustomerGroupRequired => 'Please select a customer group';
+
+  @override
   String get customerAddedSuccessfully => 'Customer added successfully';
 
   @override
