@@ -1,5 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -65,6 +65,9 @@ class CartScreen extends ConsumerWidget {
                       return _CartItemCard(
                         item: item,
                         units: units,
+                        imageUrl: state
+                            .getProductByKey(item.productId)
+                            ?.firstImageUrl,
                         onQuantityChanged: (qty) {
                           ref
                               .read(deliveryFormProvider.notifier)
@@ -148,9 +151,10 @@ class CartScreen extends ConsumerWidget {
   }
 }
 
-class _CartItemCard extends StatefulWidget {
+class _CartItemCard extends StatelessWidget {
   final CartItem item;
   final List<ProductUnit> units;
+  final String? imageUrl;
   final ValueChanged<double> onQuantityChanged;
   final ValueChanged<String> onUnitChanged;
   final ValueChanged<double> onUnitPriceChanged;
@@ -159,6 +163,7 @@ class _CartItemCard extends StatefulWidget {
   const _CartItemCard({
     required this.item,
     this.units = const [],
+    this.imageUrl,
     required this.onQuantityChanged,
     required this.onUnitChanged,
     required this.onUnitPriceChanged,
@@ -166,267 +171,247 @@ class _CartItemCard extends StatefulWidget {
   });
 
   @override
-  State<_CartItemCard> createState() => _CartItemCardState();
-}
-
-class _CartItemCardState extends State<_CartItemCard> {
-  late TextEditingController _qtyController;
-  bool _isQtyFocused = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _qtyController = TextEditingController(
-      text: widget.item.quantity.toStringAsFixed(0),
-    );
-  }
-
-  @override
-  void didUpdateWidget(_CartItemCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (!_isQtyFocused) {
-      _qtyController.text = widget.item.quantity.toStringAsFixed(0);
-    }
-  }
-
-  @override
-  void dispose() {
-    _qtyController.dispose();
-    super.dispose();
-  }
-
-  void _applyQty() {
-    final qty = double.tryParse(_qtyController.text) ?? 0;
-    if (qty != widget.item.quantity) {
-      widget.onQuantityChanged(qty);
-    }
-    setState(() => _isQtyFocused = false);
-  }
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 10),
+      color: theme.colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: theme.colorScheme.outlineVariant, width: 1),
+      ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-        child: Column(
+        padding: const EdgeInsets.all(12),
+        child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: Icon(
-                    Icons.close,
-                    size: 18,
-                    color: theme.colorScheme.error,
-                  ),
-                  onPressed: widget.onRemove,
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    widget.item.productName,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                if (widget.units.length > 1)
-                  Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: theme.colorScheme.outline),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        key: ValueKey(widget.item.selectedUnitId ?? widget.units.first.unitId),
-                        value: widget.item.selectedUnitId ?? widget.units.first.unitId,
-                        isDense: true,
-                        items: widget.units.map((u) {
-                          return DropdownMenuItem(
-                            value: u.unitId,
-                            child: Text(u.unitName, style: const TextStyle(fontSize: 13)),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          if (value != null) widget.onUnitChanged(value);
-                        },
-                      ),
-                    ),
-                  ),
-                IconButton(
-                  icon: Icon(
-                    Icons.remove_circle_outline,
-                    size: 20,
-                    color: theme.colorScheme.error,
-                  ),
-                  onPressed: () {
-                    if (widget.item.quantity <= 1) {
-                      widget.onRemove();
-                    } else {
-                      widget.onQuantityChanged(widget.item.quantity - 1);
-                    }
-                  },
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-                SizedBox(
-                  width: 48,
-                  child: Focus(
-                    onFocusChange: (focused) {
-                      if (!focused) _applyQty();
-                      setState(() => _isQtyFocused = focused);
-                    },
-                    child: TextField(
-                      controller: _qtyController,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                          RegExp(r'^\d*\.?\d{0,1}'),
-                        ),
-                      ],
-                      textAlign: TextAlign.center,
-                      decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 4,
-                          horizontal: 4,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        isDense: true,
-                        labelText: l10n.qty,
-                      ),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      onChanged: (value) {
-                        final qty = double.tryParse(value) ?? 0;
-                        widget.onQuantityChanged(qty);
-                      },
-                      onSubmitted: (_) => _applyQty(),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(
-                    Icons.add_circle_outline,
-                    size: 20,
-                    color: theme.colorScheme.primary,
-                  ),
-                  onPressed: () =>
-                      widget.onQuantityChanged(widget.item.quantity + 1),
-                  visualDensity: VisualDensity.compact,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Text(
-                  'Rs. ${widget.item.unitPrice.toStringAsFixed(2)}',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  l10n.lineTotal,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Rs. ${widget.item.lineTotal.toStringAsFixed(2)}',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ],
-            ),
-            if (widget.item.discountAmount > 0)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Row(
-                  children: [
-                    const Spacer(),
-                    Text(
-                      '${l10n.discount}: -Rs. ${widget.item.discountAmount.toStringAsFixed(2)}',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.tertiary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
+            _buildThumbnail(context),
+            const SizedBox(width: 10),
+            Expanded(child: _buildInfoColumn(context)),
+            IconButton(
+              onPressed: onRemove,
+              icon: const Icon(
+                Icons.delete_outline,
+                size: 18,
+                color: Color(0xFFC0362C),
               ),
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.all(8),
+              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+              splashRadius: 22,
+            ),
           ],
         ),
       ),
     );
   }
 
-  // Commented out: rate/price editor disabled for now.
-  // void _showPriceEditor(BuildContext context, ThemeData theme) {
-  //   final controller = TextEditingController(
-  //     text: widget.item.unitPrice.toStringAsFixed(2),
-  //   );
-  //   final l10n = AppLocalizations.of(context)!;
-  //
-  //   showDialog(
-  //     context: context,
-  //     builder: (ctx) => AlertDialog(
-  //       title: Text('${l10n.editPrice}: ${widget.item.productName}'),
-  //       content: TextField(
-  //         controller: controller,
-  //         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-  //         inputFormatters: [
-  //           FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-  //         ],
-  //         decoration: InputDecoration(
-  //           labelText: l10n.unitPrice,
-  //           prefixText: 'Rs. ',
-  //           border: const OutlineInputBorder(),
-  //         ),
-  //         autofocus: true,
-  //       ),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () => Navigator.pop(ctx),
-  //           child: Text(l10n.cancel),
-  //         ),
-  //         FilledButton(
-  //           onPressed: () {
-  //             final price = double.tryParse(controller.text) ?? 0;
-  //             if (price > 0) {
-  //               widget.onUnitPriceChanged(price);
-  //             }
-  //             Navigator.pop(ctx);
-  //           },
-  //           child: Text(l10n.save),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+  Widget _buildThumbnail(BuildContext context) {
+    final theme = Theme.of(context);
+    final url = imageUrl;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: SizedBox(
+        width: 46,
+        height: 46,
+        child: url != null && url.isNotEmpty
+            ? CachedNetworkImage(
+                imageUrl: url,
+                fit: BoxFit.cover,
+                placeholder: (_, _) => _imagePlaceholder(theme),
+                errorWidget: (_, _, _) => _imagePlaceholder(theme, icon: true),
+              )
+            : _imagePlaceholder(theme, icon: true),
+      ),
+    );
+  }
+
+  Widget _imagePlaceholder(ThemeData theme, {bool icon = false}) {
+    return Container(
+      width: 46,
+      height: 46,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFEAF2FC), Color(0xFFF6F9FD)],
+        ),
+      ),
+      child: Center(
+        child: icon
+            ? Icon(
+                Icons.inventory_2_outlined,
+                size: 18,
+                color: theme.colorScheme.primary,
+              )
+            : CircularProgressIndicator(
+                strokeWidth: 1.5,
+                color: theme.colorScheme.primary,
+              ),
+      ),
+    );
+  }
+
+  Widget _buildInfoColumn(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          item.productName,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF17202A),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildQuantityStepper(context),
+            if (units.isNotEmpty) _buildUnitDropdown(theme),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${l10n.total}: Rs. ${item.lineTotal.toStringAsFixed(2)}',
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF2E7D32),
+          ),
+        ),
+        if (item.discountAmount > 0)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              '${l10n.discount}: Rs. ${item.discountAmount.toStringAsFixed(2)}',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFFC0362C),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildQuantityStepper(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F6FA),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _stepperButton(context, Icons.remove, () {
+            if (item.quantity <= 1) {
+              onRemove();
+            } else {
+              onQuantityChanged(item.quantity - 1);
+            }
+          }),
+          ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 22),
+            child: Text(
+              item.quantity.toStringAsFixed(0),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'monospace',
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF17202A),
+              ),
+            ),
+          ),
+          _stepperButton(
+            context,
+            Icons.add,
+            () => onQuantityChanged(item.quantity + 1),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _stepperButton(
+    BuildContext context,
+    IconData icon,
+    VoidCallback onPressed,
+  ) {
+    final theme = Theme.of(context);
+    return GestureDetector(
+      onTap: onPressed,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 28,
+        height: 28,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Icon(icon, size: 18, color: theme.colorScheme.primary),
+      ),
+    );
+  }
+
+  Widget _buildUnitDropdown(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        border: Border.all(color: theme.colorScheme.outlineVariant, width: 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          key: ValueKey(
+            item.selectedUnitId ?? units.first.unitId,
+          ),
+          value: item.selectedUnitId ?? units.first.unitId,
+          isDense: true,
+          icon: const Icon(
+            Icons.arrow_drop_down,
+            size: 20,
+            color: Color(0xFF6B7684),
+          ),
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF6B7684),
+          ),
+          items: units.map((u) {
+            return DropdownMenuItem(
+              value: u.unitId,
+              child: Text(
+                u.unitName,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            );
+          }).toList(),
+          onChanged: (value) {
+            if (value != null) onUnitChanged(value);
+          },
+        ),
+      ),
+    );
+  }
 }
