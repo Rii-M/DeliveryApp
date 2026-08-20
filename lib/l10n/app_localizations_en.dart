@@ -27,6 +27,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todaysDeliveries => 'Today\'s Deliveries';
 
   @override
+  String get todaysDelivery => 'Today\'s Delivery';
+
+  @override
   String get todaysSalesReturns => 'Today\'s Sales Returns';
 
   @override
@@ -36,7 +39,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get categories => 'Categories';
 
   @override
+  String get category => 'Category';
+
+  @override
   String get customers => 'Customers';
+
+  @override
+  String get addUpdateCustomer => 'Add/Update Customer';
 
   @override
   String get quickActions => 'Quick Actions';
@@ -45,7 +54,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newDelivery => 'New Delivery';
 
   @override
+  String get newSales => 'New Sales';
+
+  @override
   String get createNewDelivery => 'Create a new delivery';
+
+  @override
+  String get todaySection => 'Today';
+
+  @override
+  String get catalogSection => 'Catalog';
 
   @override
   String get salesReturn => 'Sales Return';

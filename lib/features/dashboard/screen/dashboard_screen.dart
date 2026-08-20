@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/constants/app_constants.dart';
+import '../../../core/widgets/section_header.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/provider/auth_provider.dart';
 import '../../sync/provider/sync_provider.dart';
@@ -112,7 +114,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             const SizedBox(height: 12),
             _buildQuickActions(context, l10n),
             const SizedBox(height: 20),
-            _buildStatsRow(state, theme, l10n),
+            SectionHeader(title: l10n.todaySection),
+            const SizedBox(height: 12),
+            _buildTodayStats(state, l10n),
+            const SizedBox(height: 20),
+            SectionHeader(title: l10n.catalogSection),
+            const SizedBox(height: 12),
+            _buildCatalogStats(state, l10n),
           ],
         ),
       ),
@@ -279,63 +287,75 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildStatsRow(
+  Widget _buildTodayStats(
     DashboardState state,
-    ThemeData theme,
     AppLocalizations l10n,
   ) {
-    return Column(
+    return Row(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: StatCard(
-                title: l10n.todaysDeliveries,
-                value: state.todaysDeliveries.toString(),
-                icon: Icons.local_shipping,
-                onTap: () => context.push('/delivery-history'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: StatCard(
-                title: l10n.salesReturns,
-                value: state.todaysSalesReturns.toString(),
-                icon: Icons.assignment_return,
-                onTap: () => context.push('/sales-return-history'),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: StatCard(
-                title: l10n.categories,
-                value: state.categories.length.toString(),
-                icon: Icons.category,
-                onTap: () => context.push('/categories'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: StatCard(
-                title: l10n.products,
-                value: state.assignedProductsCount.toString(),
-                icon: Icons.inventory_2,
-                onTap: () => context.push('/products'),
-              ),
-            ),
-          ],
+        Expanded(
+          child: StatCard(
+            title: l10n.todaysDelivery,
+            value: state.todaysDeliveries.toString(),
+            icon: Icons.local_shipping,
+            iconBackground: AppConstants.indigoBg,
+            iconColor: AppConstants.indigoIcon,
+            onTap: () => context.push('/delivery-history'),
+          ),
         ),
         const SizedBox(width: 12),
-        SizedBox(
-          width: double.infinity,
+        Expanded(
+          child: StatCard(
+            title: l10n.salesReturn,
+            value: state.todaysSalesReturns.toString(),
+            icon: Icons.assignment_return,
+            iconBackground: AppConstants.rustBg,
+            iconColor: AppConstants.rustIcon,
+            onTap: () => context.push('/sales-return-history'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCatalogStats(
+    DashboardState state,
+    AppLocalizations l10n,
+  ) {
+    return Row(
+      children: [
+        Expanded(
+          child: StatCard(
+            title: l10n.category,
+            value: state.categories.length.toString(),
+            icon: Icons.category,
+            iconBackground: AppConstants.violetBg,
+            iconColor: AppConstants.violetIcon,
+            variant: StatCardVariant.compact,
+            onTap: () => context.push('/categories'),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: StatCard(
+            title: l10n.product,
+            value: state.assignedProductsCount.toString(),
+            icon: Icons.inventory_2,
+            iconBackground: AppConstants.amberBg,
+            iconColor: AppConstants.amberIcon,
+            variant: StatCardVariant.compact,
+            onTap: () => context.push('/products'),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
           child: StatCard(
             title: l10n.customers,
             value: state.assignedCustomersCount.toString(),
             icon: Icons.people,
+            iconBackground: AppConstants.tealGreenBg,
+            iconColor: AppConstants.tealGreenIcon,
+            variant: StatCardVariant.compact,
             badgeCount: state.rejectedCustomers.length,
             onTap: () => context.push('/customer-sync-status'),
           ),
@@ -345,38 +365,46 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildQuickActions(BuildContext context, AppLocalizations l10n) {
-    return Column(
+    return Row(
       children: [
-        QuickActionCard(
-          title: l10n.customers,
-          subtitle: l10n.manageCustomers,
-          icon: Icons.people_outline,
-          color: Theme.of(context).colorScheme.primaryContainer,
-          onTap: () => context.push('/customers'),
+        Expanded(
+          child: QuickActionCard(
+            title: l10n.addUpdateCustomer,
+            icon: Icons.people_outline,
+            iconBackground: AppConstants.tealGreenBg,
+            iconColor: AppConstants.tealGreenIcon,
+            onTap: () => context.push('/customers'),
+          ),
         ),
-        const SizedBox(height: 8),
-        QuickActionCard(
-          title: l10n.newDelivery,
-          subtitle: l10n.createNewDelivery,
-          icon: Icons.add_circle_outline,
-          color: Theme.of(context).colorScheme.tertiaryContainer,
-          onTap: () => context.go('/delivery'),
+        const SizedBox(width: 8),
+        Expanded(
+          child: QuickActionCard(
+            title: l10n.newSales,
+            icon: Icons.add_circle_outline,
+            iconBackground: AppConstants.indigoBg,
+            iconColor: AppConstants.indigoIcon,
+            onTap: () => context.go('/delivery'),
+          ),
         ),
-        const SizedBox(height: 8),
-        QuickActionCard(
-          title: l10n.salesReturn,
-          subtitle: l10n.recordSalesReturn,
-          icon: Icons.assignment_return,
-          color: Theme.of(context).colorScheme.secondaryContainer,
-          onTap: () => context.go('/sales-return'),
+        const SizedBox(width: 8),
+        Expanded(
+          child: QuickActionCard(
+            title: l10n.newSalesReturn,
+            icon: Icons.assignment_return,
+            iconBackground: AppConstants.rustBg,
+            iconColor: AppConstants.rustIcon,
+            onTap: () => context.go('/sales-return'),
+          ),
         ),
-        const SizedBox(height: 8),
-        QuickActionCard(
-          title: l10n.sync,
-          subtitle: l10n.syncPendingData,
-          icon: Icons.sync,
-          color: Theme.of(context).colorScheme.tertiaryContainer,
-          onTap: () => context.go('/sync'),
+        const SizedBox(width: 8),
+        Expanded(
+          child: QuickActionCard(
+            title: l10n.sync,
+            icon: Icons.sync,
+            iconBackground: AppConstants.violetBg,
+            iconColor: AppConstants.violetIcon,
+            onTap: () => context.go('/sync'),
+          ),
         ),
       ],
     );

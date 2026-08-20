@@ -1,54 +1,80 @@
 import 'package:flutter/material.dart';
 
+enum StatCardVariant { large, compact }
+
 class StatCard extends StatelessWidget {
   final String title;
   final String value;
   final IconData icon;
-  final Color? color;
+  final Color iconBackground;
+  final Color iconColor;
   final VoidCallback? onTap;
   final int badgeCount;
+  final StatCardVariant variant;
 
   const StatCard({
     super.key,
     required this.title,
     required this.value,
     required this.icon,
-    this.color,
+    required this.iconBackground,
+    required this.iconColor,
     this.onTap,
     this.badgeCount = 0,
+    this.variant = StatCardVariant.large,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final containerColor =
-        color ?? theme.colorScheme.primaryContainer;
+    final isCompact = variant == StatCardVariant.compact;
 
-    return Card(
+    final iconContainerSize = isCompact ? 28.0 : 36.0;
+    final iconRadius = isCompact ? 8.0 : 10.0;
+    final iconSize = isCompact ? 17.0 : 21.0;
+    final padding =
+        isCompact ? const EdgeInsets.all(10) : const EdgeInsets.all(13);
+    final numberSize = isCompact ? 18.0 : 22.0;
+    final labelSize = isCompact ? 12.0 : 13.0;
+    final iconNumberGap = isCompact ? 6.0 : 8.0;
+    final labelTopGap = isCompact ? 2.0 : 3.0;
+
+    return Material(
+      color: theme.colorScheme.surface,
+      borderRadius: BorderRadius.circular(14),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: theme.colorScheme.outline),
+          ),
+          padding: padding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    width: iconContainerSize,
+                    height: iconContainerSize,
+                    alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: containerColor,
-                      borderRadius: BorderRadius.circular(8),
+                      color: iconBackground,
+                      borderRadius: BorderRadius.circular(iconRadius),
                     ),
-                    child: Icon(icon, size: 20, color: theme.colorScheme.onPrimaryContainer),
+                    child: Icon(icon, size: iconSize, color: iconColor),
                   ),
                   const Spacer(),
                   if (badgeCount > 0)
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
+                        horizontal: 6,
+                        vertical: 3,
                       ),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.error,
@@ -64,17 +90,19 @@ class StatCard extends StatelessWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: iconNumberGap),
               Text(
                 value,
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                style: TextStyle(
+                  fontSize: numberSize,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: labelTopGap),
               Text(
                 title,
-                style: theme.textTheme.bodySmall?.copyWith(
+                style: TextStyle(
+                  fontSize: labelSize,
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),

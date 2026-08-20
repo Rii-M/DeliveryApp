@@ -27,6 +27,9 @@ class AppLocalizationsNe extends AppLocalizations {
   String get todaysDeliveries => 'आजको डेलिभरीहरू';
 
   @override
+  String get todaysDelivery => 'आजको डेलिभरी';
+
+  @override
   String get todaysSalesReturns => 'आजको सेल्स रिटर्नहरू';
 
   @override
@@ -36,7 +39,13 @@ class AppLocalizationsNe extends AppLocalizations {
   String get categories => 'कोटिहरू';
 
   @override
+  String get category => 'कोटि';
+
+  @override
   String get customers => 'ग्राहकहरू';
+
+  @override
+  String get addUpdateCustomer => 'ग्राहक थप्नुहोस्/अपडेट गर्नुहोस्';
 
   @override
   String get quickActions => 'द्रुत कार्यहरू';
@@ -45,7 +54,16 @@ class AppLocalizationsNe extends AppLocalizations {
   String get newDelivery => 'नयाँ डेलिभरी';
 
   @override
+  String get newSales => 'नयाँ बिक्री';
+
+  @override
   String get createNewDelivery => 'नयाँ डेलिभरी सिर्जना गर्नुहोस्';
+
+  @override
+  String get todaySection => 'आज';
+
+  @override
+  String get catalogSection => 'क्याटालग';
 
   @override
   String get salesReturn => 'सेल्स रिटर्न';

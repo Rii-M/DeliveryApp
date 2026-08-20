@@ -134,6 +134,12 @@ abstract class AppLocalizations {
   /// **'Today\'s Deliveries'**
   String get todaysDeliveries;
 
+  /// No description provided for @todaysDelivery.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s Delivery'**
+  String get todaysDelivery;
+
   /// No description provided for @todaysSalesReturns.
   ///
   /// In en, this message translates to:
@@ -152,11 +158,23 @@ abstract class AppLocalizations {
   /// **'Categories'**
   String get categories;
 
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category;
+
   /// No description provided for @customers.
   ///
   /// In en, this message translates to:
   /// **'Customers'**
   String get customers;
+
+  /// No description provided for @addUpdateCustomer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add/Update Customer'**
+  String get addUpdateCustomer;
 
   /// No description provided for @quickActions.
   ///
@@ -170,11 +188,29 @@ abstract class AppLocalizations {
   /// **'New Delivery'**
   String get newDelivery;
 
+  /// No description provided for @newSales.
+  ///
+  /// In en, this message translates to:
+  /// **'New Sales'**
+  String get newSales;
+
   /// No description provided for @createNewDelivery.
   ///
   /// In en, this message translates to:
   /// **'Create a new delivery'**
   String get createNewDelivery;
+
+  /// No description provided for @todaySection.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todaySection;
+
+  /// No description provided for @catalogSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalog'**
+  String get catalogSection;
 
   /// No description provided for @salesReturn.
   ///
