@@ -29,9 +29,11 @@ class _CustomerSyncStatusScreenState
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
+      final now = DateTime.now();
+      final startOfDay = DateTime(now.year, now.month, now.day);
       final repo = ref.read(dashboardRepositoryProvider);
-      final entries = await repo.getCustomerSyncStatus();
-      final rejected = await repo.getRejectedCustomers();
+      final entries = await repo.getCustomerSyncStatus(from: startOfDay);
+      final rejected = await repo.getRejectedCustomers(from: startOfDay);
       if (!mounted) return;
       setState(() {
         _entries = entries;
@@ -68,6 +70,9 @@ class _CustomerSyncStatusScreenState
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
+    final syncedEntries = _entries
+        .where((e) => (e['status'] as String? ?? '') == 'Synced')
+        .toList();
     final pendingEntries = _entries
         .where((e) => (e['status'] as String? ?? '') != 'Synced')
         .toList();
@@ -79,61 +84,17 @@ class _CustomerSyncStatusScreenState
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            if (_rejected.isNotEmpty) ...[
-              Card(
-                color: theme.colorScheme.errorContainer,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.error_outline,
-                              color: theme.colorScheme.onErrorContainer),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              l10n.rejectedCustomers,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                color: theme.colorScheme.onErrorContainer,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          TextButton.icon(
-                            onPressed: _clearAllRejected,
-                            icon: const Icon(Icons.delete_sweep, size: 18),
-                            label: Text(l10n.clearAll),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      ..._rejected.map((r) {
-                        return _RejectedTile(
-                          customer: r,
-                          onClear: () => _clearRejected(r),
-                          theme: theme,
-                          l10n: l10n,
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
             if (_isLoading)
               const Padding(
                 padding: EdgeInsets.only(top: 32),
                 child: Center(child: CircularProgressIndicator()),
               )
-            else if (_entries.isEmpty)
+            else if (_entries.isEmpty && _rejected.isEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 32),
                 child: Center(
                   child: Text(
-                    l10n.noCustomerSyncEntries,
+                    l10n.noCustomersToday,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -141,24 +102,146 @@ class _CustomerSyncStatusScreenState
                 ),
               )
             else ...[
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: pendingEntries.map((e) {
-                      return _CustomerSyncTile(
-                        name: (e['customer_name'] as String? ?? ''),
-                        phone: (e['customer_phone'] as String? ?? ''),
-                        status: (e['status'] as String? ?? 'Pending'),
-                        errorMessage: e['error_message'] as String?,
-                        theme: theme,
-                        l10n: l10n,
-                      );
-                    }).toList(),
+              if (syncedEntries.isNotEmpty) ...[
+                _SectionCard(
+                  title: l10n.syncedCustomers,
+                  count: syncedEntries.length,
+                  icon: Icons.check_circle,
+                  color: Colors.green,
+                  theme: theme,
+                  children: syncedEntries.map((e) {
+                    return _CustomerSyncTile(
+                      name: (e['customer_name'] as String? ?? ''),
+                      phone: (e['customer_phone'] as String? ?? ''),
+                      status: (e['status'] as String? ?? 'Pending'),
+                      errorMessage: e['error_message'] as String?,
+                      theme: theme,
+                      l10n: l10n,
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 16),
+              ],
+              if (pendingEntries.isNotEmpty) ...[
+                _SectionCard(
+                  title: l10n.pendingCustomers,
+                  count: pendingEntries.length,
+                  icon: Icons.pending,
+                  color: Colors.orange,
+                  theme: theme,
+                  children: pendingEntries.map((e) {
+                    return _CustomerSyncTile(
+                      name: (e['customer_name'] as String? ?? ''),
+                      phone: (e['customer_phone'] as String? ?? ''),
+                      status: (e['status'] as String? ?? 'Pending'),
+                      errorMessage: e['error_message'] as String?,
+                      theme: theme,
+                      l10n: l10n,
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 16),
+              ],
+              if (_rejected.isNotEmpty) ...[
+                Card(
+                  color: theme.colorScheme.errorContainer,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.error_outline,
+                                color: theme.colorScheme.onErrorContainer),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                '${l10n.rejectedCustomers} (${_rejected.length})',
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  color: theme.colorScheme.onErrorContainer,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            TextButton.icon(
+                              onPressed: _clearAllRejected,
+                              icon: const Icon(Icons.delete_sweep, size: 18),
+                              label: Text(l10n.clearAll),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        ..._rejected.map((r) {
+                          return _RejectedTile(
+                            customer: r,
+                            onClear: () => _clearRejected(r),
+                            theme: theme,
+                            l10n: l10n,
+                          );
+                        }),
+                      ],
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  final String title;
+  final int count;
+  final IconData icon;
+  final Color color;
+  final ThemeData theme;
+  final List<Widget> children;
+
+  const _SectionCard({
+    required this.title,
+    required this.count,
+    required this.icon,
+    required this.color,
+    required this.theme,
+    required this.children,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = theme.brightness == Brightness.dark;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: isDark ? 0.2 : 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, size: 18, color: color),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '$title (${count.toString()})',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ...children,
           ],
         ),
       ),

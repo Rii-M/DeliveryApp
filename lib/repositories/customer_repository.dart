@@ -161,7 +161,9 @@ class CustomerRepository {
         ..entityType = 'Customer'
         ..entityId = customerId
         ..status = 'Pending'
-        ..createdDate = DateTime.now();
+        ..createdDate = DateTime.now()
+        ..customerName = customer.name
+        ..customerPhone = customer.phone;
       await txn.insert('sync_queue', syncEntry.toMap());
       return customerId;
     });
@@ -219,7 +221,9 @@ class CustomerRepository {
           ..entityType = 'Customer'
           ..entityId = existing.id!
           ..status = 'Pending'
-          ..createdDate = DateTime.now();
+          ..createdDate = DateTime.now()
+          ..customerName = existing.name
+          ..customerPhone = existing.phone;
         await txn.insert('sync_queue', syncEntry.toMap());
       }
     });

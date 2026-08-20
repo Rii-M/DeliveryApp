@@ -685,4 +685,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rs => 'Rs.';
+
+  @override
+  String get pendingCustomers => 'Pending customers';
+
+  @override
+  String get noCustomersToday => 'No new customer today';
+
+  @override
+  String get syncedCustomers => 'synced customers';
 }

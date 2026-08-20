@@ -235,5 +235,8 @@
   "clearAll": "Clear all",
   "rejectedCustomers": "Rejected customers",
   "customerNotSaved": "Customer not saved",
-  "rs":"Rs."
+  "rs":"Rs.",
+  "pendingCustomers": "Pending customers",
+  "noCustomersToday" : "No new customer today",
+  "syncedCustomers": "synced customers"
 }

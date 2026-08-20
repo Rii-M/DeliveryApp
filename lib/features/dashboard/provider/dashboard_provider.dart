@@ -62,6 +62,8 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
     final cachedCategories = await _categoryRepo.getCachedCategories();
     final hasCache = cachedCategories.isNotEmpty;
 
+    final today = DateTime.now();
+    final startOfDay = DateTime(today.year, today.month, today.day);
     final deliveries = await _dashboardRepo.getTodaysDeliveries();
     final estimates = await _dashboardRepo.getEstimatedBillsCreated();
     final salesReturns = await _dashboardRepo.getTodaysSalesReturns();
@@ -71,7 +73,8 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
     final dbLastSync = await _dashboardRepo.getLastSyncTime();
     final customerSyncStatus =
         await _dashboardRepo.getCustomerSyncStatus();
-    final rejectedCustomers = await _dashboardRepo.getRejectedCustomers();
+    final rejectedCustomers =
+        await _dashboardRepo.getRejectedCustomers(from: startOfDay);
 
     state = DashboardState(
       isLoading: !hasCache,
@@ -96,6 +99,8 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
       final categories = await _categoryRepo.getCachedCategories();
       _prefetchImages(categories);
 
+      final today = DateTime.now();
+      final startOfDay = DateTime(today.year, today.month, today.day);
       final deliveries = await _dashboardRepo.getTodaysDeliveries();
       final estimates = await _dashboardRepo.getEstimatedBillsCreated();
       final salesReturns = await _dashboardRepo.getTodaysSalesReturns();
@@ -106,7 +111,8 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
       final dbLastSync = await _dashboardRepo.getLastSyncTime();
       final customerSyncStatus =
           await _dashboardRepo.getCustomerSyncStatus();
-      final rejectedCustomers = await _dashboardRepo.getRejectedCustomers();
+      final rejectedCustomers =
+          await _dashboardRepo.getRejectedCustomers(from: startOfDay);
 
       state = DashboardState(
         categories: categories,

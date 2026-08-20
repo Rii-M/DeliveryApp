@@ -24,7 +24,7 @@ class DatabaseService {
 
       _database = await openDatabase(
         path,
-        version: 26,
+        version: 27,
         onCreate: _createTables,
         onUpgrade: _onUpgrade,
       );
@@ -399,6 +399,21 @@ class DatabaseService {
         await db.execute('ALTER TABLE product_new RENAME TO product');
       } catch (_) {}
     }
+    if (oldVersion < 27) {
+      // Snapshot the customer's name/phone at queue time so the sync-status
+      // screen keeps showing synced customers even after refreshCustomers()
+      // deletes and re-inserts customer rows under new local ids.
+      try {
+        await db.execute(
+          'ALTER TABLE sync_queue ADD COLUMN customer_name TEXT',
+        );
+      } catch (_) {}
+      try {
+        await db.execute(
+          'ALTER TABLE sync_queue ADD COLUMN customer_phone TEXT',
+        );
+      } catch (_) {}
+    }
   }
 
   Future<void> _createTables(Database db, int version) async {
@@ -574,7 +589,9 @@ class DatabaseService {
         entity_id INTEGER NOT NULL,
         status TEXT NOT NULL,
         created_date TEXT NOT NULL,
-        error_message TEXT
+        error_message TEXT,
+        customer_name TEXT,
+        customer_phone TEXT
       )
     ''');
 

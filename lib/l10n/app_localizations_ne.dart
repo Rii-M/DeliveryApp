@@ -686,4 +686,13 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get rs => 'रु.';
+
+  @override
+  String get pendingCustomers => 'पेन्डिङ ग्राहकहरू';
+
+  @override
+  String get noCustomersToday => 'आज कुनै ग्राहक थपिएको छैन';
+
+  @override
+  String get syncedCustomers => 'सिङ्क गरिएको ग्राहकहरू';
 }

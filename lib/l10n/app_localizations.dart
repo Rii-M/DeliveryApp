@@ -1381,6 +1381,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rs.'**
   String get rs;
+
+  /// No description provided for @pendingCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending customers'**
+  String get pendingCustomers;
+
+  /// No description provided for @noCustomersToday.
+  ///
+  /// In en, this message translates to:
+  /// **'No new customer today'**
+  String get noCustomersToday;
+
+  /// No description provided for @syncedCustomers.
+  ///
+  /// In en, this message translates to:
+  /// **'synced customers'**
+  String get syncedCustomers;
 }
 
 class _AppLocalizationsDelegate

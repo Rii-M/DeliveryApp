@@ -56,9 +56,13 @@ class DashboardRepository {
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
-  Future<List<RejectedCustomer>> getRejectedCustomers() async {
-    final maps = await _db.query('rejected_customer_log',
-        orderBy: 'created_date ASC');
+  Future<List<RejectedCustomer>> getRejectedCustomers({DateTime? from}) async {
+    final maps = await _db.query(
+      'rejected_customer_log',
+      where: from != null ? 'created_date >= ?' : null,
+      whereArgs: from != null ? [from.toIso8601String()] : null,
+      orderBy: 'created_date ASC',
+    );
     return maps.map((map) => RejectedCustomer.fromMap(map)).toList();
   }
 
@@ -172,16 +176,21 @@ class DashboardRepository {
 
   /// Returns the customer sync queue entries (with customer name/phone) so the
   /// dashboard can show "synced / not synced" status along with any sync error.
-  Future<List<Map<String, dynamic>>> getCustomerSyncStatus() async {
-    final maps = await _db.rawQuery('''
+  Future<List<Map<String, dynamic>>> getCustomerSyncStatus({DateTime? from}) async {
+    final maps = await _db.rawQuery(
+      '''
       SELECT q.id AS queue_id, q.entity_type, q.entity_id, q.status,
              q.created_date, q.error_message,
-             c.name AS customer_name, c.phone AS customer_phone
+             COALESCE(q.customer_name, c.name) AS customer_name,
+             COALESCE(q.customer_phone, c.phone) AS customer_phone
       FROM sync_queue q
       LEFT JOIN customer c ON c.id = q.entity_id
       WHERE q.entity_type = 'Customer'
+        ${from != null ? 'AND q.created_date >= ?' : ''}
       ORDER BY q.created_date ASC
-    ''');
+      ''',
+      from != null ? [from.toIso8601String()] : null,
+    );
     return maps;
   }
 }

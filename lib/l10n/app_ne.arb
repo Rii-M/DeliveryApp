@@ -230,6 +230,8 @@
   "clearAll": "सबै हटाउनुहोस्",
 "rejectedCustomers": "अस्वीकृत ग्राहकहरू",
 "customerNotSaved": "ग्राहक सुरक्षित भएन",
-"rs":"रु."
-
+"rs":"रु.",
+"pendingCustomers": "पेन्डिङ ग्राहकहरू",
+"noCustomersToday" : "आज कुनै ग्राहक थपिएको छैन",
+"syncedCustomers": "सिङ्क गरिएको ग्राहकहरू"
 }

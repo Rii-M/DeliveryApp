@@ -5,6 +5,8 @@ class SyncQueue {
   late String status;
   late DateTime createdDate;
   String? errorMessage;
+  String? customerName;
+  String? customerPhone;
 
   SyncQueue();
 
@@ -16,6 +18,8 @@ class SyncQueue {
       'status': status,
       'created_date': createdDate.toIso8601String(),
       'error_message': errorMessage,
+      'customer_name': customerName,
+      'customer_phone': customerPhone,
     };
   }
 
@@ -27,6 +31,8 @@ class SyncQueue {
     entry.status = map['status'] as String;
     entry.createdDate = DateTime.parse(map['created_date'] as String);
     entry.errorMessage = map['error_message'] as String?;
+    entry.customerName = map['customer_name'] as String?;
+    entry.customerPhone = map['customer_phone'] as String?;
     return entry;
   }
 }
