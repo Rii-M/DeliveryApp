@@ -17,6 +17,7 @@ class Product {
   List<String> productImages = [];
   String? description;
   int taxable = 0;
+  String? chalanId;
   String? chalanNumber;
   List<ProductUnit> units = [];
 
@@ -39,6 +40,7 @@ class Product {
           : null,
       'description': description,
       'taxable': taxable,
+      'chalan_id': chalanId,
       'chalan_number': chalanNumber,
       'units_json': units.isNotEmpty ? jsonEncode(units.map((u) => u.toJson()).toList()) : null,
     };
@@ -58,6 +60,7 @@ class Product {
     product.imageUrl = map['image_url'] as String?;
     product.description = map['description'] as String?;
     product.taxable = (map['taxable'] as num?)?.toInt() ?? 0;
+    product.chalanId = map['chalan_id'] as String?;
     product.chalanNumber = map['chalan_number'] as String?;
     final imagesRaw = map['product_images'] as String?;
     if (imagesRaw != null && imagesRaw.isNotEmpty) {

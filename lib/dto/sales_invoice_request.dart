@@ -9,6 +9,8 @@ class SalesInvoiceRequest {
   final dynamic customerMobile;
   final dynamic customerAddress;
   final dynamic customerPan;
+
+  final String chalanId;
   final String chalanNumber;
   final String outletId;
   final double totalQuantity;
@@ -50,6 +52,7 @@ class SalesInvoiceRequest {
     this.customerMobile,
     this.customerAddress,
     this.customerPan,
+    this.chalanId = '',
     this.chalanNumber = '',
     required this.outletId,
     required this.totalQuantity,
@@ -93,6 +96,7 @@ class SalesInvoiceRequest {
       'CustomerMobile': customerMobile,
       'CustomerAddress': customerAddress,
       'CustomerPAN': customerPan,
+      'ChalanId': chalanId,
       'ChalanNumber': chalanNumber,
       'OutletId': outletId,
       'TotalQuantity': totalQuantity,
@@ -149,6 +153,7 @@ class SalesInvoiceItemRequest {
   final bool hasSerialNumber;
   final String serialNumber;
   final String refNo;
+  final String chalanId;
   final String chalanNumber;
   final String lotNo;
   final String productId;
@@ -186,6 +191,7 @@ class SalesInvoiceItemRequest {
     this.hasSerialNumber = false,
     this.serialNumber = '',
     required this.refNo,
+    this.chalanId = '',
     this.chalanNumber = '',
     this.lotNo = '',
     required this.productId,
@@ -225,6 +231,7 @@ class SalesInvoiceItemRequest {
       'HasSerialNumber': hasSerialNumber,
       'SerialNumber': serialNumber,
       'RefNo': refNo,
+      'ChalanId': chalanId,
       'ChalanNumber': chalanNumber,
       'LotNo': lotNo,
       'ProductId': productId,

@@ -751,6 +751,7 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
 
         return SalesInvoiceItemRequest(
           refNo: item.productId,
+          chalanId: product?.chalanId ?? '',
           chalanNumber: product?.chalanNumber ?? '',
           productId: item.productId,
           name: item.productName,
@@ -779,6 +780,8 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
         );
       }).toList();
 
+      final chalanId =
+          productsMap[state.items.first.productId]?.chalanId ?? '';
       final chalanNumber =
           productsMap[state.items.first.productId]?.chalanNumber ?? '';
       final totalTaxable = salesInvoiceItems.fold<double>(
@@ -835,6 +838,7 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
             ? (state.paymentEntries.first.paymentModeName ?? ' ')
             : 'Mix',
         tenderAmount: totalNetAmount,
+        chalanId: chalanId,
         chalanNumber: chalanNumber,
         salesInvoiceTax: [SalesInvoiceTaxRequest(taxAmount: totalItemTax)],
         salesInvoiceItem: salesInvoiceItems,

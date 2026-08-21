@@ -649,6 +649,7 @@ void clearItems() {
           hasSerialNumber: false,
           serialNumber: '',
           refNo: item.productId,
+          chalanId: product?.chalanId ?? '',
           chalanNumber: product?.chalanNumber ?? '',
           lotNo: '',
           productId: item.productId,
@@ -710,6 +711,11 @@ void clearItems() {
       totalDiscountIncTax += state.discountAmount;
       totalNetAmount -= state.discountAmount;
 
+      final chalanId =
+          productsMap[state.items.first.productId]?.chalanId ?? '';
+      final chalanNumber =
+          productsMap[state.items.first.productId]?.chalanNumber ?? '';
+
       // Build payment entries
             // Auto-add Cash payment if none exists
       final cashMode = state.paymentModes
@@ -768,6 +774,8 @@ void clearItems() {
         customerName: state.selectedCustomer!.name,
         returnReason: state.reason ?? state.remarks ?? '',
         outletId: _outletId,
+        chalanId: chalanId,
+        chalanNumber: chalanNumber,
         totalQuantity: totalQty,
         totalGrossAmount: totalGrossAmount,
         totalGrossAmountIncludingTax: totalGrossAmountIncTax,

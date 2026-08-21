@@ -16,6 +16,8 @@ class SalesReturnRequest {
   final String? invoiceNumber;
   final String? invoiceRefNumber;
   final String outletId;
+  final String chalanId;
+  final String chalanNumber;
   final String? payMode;
   final double roundoffAmount;
   final double totalDiscount;
@@ -54,6 +56,8 @@ class SalesReturnRequest {
     this.invoiceNumber = '',
     this.invoiceRefNumber = '',
     required this.outletId,
+    this.chalanId = '',
+    this.chalanNumber = '',
     this.payMode,
     this.roundoffAmount = 0,
     required this.totalDiscount,
@@ -94,6 +98,8 @@ class SalesReturnRequest {
       'InvoiceNumber': invoiceNumber ?? '',
       'InvoiceRefNumber': invoiceRefNumber ?? '',
       'OutletId': outletId,
+      'ChalanId': chalanId,
+      'ChalanNumber': chalanNumber,
       'PayMode': payMode ?? '',
       'RoundoffAmount': roundoffAmount,
       'TotalDiscount': totalDiscount,

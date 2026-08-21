@@ -24,7 +24,7 @@ class DatabaseService {
 
       _database = await openDatabase(
         path,
-        version: 28,
+        version: 29,
         onCreate: _createTables,
         onUpgrade: _onUpgrade,
       );
@@ -430,6 +430,23 @@ class DatabaseService {
         );
       } catch (_) {}
     }
+    if (oldVersion < 29) {
+      try {
+        await db.execute(
+          'ALTER TABLE all_product ADD COLUMN chalan_id TEXT',
+        );
+      } catch (_) {}
+      try {
+        await db.execute(
+          'ALTER TABLE all_product ADD COLUMN chalan_number TEXT',
+        );
+      } catch (_) {}
+      try {
+        await db.execute(
+          'ALTER TABLE product ADD COLUMN chalan_id TEXT',
+        );
+      } catch (_) {}
+    }
   }
 
   Future<void> _createTables(Database db, int version) async {
@@ -495,6 +512,7 @@ class DatabaseService {
         product_images TEXT,
         description TEXT,
         taxable INTEGER DEFAULT 0,
+        chalan_id TEXT,
         chalan_number TEXT,
         units_json TEXT
       )
@@ -634,7 +652,9 @@ class DatabaseService {
         unit_price REAL DEFAULT 0,
         image_url TEXT,
         units_json TEXT,
-        taxable INTEGER DEFAULT 0
+        taxable INTEGER DEFAULT 0,
+        chalan_id TEXT,
+        chalan_number TEXT
       )
     ''');
 

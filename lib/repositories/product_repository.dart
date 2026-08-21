@@ -93,6 +93,8 @@ class ProductRepository {
             'image_url': p.imageUrl,
             'units_json': p.units.isNotEmpty ? jsonEncode(p.units.map((u) => u.toJson()).toList()) : null,
             'taxable': p.taxable,
+            'chalan_id': p.chalanId,
+            'chalan_number': p.chalanNumber,
           }, conflictAlgorithm: ConflictAlgorithm.replace);
         }
       });
@@ -115,6 +117,8 @@ class ProductRepository {
       p.imageUrl = map['image_url'] as String?;
       p.unitPrice = (map['unit_price'] as num?)?.toDouble() ?? 0;
       p.taxable = (map['taxable'] as int?) ?? 0;
+      p.chalanId = map['chalan_id'] as String?;
+      p.chalanNumber = map['chalan_number'] as String?;
       final unitsRaw = map['units_json'] as String?;
       if (unitsRaw != null && unitsRaw.isNotEmpty) {
         p.units = (jsonDecode(unitsRaw) as List)
@@ -143,6 +147,7 @@ class ProductRepository {
       p.unitPrice = (json['Rate'] as num?)?.toDouble() ?? 0;
       p.stock = (json['Quantity'] as num?)?.toDouble() ?? 0;
       p.taxable = (json['Taxable'] as num?)?.toInt() ?? 0;
+      p.chalanId = json['ChalanId'] as String?;
       p.chalanNumber = json['ChalanNumber'] as String?;
 
       final baseUnit = json['BaseUnit'] as Map<String, dynamic>?;

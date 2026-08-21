@@ -199,6 +199,7 @@ class SyncRepository {
 
       return SalesInvoiceItemRequest(
         refNo: item.productId,
+        chalanId: product?['chalan_id'] as String? ?? '',
         chalanNumber: product?['chalan_number'] as String? ?? '',
         productId: item.productId,
         name: product?['name'] as String? ?? '',
@@ -249,6 +250,9 @@ class SyncRepository {
     );
     final totalNetAmount = totalGrossAmountIncTax - totalDiscountIncludingTax;
 
+    final chalanId = items.isNotEmpty
+        ? (productsMap[items.first.productId]?['chalan_id'] as String? ?? '')
+        : '';
     final chalanNumber = items.isNotEmpty
         ? (productsMap[items.first.productId]?['chalan_number'] as String? ?? '')
         : '';
@@ -266,6 +270,7 @@ class SyncRepository {
     }
 
     final request = SalesInvoiceRequest(
+      chalanId: chalanId,
       chalanNumber: chalanNumber,
       transactionDate: transactionDate,
       customerId: customerId,
@@ -394,6 +399,7 @@ class SyncRepository {
         hasSerialNumber: false,
         serialNumber: '',
         refNo: item.productId,
+        chalanId: product?['chalan_id'] as String? ?? '',
         chalanNumber: product?['chalan_number'] as String? ?? '',
         lotNo: '',
         productId: item.productId,
@@ -485,6 +491,13 @@ class SyncRepository {
       customerName = customerMaps.first['name'] as String? ?? '';
     }
 
+    final chalanId = sr.items.isNotEmpty
+        ? (productsMap[sr.items.first.productId]?['chalan_id'] as String? ?? '')
+        : '';
+    final chalanNumber = sr.items.isNotEmpty
+        ? (productsMap[sr.items.first.productId]?['chalan_number'] as String? ?? '')
+        : '';
+
     // Build the request
     final request = SalesReturnRequest(
       transactionDate: transactionDate,
@@ -496,6 +509,8 @@ class SyncRepository {
       customerName: customerName,
       remarks: sr.reason ?? sr.remarks ?? '',
       outletId: _outletId,
+      chalanId: chalanId,
+      chalanNumber: chalanNumber,
       deliveryBoyId: driverId,
       deliveryBoyName: driverName,
       totalQuantity: totalQty,
