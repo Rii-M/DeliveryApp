@@ -18,6 +18,7 @@ import '../../features/profile/screen/profile_screen.dart';
 import '../../features/sales_return/screen/sales_return_detail_screen.dart';
 import '../../features/sales_return/screen/sales_return_history_screen.dart';
 import '../../features/sales_return/screen/sales_return_screen.dart';
+import '../../features/sync/provider/sync_provider.dart';
 import '../../features/sync/screen/sync_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/customer.dart';
@@ -196,9 +197,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   );
 });
 
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   final Widget child;
   const AppShell({super.key, required this.child});
+
+  static const _accentColors = <int, Color>{
+    0: Color(0xFFB4482E), // Sales Return — coral
+    1: Color(0xFFE2992F), // Delivery — amber
+    2: Color(0xFF6B4C7A), // Sync — violet
+    3: Color(0xFF4B7A5B), // Dashboard — teal
+  };
+
+  static const _indicatorColors = <int, Color>{
+    0: Color(0xFFF7E6E1),
+    1: Color(0xFFFBEEDA),
+    2: Color(0xFFEFE7F2),
+    3: Color(0xFFE7F0E9),
+  };
 
   int _currentIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
@@ -222,39 +237,134 @@ class AppShell extends StatelessWidget {
     }
   }
 
+  Widget _badge({required Widget child, required int pendingCount}) {
+    if (pendingCount <= 0) return child;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        child,
+        Positioned(
+          right: -2,
+          top: -2,
+          child: Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: const Color(0xFFB4482E),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0xFFFFFFFF),
+                width: 2,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final colorScheme = Theme.of(context).colorScheme;
+    final currentIndex = _currentIndex(context);
+    final pendingCount = ref.watch(syncProvider).pendingCount;
+
     return Scaffold(
       body: child,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex(context),
-        onDestinationSelected: (index) => _onTap(context, index),
-        backgroundColor: colorScheme.surface,
-        indicatorColor: colorScheme.primaryContainer,
-        destinations: [
-          NavigationDestination(
-            icon: Icon(Icons.assignment_return_outlined),
-            selectedIcon: Icon(Icons.assignment_return),
-            label: l10n.salesReturn,
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x14000000),
+              blurRadius: 24,
+              offset: Offset(0, 10),
+            ),
+            BoxShadow(
+              color: Color(0x0D000000),
+              blurRadius: 6,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              navigationBarTheme: NavigationBarThemeData(
+                labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                  final selected = states.contains(WidgetState.selected);
+                  return TextStyle(
+                    fontSize: 11,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                  );
+                }),
+              ),
+            ),
+            child: NavigationBar(
+            selectedIndex: currentIndex,
+            onDestinationSelected: (index) => _onTap(context, index),
+            backgroundColor: colorScheme.surface,
+            indicatorColor: _indicatorColors[currentIndex],
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+            destinations: [
+              NavigationDestination(
+                icon: Icon(
+                  Icons.assignment_return_outlined,
+                  color: currentIndex == 0 ? _accentColors[0] : null,
+                ),
+                selectedIcon: Icon(
+                  Icons.assignment_return,
+                  color: _accentColors[0],
+                ),
+                label: l10n.salesReturn,
+              ),
+              NavigationDestination(
+                icon: Icon(
+                  Icons.local_shipping_outlined,
+                  color: currentIndex == 1 ? _accentColors[1] : null,
+                ),
+                selectedIcon: Icon(
+                  Icons.local_shipping,
+                  color: _accentColors[1],
+                ),
+                label: l10n.delivery,
+              ),
+              NavigationDestination(
+                icon: _badge(
+                  pendingCount: pendingCount,
+                  child: Icon(
+                    Icons.sync_outlined,
+                    color: currentIndex == 2 ? _accentColors[2] : null,
+                  ),
+                ),
+                selectedIcon: _badge(
+                  pendingCount: pendingCount,
+                  child: Icon(
+                    Icons.sync,
+                    color: _accentColors[2],
+                  ),
+                ),
+                label: l10n.sync,
+              ),
+              NavigationDestination(
+                icon: Icon(
+                  Icons.dashboard_outlined,
+                  color: currentIndex == 3 ? _accentColors[3] : null,
+                ),
+                selectedIcon: Icon(
+                  Icons.dashboard,
+                  color: _accentColors[3],
+                ),
+                label: l10n.dashboard,
+              ),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.local_shipping_outlined),
-            selectedIcon: Icon(Icons.local_shipping),
-            label: l10n.delivery,
           ),
-          NavigationDestination(
-            icon: Icon(Icons.sync_outlined),
-            selectedIcon: Icon(Icons.sync),
-            label: l10n.sync,
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: l10n.dashboard,
-          ),
-        ],
+        ),
       ),
     );
   }
