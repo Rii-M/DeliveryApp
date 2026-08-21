@@ -33,9 +33,7 @@ class QuickActionCard extends StatelessWidget {
             border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
-          child: SizedBox(
-            height: 92,
-            child: Column(
+          child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
@@ -63,7 +61,6 @@ class QuickActionCard extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }

@@ -365,48 +365,51 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildQuickActions(BuildContext context, AppLocalizations l10n) {
-    return Row(
-      children: [
-        Expanded(
-          child: QuickActionCard(
-            title: l10n.addUpdateCustomer,
-            icon: Icons.people_outline,
-            iconBackground: AppConstants.tealGreenBg,
-            iconColor: AppConstants.tealGreenIcon,
-            onTap: () => context.push('/customers'),
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: QuickActionCard(
+              title: l10n.addUpdateCustomer,
+              icon: Icons.people_outline,
+              iconBackground: AppConstants.tealGreenBg,
+              iconColor: AppConstants.tealGreenIcon,
+              onTap: () => context.push('/customers'),
+            ),
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: QuickActionCard(
-            title: l10n.newSales,
-            icon: Icons.add_circle_outline,
-            iconBackground: AppConstants.indigoBg,
-            iconColor: AppConstants.indigoIcon,
-            onTap: () => context.go('/delivery'),
+          const SizedBox(width: 8),
+          Expanded(
+            child: QuickActionCard(
+              title: l10n.newSales,
+              icon: Icons.add_circle_outline,
+              iconBackground: AppConstants.indigoBg,
+              iconColor: AppConstants.indigoIcon,
+              onTap: () => context.go('/delivery'),
+            ),
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: QuickActionCard(
-            title: l10n.newSalesReturn,
-            icon: Icons.assignment_return,
-            iconBackground: AppConstants.rustBg,
-            iconColor: AppConstants.rustIcon,
-            onTap: () => context.go('/sales-return'),
+          const SizedBox(width: 8),
+          Expanded(
+            child: QuickActionCard(
+              title: l10n.newSalesReturn,
+              icon: Icons.assignment_return,
+              iconBackground: AppConstants.rustBg,
+              iconColor: AppConstants.rustIcon,
+              onTap: () => context.go('/sales-return'),
+            ),
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: QuickActionCard(
-            title: l10n.sync,
-            icon: Icons.sync,
-            iconBackground: AppConstants.violetBg,
-            iconColor: AppConstants.violetIcon,
-            onTap: () => context.go('/sync'),
+          const SizedBox(width: 8),
+          Expanded(
+            child: QuickActionCard(
+              title: l10n.sync,
+              icon: Icons.sync,
+              iconBackground: AppConstants.violetBg,
+              iconColor: AppConstants.violetIcon,
+              onTap: () => context.go('/sync'),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
