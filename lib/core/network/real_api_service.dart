@@ -52,11 +52,11 @@ class RealApiService implements ApiService {
 
   @override
   Future<List<Map<String, dynamic>>> fetchCategories({
-    required String customerId,
+    required String deliveryBoyId,
     required String transactionDate,
   }) async {
     return _fetchList(
-      '${ApiConfig.categoryEndpoint}?customerId=$customerId&transactionDate=$transactionDate',
+      '${ApiConfig.categoryEndpoint}?deliveryBoyId=$deliveryBoyId&transactionDate=$transactionDate',
     );
   }
 
@@ -95,11 +95,11 @@ Future<List<Map<String, dynamic>>> fetchAssignedCategories() async {
 
   @override
   Future<List<Map<String, dynamic>>> fetchProducts({
-    required String customerId,
+    required String deliveryBoyId,
     required String transactionDate,
   }) async {
     return _fetchList(
-      '${ApiConfig.productEndpoint}?customerId=$customerId&transactionDate=$transactionDate',
+      '${ApiConfig.productEndpoint}?deliveryBoyId=$deliveryBoyId&transactionDate=$transactionDate',
     );
   }
 

@@ -21,6 +21,7 @@ class AuthState {
   final String? companyCode;
   final String? tempToken;
   final String? finalToken;
+  final String? userId;
   final String? customerId;
   final String? driverId;
     final String? driverName;
@@ -40,6 +41,7 @@ class AuthState {
     this.companyCode,
     this.tempToken,
     this.finalToken,
+    this.userId,
     this.customerId,
     this.driverId,
     this.driverName,
@@ -60,6 +62,7 @@ class AuthState {
     String? companyCode,
     String? tempToken,
     String? finalToken,
+    String? userId,
     String? customerId,
     String? driverId,
     String? driverName,
@@ -79,6 +82,7 @@ class AuthState {
       companyCode: companyCode ?? this.companyCode,
       tempToken: tempToken ?? this.tempToken,
       finalToken: finalToken ?? this.finalToken,
+      userId: userId ?? this.userId,
       customerId: customerId ?? this.customerId,
       driverId: driverId ?? this.driverId,
       driverName: driverName ?? this.driverName,
@@ -114,6 +118,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     if (hasAuth) {
       final token = await getSavedToken();
       final baseUrl = await getSavedBaseUrl();
+      final userId = await getSavedUserId();
       final customerId = await getSavedCustomerId();
       final driverId = await getSavedDriverId();
       final driverName = await getSavedDriverName();
@@ -126,6 +131,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           status: AuthStatus.authenticated,
           finalToken: token,
           baseUrl: baseUrl,
+          userId: userId,
           customerId: customerId,
           driverId: driverId,
           driverName: driverName,
@@ -419,6 +425,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     String? userName;
     String? email;
     String? driverName;
+    String? resolvedCustomerId;
+    String? resolvedDriverId;
     if (userId != null && userId.isNotEmpty) {
       try {
         final profileData = await _authRepo.getProfile(
@@ -432,14 +440,41 @@ class AuthNotifier extends StateNotifier<AuthState> {
         userName = '$firstName $lastName'.trim();
         if (userName.isEmpty) userName = null;
         email = profileData['Email'] as String?;
-      } catch (_) {}
+      } catch (e) {
+        print('[Auth] getProfile failed: $e');
+      }
+
+      try {
+        resolvedCustomerId = await _authRepo.getCustomerId(
+          baseUrl: baseUrl,
+          token: finalToken,
+          userId: userId,
+        );
+      } catch (e) {
+        print('[Auth] getCustomerId failed: $e');
+      }
+
+      try {
+        resolvedDriverId = await _authRepo.getDeliveryBoyId(
+          baseUrl: baseUrl,
+          token: finalToken,
+          userId: userId,
+        );
+      } catch (e) {
+        print('[Auth] getDeliveryBoyId failed: $e');
+      }
     }
+
+    final customerId = resolvedCustomerId ?? userId;
+    final driverId = resolvedDriverId ?? userId;
+    print('[Auth] userId=$userId, customerId=$customerId, driverId=$driverId');
 
     await saveAuthData(
       token: finalToken,
       baseUrl: baseUrl,
-      customerId: userId,
-      driverId: userId,
+      userId: userId,
+      customerId: customerId,
+      driverId: driverId,
       driverName: driverName,
       userName: userName,
       email : email,
@@ -452,8 +487,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       status: AuthStatus.authenticated,
       baseUrl: baseUrl,
       finalToken: finalToken,
-      customerId: userId,
-      driverId: userId,
+      userId: userId,
+      customerId: customerId,
+      driverId: driverId,
       driverName: driverName,
       userName: userName,
       email:email,

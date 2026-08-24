@@ -132,6 +132,72 @@ class AuthRepository {
     return body['Data'] as Map<String, dynamic>;
   }
 
+  Future<String?> getCustomerId({
+    required String baseUrl,
+    required String token,
+    required String userId,
+  }) async {
+    final dio = Dio(BaseOptions(
+      baseUrl: baseUrl,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    ));
+    print('[Auth] getCustomerId calling: $baseUrl/ap1/pos/posMobile/getCustomerId?userId=$userId');
+    final response = await dio.get(
+      '/ap1/pos/posMobile/getCustomerId',
+      queryParameters: {'userId': userId},
+    );
+    print('[Auth] getCustomerId response: ${response.data}');
+    final body = response.data as Map<String, dynamic>;
+    if (body['Status'] != true) {
+      throw Exception(body['Message'] ?? 'Failed to fetch customer ID');
+    }
+    final data = body['Data'];
+    if (data is List && data.isNotEmpty) {
+      return data.first['Id'] as String?;
+    }
+    if (data is Map<String, dynamic>) {
+      return data['Id'] as String?;
+    }
+    return null;
+  }
+
+  Future<String?> getDeliveryBoyId({
+    required String baseUrl,
+    required String token,
+    required String userId,
+  }) async {
+    final dio = Dio(BaseOptions(
+      baseUrl: baseUrl,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    ));
+    print('[Auth] getDeliveryBoyId calling: $baseUrl/ap1/pos/posMobile/getDeliveryBoyId?userId=$userId');
+    final response = await dio.get(
+      '/ap1/pos/posMobile/getDeliveryBoyId',
+      queryParameters: {'userId': userId},
+    );
+    print('[Auth] getDeliveryBoyId response: ${response.data}');
+    final body = response.data as Map<String, dynamic>;
+    if (body['Status'] != true) {
+      throw Exception(body['Message'] ?? 'Failed to fetch delivery boy ID');
+    }
+    final data = body['Data'];
+    if (data is List && data.isNotEmpty) {
+      return data.first['Id'] as String?;
+    }
+    if (data is Map<String, dynamic>) {
+      return data['Id'] as String?;
+    }
+    return null;
+  }
+
   static List<SelectionOption> parseOptions(List<dynamic>? list) {
     if (list == null || list.isEmpty) return [];
     return list

@@ -33,7 +33,7 @@ class ProductRepository {
       return cached.map((map) => Product.fromMap(map)).toList();
     }
     return _fetchAndCacheProducts(
-      customerId: customerId,
+      deliveryBoyId: customerId,
       transactionDate: transactionDate,
     );
   }
@@ -43,7 +43,7 @@ class ProductRepository {
     required String transactionDate,
   }) async {
     return _fetchAndCacheProducts(
-      customerId: customerId,
+      deliveryBoyId: customerId,
       transactionDate: transactionDate,
     );
   }
@@ -130,11 +130,11 @@ class ProductRepository {
   }
 
  Future<List<Product>> _fetchAndCacheProducts({
-    required String customerId,
+    required String deliveryBoyId,
     required String transactionDate,
   }) async {
     final data = await _apiService.fetchProducts(
-      customerId: customerId,
+      deliveryBoyId: deliveryBoyId,
       transactionDate: transactionDate,
     );
 

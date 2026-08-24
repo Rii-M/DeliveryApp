@@ -65,8 +65,9 @@ class CustomerRepository {
 
   /// Downloads customers from the server into local cache, preserving any
   /// locally-created unsynced rows.
-  Future<List<Customer>> refreshCustomers() async {
-    final data = await _apiService.fetchCustomers(await getSavedDriverId() ?? '');
+  Future<List<Customer>> refreshCustomers({String? driverId}) async {
+    final id = driverId ?? (await getSavedDriverId() ?? '');
+    final data = await _apiService.fetchCustomers(id);
     final customers = data.map(_customerFromJson).toList();
 
     if (customers.isNotEmpty) {

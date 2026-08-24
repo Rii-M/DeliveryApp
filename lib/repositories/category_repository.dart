@@ -31,7 +31,7 @@ class CategoryRepository {
       return cached.map((map) => Category.fromMap(map)).toList();
     }
     return _fetchAndCacheCategories(
-      customerId: customerId,
+      deliveryBoyId: customerId,
       transactionDate: transactionDate,
     );
   }
@@ -41,7 +41,7 @@ class CategoryRepository {
     required String transactionDate,
   }) async {
     return _fetchAndCacheCategories(
-      customerId: customerId,
+      deliveryBoyId: customerId,
       transactionDate: transactionDate,
     );
   }
@@ -52,11 +52,11 @@ class CategoryRepository {
   }
 
   Future<List<Category>> _fetchAndCacheCategories({
-    required String customerId,
+    required String deliveryBoyId,
     required String transactionDate,
   }) async {
     final data = await _apiService.fetchCategories(
-      customerId: customerId,
+      deliveryBoyId: deliveryBoyId,
       transactionDate: transactionDate,
     );
     final categories = data.map((json) {

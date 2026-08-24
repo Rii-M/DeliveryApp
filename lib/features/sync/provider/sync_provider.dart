@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/auth/auth_storage.dart';
 import '../../../core/database/providers.dart';
 import '../../../core/network/api_config.dart';
 import '../../../core/network/providers.dart';
 import '../../../core/services/image_prefetch_service.dart';
 import '../../../models/sync_queue.dart';
+import '../../../repositories/auth_repository.dart';
 import '../../../repositories/category_repository.dart';
 import '../../../repositories/category_wise_discount_repository.dart';
 import '../../../repositories/area_repository.dart';
@@ -238,15 +240,44 @@ incomingStatus: {
   Future<Map<String, dynamic>> _syncFromServer() async {
     final results = <String, dynamic>{};
 
-    final customerId = _ref.read(authProvider).customerId ?? '';
+    final authState = _ref.read(authProvider);
+    final token = authState.finalToken ?? '';
+    final baseUrl = authState.baseUrl ?? '';
+    final userId = authState.userId ?? '';
+
+    String driverId = authState.driverId ?? '';
+
+    try {
+      final authRepo = AuthRepository();
+      final freshDriverId = await authRepo.getDeliveryBoyId(
+        baseUrl: baseUrl,
+        token: token,
+        userId: userId,
+      );
+      if (freshDriverId != null && freshDriverId.isNotEmpty) {
+        driverId = freshDriverId;
+      }
+    } catch (e) {
+      print('[Sync] getDeliveryBoyId failed, using stored driverId: $e');
+    }
+
+    await saveAuthData(
+      token: token,
+      baseUrl: baseUrl,
+      userId: userId,
+      driverId: driverId,
+    );
+    _ref.read(authProvider.notifier).state = authState.copyWith(
+      driverId: driverId,
+    );
 
     final now = DateTime.now();
     final transactionDate =
-        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} ';
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
     try {
       final categories = await _categoryRepo.refreshCategories(
-        customerId: customerId,
+        customerId: driverId,
         transactionDate: transactionDate,
       );
       results['categories'] = true;
@@ -264,7 +295,7 @@ incomingStatus: {
 
     try {
       final products = await _productRepo.refreshProducts(
-        customerId: customerId,
+        customerId: driverId,
         transactionDate: transactionDate,
       );
       results['assignedProducts'] = true;
@@ -291,7 +322,7 @@ incomingStatus: {
     }
 
     try {
-      await _customerRepo.refreshCustomers();
+      await _customerRepo.refreshCustomers(driverId: driverId);
       results['customers'] = true;
     } catch (e) {
       results['customers'] = false;

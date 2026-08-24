@@ -4,6 +4,7 @@ const _tokenKey = 'auth_final_token';
 const _baseUrlKey = 'auth_base_url';
 const _customerIdKey = 'auth_customer_id';
 const _driverIdKey = 'auth_driver_id';
+const _userIdKey = 'auth_user_id';
 const _userNameKey = 'auth_user_name';
 const _outletIdKey = 'auth_outlet_id';
 const _emailKey = 'auth_email';
@@ -27,6 +28,10 @@ Future<String?> getSavedDriverId() async {
   return _storage.read(key: _driverIdKey);
 }
 
+Future<String?> getSavedUserId() async {
+  return _storage.read(key: _userIdKey);
+}
+
 Future<String?> getSavedDriverName() async {
   return _storage.read(key: _driverNameKey);
 }
@@ -46,6 +51,7 @@ Future<String?> getEmail() async {
 Future<void> saveAuthData({
   required String token,
   required String baseUrl,
+  String? userId,
   String? customerId,
   String? driverId,
   String? driverName,
@@ -55,6 +61,9 @@ Future<void> saveAuthData({
 }) async {
   await _storage.write(key: _tokenKey, value: token);
   await _storage.write(key: _baseUrlKey, value: baseUrl);
+  if (userId != null) {
+    await _storage.write(key: _userIdKey, value: userId);
+  }
   if (customerId != null) {
     await _storage.write(key: _customerIdKey, value: customerId);
   }
@@ -80,6 +89,7 @@ Future<void> clearAuthData() async {
   await _storage.delete(key: _baseUrlKey);
   await _storage.delete(key: _customerIdKey);
   await _storage.delete(key: _driverIdKey);
+  await _storage.delete(key: _userIdKey);
   await _storage.delete(key: _driverNameKey);
   await _storage.delete(key: _userNameKey);
   await _storage.delete(key: _outletIdKey);
