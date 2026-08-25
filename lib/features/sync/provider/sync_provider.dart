@@ -267,9 +267,6 @@ incomingStatus: {
       userId: userId,
       driverId: driverId,
     );
-    _ref.read(authProvider.notifier).state = authState.copyWith(
-      driverId: driverId,
-    );
 
     final now = DateTime.now();
     final transactionDate =
