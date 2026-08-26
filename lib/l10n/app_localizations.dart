@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// The application title
   ///
   /// In en, this message translates to:
-  /// **'POS Delivery'**
+  /// **'POS Sales'**
   String get appTitle;
 
   /// No description provided for @dashboard.
@@ -131,13 +131,13 @@ abstract class AppLocalizations {
   /// No description provided for @todaysDeliveries.
   ///
   /// In en, this message translates to:
-  /// **'Today\'s Deliveries'**
+  /// **'Today\'s Sales'**
   String get todaysDeliveries;
 
   /// No description provided for @todaysDelivery.
   ///
   /// In en, this message translates to:
-  /// **'Today\'s Delivery'**
+  /// **'Today\'s Sales'**
   String get todaysDelivery;
 
   /// No description provided for @todaysSalesReturns.
@@ -185,7 +185,7 @@ abstract class AppLocalizations {
   /// No description provided for @newDelivery.
   ///
   /// In en, this message translates to:
-  /// **'New Delivery'**
+  /// **'New Sales'**
   String get newDelivery;
 
   /// No description provided for @newSales.
@@ -197,7 +197,7 @@ abstract class AppLocalizations {
   /// No description provided for @createNewDelivery.
   ///
   /// In en, this message translates to:
-  /// **'Create a new delivery'**
+  /// **'Create a new sale'**
   String get createNewDelivery;
 
   /// No description provided for @todaySection.
@@ -293,7 +293,7 @@ abstract class AppLocalizations {
   /// No description provided for @editDelivery.
   ///
   /// In en, this message translates to:
-  /// **'Edit Delivery'**
+  /// **'Edit Sale'**
   String get editDelivery;
 
   /// No description provided for @invoice.
@@ -401,13 +401,13 @@ abstract class AppLocalizations {
   /// No description provided for @backToDelivery.
   ///
   /// In en, this message translates to:
-  /// **'Back to Delivery'**
+  /// **'Back to Sales'**
   String get backToDelivery;
 
   /// No description provided for @noDeliveriesForToday.
   ///
   /// In en, this message translates to:
-  /// **'No deliveries for today'**
+  /// **'No sales for today'**
   String get noDeliveriesForToday;
 
   /// No description provided for @noSalesReturnsForToday.
@@ -647,7 +647,7 @@ abstract class AppLocalizations {
   /// No description provided for @goToDelivery.
   ///
   /// In en, this message translates to:
-  /// **'Go to Delivery'**
+  /// **'Go to Sales'**
   String get goToDelivery;
 
   /// No description provided for @salesReturnSaved.
@@ -827,13 +827,13 @@ abstract class AppLocalizations {
   /// No description provided for @delivery.
   ///
   /// In en, this message translates to:
-  /// **'Delivery'**
+  /// **'Sales'**
   String get delivery;
 
   /// No description provided for @deliveryNumber.
   ///
   /// In en, this message translates to:
-  /// **'Delivery #{id}'**
+  /// **'Sale #{id}'**
   String deliveryNumber(Object id);
 
   /// No description provided for @phone.
@@ -899,7 +899,7 @@ abstract class AppLocalizations {
   /// No description provided for @deliveryShort.
   ///
   /// In en, this message translates to:
-  /// **'Delivery'**
+  /// **'Sale'**
   String get deliveryShort;
 
   /// No description provided for @receipt.
@@ -1163,7 +1163,7 @@ abstract class AppLocalizations {
   /// No description provided for @posDelivery.
   ///
   /// In en, this message translates to:
-  /// **'POS Delivery'**
+  /// **'POS Sales'**
   String get posDelivery;
 
   /// No description provided for @noCategoriesAvailable.
@@ -1211,7 +1211,7 @@ abstract class AppLocalizations {
   /// No description provided for @deliveryLabel.
   ///
   /// In en, this message translates to:
-  /// **'Delivery'**
+  /// **'Sale'**
   String get deliveryLabel;
 
   /// No description provided for @invoiceNumber.
@@ -1381,6 +1381,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'PAN'**
   String get pan;
+
+  /// No description provided for @enterPan.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter PAN number'**
+  String get enterPan;
 
   /// No description provided for @needInternetToSaveCustomer.
   ///

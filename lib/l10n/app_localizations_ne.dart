@@ -9,7 +9,7 @@ class AppLocalizationsNe extends AppLocalizations {
   AppLocalizationsNe([String locale = 'ne']) : super(locale);
 
   @override
-  String get appTitle => 'POS डेलिभरी';
+  String get appTitle => 'POS बिक्री';
 
   @override
   String get dashboard => 'ड्यासबोर्ड';
@@ -24,10 +24,10 @@ class AppLocalizationsNe extends AppLocalizations {
   String get welcomeBack => 'फेरि स्वागत छ,';
 
   @override
-  String get todaysDeliveries => 'आजको डेलिभरीहरू';
+  String get todaysDeliveries => 'आजको बिक्रीहरू';
 
   @override
-  String get todaysDelivery => 'आजको डेलिभरी';
+  String get todaysDelivery => 'आजको बिक्री';
 
   @override
   String get todaysSalesReturns => 'आजको सेल्स रिटर्नहरू';
@@ -51,13 +51,13 @@ class AppLocalizationsNe extends AppLocalizations {
   String get quickActions => 'द्रुत कार्यहरू';
 
   @override
-  String get newDelivery => 'नयाँ डेलिभरी';
+  String get newDelivery => 'नयाँ बिक्री';
 
   @override
   String get newSales => 'नयाँ बिक्री';
 
   @override
-  String get createNewDelivery => 'नयाँ डेलिभरी सिर्जना गर्नुहोस्';
+  String get createNewDelivery => 'नयाँ बिक्री सिर्जना गर्नुहोस्';
 
   @override
   String get todaySection => 'आज';
@@ -109,7 +109,7 @@ class AppLocalizationsNe extends AppLocalizations {
   String get addProducts => 'उत्पादनहरू थप्नुहोस्';
 
   @override
-  String get editDelivery => 'डेलिभरी सम्पादन गर्नुहोस्';
+  String get editDelivery => 'बिक्री सम्पादन गर्नुहोस्';
 
   @override
   String get invoice => 'इन्भ्वाइस';
@@ -163,10 +163,10 @@ class AppLocalizationsNe extends AppLocalizations {
   String get available => 'उपलब्ध:';
 
   @override
-  String get backToDelivery => 'डेलिभरीमा फर्कनुहोस्';
+  String get backToDelivery => 'बिक्रीमा फर्कनुहोस्';
 
   @override
-  String get noDeliveriesForToday => 'आजको लागि कुनै डेलिभरी छैन';
+  String get noDeliveriesForToday => 'आजको लागि कुनै बिक्री छैन';
 
   @override
   String get noSalesReturnsForToday => 'आजको लागि कुनै सेल्स रिटर्न छैन';
@@ -288,7 +288,7 @@ class AppLocalizationsNe extends AppLocalizations {
   String get goToSalesReturn => 'सेल्स रिटर्नमा जानुहोस्';
 
   @override
-  String get goToDelivery => 'डेलिभरीमा जानुहोस्';
+  String get goToDelivery => 'बिक्रीमा जानुहोस्';
 
   @override
   String get salesReturnSaved => 'सेल्स रिटर्न सुरक्षित भयो';
@@ -378,11 +378,11 @@ class AppLocalizationsNe extends AppLocalizations {
   String get off => 'अफ';
 
   @override
-  String get delivery => 'डेलिभरी';
+  String get delivery => 'बिक्री';
 
   @override
   String deliveryNumber(Object id) {
-    return 'डेलिभरी #$id';
+    return 'बिक्री #$id';
   }
 
   @override
@@ -428,7 +428,7 @@ class AppLocalizationsNe extends AppLocalizations {
   }
 
   @override
-  String get deliveryShort => 'डेलिभरी';
+  String get deliveryShort => 'बिक्री';
 
   @override
   String get receipt => 'रसिद';
@@ -569,7 +569,7 @@ class AppLocalizationsNe extends AppLocalizations {
   String get stock => 'स्टक';
 
   @override
-  String get posDelivery => 'POS डेलिभरी';
+  String get posDelivery => 'POS बिक्री';
 
   @override
   String get noCategoriesAvailable => 'कुनै कोटी उपलब्ध छैन';
@@ -596,7 +596,7 @@ class AppLocalizationsNe extends AppLocalizations {
       'अफलाइन इन्भ्वाइसहरू सर्भरमा पठाउन बाँकी छन्।';
 
   @override
-  String get deliveryLabel => 'डेलिभरी';
+  String get deliveryLabel => 'बिक्री';
 
   @override
   String invoiceNumber(Object id) {
@@ -684,6 +684,9 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get pan => 'प्यान';
+
+  @override
+  String get enterPan => 'कृपया प्यान नम्बर लेख्नुहोस्';
 
   @override
   String get needInternetToSaveCustomer =>

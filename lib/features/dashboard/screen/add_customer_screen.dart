@@ -426,6 +426,12 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                               prefixIcon: const Icon(Icons.badge_outlined),
                               border: const OutlineInputBorder(),
                             ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return l10n.enterPan;
+                              }
+                              return null;
+                            },
                           ),
                           const SizedBox(height: 12),
                           TextFormField(

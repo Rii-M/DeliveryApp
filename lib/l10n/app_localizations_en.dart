@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'POS Delivery';
+  String get appTitle => 'POS Sales';
 
   @override
   String get dashboard => 'Dashboard';
@@ -24,10 +24,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeBack => 'Welcome back,';
 
   @override
-  String get todaysDeliveries => 'Today\'s Deliveries';
+  String get todaysDeliveries => 'Today\'s Sales';
 
   @override
-  String get todaysDelivery => 'Today\'s Delivery';
+  String get todaysDelivery => 'Today\'s Sales';
 
   @override
   String get todaysSalesReturns => 'Today\'s Sales Returns';
@@ -51,13 +51,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quickActions => 'Quick Actions';
 
   @override
-  String get newDelivery => 'New Delivery';
+  String get newDelivery => 'New Sales';
 
   @override
   String get newSales => 'New Sales';
 
   @override
-  String get createNewDelivery => 'Create a new delivery';
+  String get createNewDelivery => 'Create a new sale';
 
   @override
   String get todaySection => 'Today';
@@ -109,7 +109,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addProducts => 'Add Products';
 
   @override
-  String get editDelivery => 'Edit Delivery';
+  String get editDelivery => 'Edit Sale';
 
   @override
   String get invoice => 'Invoice';
@@ -163,10 +163,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get available => 'Available:';
 
   @override
-  String get backToDelivery => 'Back to Delivery';
+  String get backToDelivery => 'Back to Sales';
 
   @override
-  String get noDeliveriesForToday => 'No deliveries for today';
+  String get noDeliveriesForToday => 'No sales for today';
 
   @override
   String get noSalesReturnsForToday => 'No sales returns for today';
@@ -288,7 +288,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goToSalesReturn => 'Go to Sales Return';
 
   @override
-  String get goToDelivery => 'Go to Delivery';
+  String get goToDelivery => 'Go to Sales';
 
   @override
   String get salesReturnSaved => 'Sales Return Saved';
@@ -378,11 +378,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get off => 'Off';
 
   @override
-  String get delivery => 'Delivery';
+  String get delivery => 'Sales';
 
   @override
   String deliveryNumber(Object id) {
-    return 'Delivery #$id';
+    return 'Sale #$id';
   }
 
   @override
@@ -428,7 +428,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get deliveryShort => 'Delivery';
+  String get deliveryShort => 'Sale';
 
   @override
   String get receipt => 'Receipt';
@@ -569,7 +569,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stock => 'Stock';
 
   @override
-  String get posDelivery => 'POS Delivery';
+  String get posDelivery => 'POS Sales';
 
   @override
   String get noCategoriesAvailable => 'No categories available';
@@ -596,7 +596,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Offline invoices waiting to be pushed to server.';
 
   @override
-  String get deliveryLabel => 'Delivery';
+  String get deliveryLabel => 'Sale';
 
   @override
   String invoiceNumber(Object id) {
@@ -683,6 +683,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get pan => 'PAN';
+
+  @override
+  String get enterPan => 'Please enter PAN number';
 
   @override
   String get needInternetToSaveCustomer =>

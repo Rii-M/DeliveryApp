@@ -271,7 +271,7 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
                           ? Icons.local_shipping
                           : Icons.receipt_long,
                     ),
-                    title: Text('${entry.entityType} #${entry.entityId}'),
+                    title: Text('${entry.entityType == 'Delivery' ? 'Sale' : entry.entityType} #${entry.entityId}'),
                     subtitle: Text(
                       l10n.statusLabel(entry.status),
                       style: TextStyle(

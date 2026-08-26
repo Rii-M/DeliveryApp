@@ -3,7 +3,7 @@ import 'dart:ui' show Color;
 class AppConstants {
   AppConstants._();
 
-  static const String appName = 'POS Delivery';
+  static const String appName = 'POS Sales';
   static const String driverName = 'Ram Sharma';
 
   static const String defaultCurrency = 'Rs.';

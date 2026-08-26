@@ -82,7 +82,7 @@ class _PosDeliveryAppState extends ConsumerState<PosDeliveryApp> {
     final router = ref.watch(appRouterProvider);
     const double textScale = 1.15;
     return MaterialApp.router(
-      title: 'POS Delivery',
+      title: 'POS Sales',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

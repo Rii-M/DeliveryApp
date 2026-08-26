@@ -186,7 +186,7 @@ class AuthRepository {
     print('[Auth] getDeliveryBoyId response: ${response.data}');
     final body = response.data as Map<String, dynamic>;
     if (body['Status'] != true) {
-      throw Exception(body['Message'] ?? 'Failed to fetch delivery boy ID');
+      throw Exception(body['Message'] ?? 'Failed to fetch sales boy ID');
     }
     final data = body['Data'];
     if (data is List && data.isNotEmpty) {
