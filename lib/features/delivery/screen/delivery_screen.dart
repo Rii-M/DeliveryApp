@@ -87,8 +87,10 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
       // Filter products assigned to this customer by customer_id
       if (product.customerId == customerId) {
         final key = DeliveryFormState.variantKey(product);
-        print('[DELIVERY_SCREEN] Adding to cart: ${product.name}, customer_id matches: ${product.customerId == customerId}');
-        await notifier.addToCart(key, 1);
+        // Use product's actual stock/quantity from API instead of hardcoded 1
+        final double quantityToAdd = product.stock > 0 ? product.stock : 1;
+        print('[DELIVERY_SCREEN] Adding to cart: ${product.name}, stock: ${product.stock}, qty: $quantityToAdd');
+        await notifier.addToCart(key, quantityToAdd);
       }
     }
     print('[DELIVERY_SCREEN] Auto-add complete');
