@@ -472,7 +472,7 @@ void initState() {
                           child: Text(
                             inCart > 0 ? l10n.addMore : l10n.add,
                             softWrap: false,
-                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12),
                           ),
                         ),
                       ),
