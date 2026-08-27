@@ -775,10 +775,18 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
       ),
       itemCount: products.length,
       itemBuilder: (context, index) {
-        final product = products[index];
-        final productKey = DeliveryFormState.variantKey(product);
-        final inCart = state.cart[productKey] ?? 0;
-        final remaining = state.getRemainingQuantity(productKey);
+        final card = products[index];
+        // Resolve all underlying variants that merge into this display card
+        // (same product+rate+unit, possibly across chalans/customers).
+        final dKey = DeliveryFormState.displayKey(card);
+        final variantKeys = state.products
+            .where((p) => DeliveryFormState.displayKey(p) == dKey)
+            .map((p) => DeliveryFormState.variantKey(p))
+            .toList();
+        final inCart = variantKeys.fold<double>(
+            0.0, (sum, k) => sum + (state.cart[k] ?? 0));
+        final remaining = variantKeys.fold<double>(
+            0.0, (sum, k) => sum + state.getRemainingQuantity(k));
 
         return Card(
           clipBehavior: Clip.antiAlias,
@@ -789,10 +797,10 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                 child: Container(
                   color: theme.colorScheme.surfaceContainerHighest,
                   child:
-                      product.firstImageUrl != null &&
-                          product.firstImageUrl!.isNotEmpty
+                      card.firstImageUrl != null &&
+                          card.firstImageUrl!.isNotEmpty
                       ? CachedNetworkImage(
-                          imageUrl: product.firstImageUrl!,
+                          imageUrl: card.firstImageUrl!,
                           fit: BoxFit.cover,
                           placeholder: (_, _) =>
                               _buildShimmerPlaceholder(theme),
@@ -808,7 +816,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      product.localizedName(langCode),
+                      card.localizedName(langCode),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
@@ -817,7 +825,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Rs. ${product.unitPrice.toStringAsFixed(0)}/${product.unit ?? 'unit'}',
+                      'Rs. ${card.unitPrice.toStringAsFixed(0)}/${card.unit ?? 'unit'}',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -838,9 +846,12 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                       child: FilledButton.tonalIcon(
                         onPressed: remaining > 0
                             ? () {
-                                ref
-                                    .read(deliveryFormProvider.notifier)
-                                    .addToCart(productKey, 1);
+                                final notifier = ref.read(
+                                  deliveryFormProvider.notifier,
+                                );
+                                for (final k in variantKeys) {
+                                  notifier.addToCart(k, 1);
+                                }
                               }
                             : null,
                         icon: Icon(

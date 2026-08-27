@@ -78,18 +78,42 @@ class DeliveryFormState {
         .toList();
   }
 
+  /// Products grouped by (serverId, unitPrice, unit) for display.
+  /// Combines quantities from same product+rate+unit variants for the selected customer.
+  /// Clones rows so the underlying [products] state is never mutated.
+  List<Product> get displayProducts {
+    final merged = <String, Product>{};
+    final summedStock = <String, double>{};
+    for (final p in displayedProducts) {
+      final key = displayKey(p);
+      merged.putIfAbsent(key, () => Product.fromMap(p.toMap()));
+      summedStock[key] = (summedStock[key] ?? 0) + p.stock;
+    }
+    return merged.values.map((p) {
+      p.stock = summedStock[displayKey(p)] ?? p.stock;
+      return p;
+    }).toList();
+  }
+
   List<Product> get filteredProducts {
-    if (productSearchQuery.isEmpty) return displayedProducts.take(6).toList();
+    if (productSearchQuery.isEmpty) return displayProducts.take(6).toList();
     final query = productSearchQuery.toLowerCase();
-    return products.where((p) => p.name.toLowerCase().contains(query)).toList();
+    return displayProducts.where((p) => p.name.toLowerCase().contains(query)).toList();
   }
 
   bool get isValid => cart.values.any((q) => q > 0);
 
-  /// A cart key uniquely identifies a product variant (a product assigned at a
-  /// specific rate/unit). It is stable across syncs, unlike the DB row id.
+/// A cart key uniquely identifies a product variant (a product assigned at a
+/// specific rate/unit/customer/chalan). It is stable across syncs, unlike the DB row id.
   static String variantKey(Product p) =>
-      '${p.serverId}|${p.unitPrice}|${p.unitId}';
+      '${p.serverId}|${p.unitPrice}|${p.unitId}|${p.customerId}|${p.chalanId}';
+
+  /// A display key groups products by product+rate+unit for UI merging,
+  /// while keeping full variant keys for cart operations. Uses the unit name
+  /// (falling back to unitId) so the same product across chalans/customers
+  /// still merges even if the stored unitId differs.
+  static String displayKey(Product p) =>
+      '${p.serverId}|${p.unitPrice}|${p.unit ?? p.unitId ?? ''}';
 
   double getUnitPrice(String productId) {
     if (customPrices.containsKey(productId)) return customPrices[productId]!;
@@ -100,14 +124,18 @@ class DeliveryFormState {
   /// Resolves a variant cart key back to the matching product row.
   Product? getProductByKey(String key) {
     final parts = key.split('|');
-    if (parts.length < 2) return null;
+    if (parts.length < 5) return null;
     final serverId = parts[0];
     final rate = double.tryParse(parts[1]);
-    final unitId = parts.length > 2 ? parts[2] : null;
+    final unitId = parts[2];
+    final customerId = parts[3];
+    final chalanId = parts[4];
     for (final p in products) {
       if (p.serverId != serverId) continue;
       if (rate != null && p.unitPrice != rate) continue;
-      if (unitId != null && unitId.isNotEmpty && p.unitId != unitId) continue;
+      if (unitId != p.unitId) continue;
+      if (customerId != p.customerId) continue;
+      if (chalanId != p.chalanId) continue;
       return p;
     }
     return null;

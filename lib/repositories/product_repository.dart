@@ -192,7 +192,8 @@ class ProductRepository {
     final merged = <String, Product>{};
     for (final json in data) {
       final p = productFromJson(json);
-      final key = '${p.serverId}|${p.unitPrice}|${p.unitId}';
+      // Key includes customerId to keep products separate per customer
+      final key = '${p.serverId}|${p.unitPrice}|${p.unitId}|${p.customerId}';
       final existing = merged[key];
       if (existing == null) {
         merged[key] = p;
