@@ -54,7 +54,13 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
 
   Future<void> _preselectCustomer(String customerId) async {
     await ref.read(deliveryFormProvider.notifier).preselectCustomer(customerId);
-    if (mounted) setState(() => _preselecting = false);
+    if (mounted) {
+      setState(() => _preselecting = false);
+      final customer = ref.read(deliveryFormProvider).selectedCustomer;
+      if (customer != null) {
+        _autoAddCustomerProductsToCart(customer);
+      }
+    }
   }
 
   void _openCustomerPicker() {
