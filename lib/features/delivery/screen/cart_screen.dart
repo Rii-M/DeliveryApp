@@ -191,10 +191,10 @@ class _CartItemCard extends StatelessWidget {
             Expanded(child: _buildInfoColumn(context)),
             IconButton(
               onPressed: onRemove,
-              icon: const Icon(
+              icon: Icon(
                 Icons.delete_outline,
                 size: 18,
-                color: Color(0xFFC0362C),
+                color: theme.colorScheme.error,
               ),
               visualDensity: VisualDensity.compact,
               padding: const EdgeInsets.all(8),
@@ -235,7 +235,7 @@ class _CartItemCard extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFEAF2FC), Color(0xFFF6F9FD)],
+          colors: [Color(0xFFFFF0E0), Color(0xFFFFE8CC)],
         ),
       ),
       child: Center(
@@ -264,10 +264,10 @@ class _CartItemCard extends StatelessWidget {
           item.productName,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF17202A),
+            color: theme.colorScheme.onSurface,
           ),
         ),
         const SizedBox(height: 8),
@@ -292,10 +292,10 @@ class _CartItemCard extends StatelessWidget {
             padding: const EdgeInsets.only(top: 4),
             child: Text(
               '${l10n.discount}: Rs. ${item.discountAmount.toStringAsFixed(2)}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFFC0362C),
+                color: theme.colorScheme.error,
               ),
             ),
           ),
@@ -304,10 +304,11 @@ class _CartItemCard extends StatelessWidget {
   }
 
   Widget _buildQuantityStepper(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F6FA),
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -325,11 +326,11 @@ class _CartItemCard extends StatelessWidget {
             child: Text(
               item.quantity.toStringAsFixed(0),
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'monospace',
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF17202A),
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),
@@ -385,15 +386,15 @@ class _CartItemCard extends StatelessWidget {
           ),
           value: item.selectedUnitId ?? units.first.unitId,
           isDense: true,
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_drop_down,
             size: 20,
-            color: Color(0xFF6B7684),
+            color: theme.colorScheme.onSurfaceVariant,
           ),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF6B7684),
+            color: theme.colorScheme.onSurfaceVariant,
           ),
           items: units.map((u) {
             return DropdownMenuItem(

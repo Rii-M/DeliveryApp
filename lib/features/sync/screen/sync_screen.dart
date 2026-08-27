@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 import '../provider/sync_provider.dart';
 import '../widgets/sync_status_tile.dart';
@@ -302,16 +303,16 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
     return Icon(
       success ? Icons.check_circle : Icons.error,
       size: 16,
-      color: success ? Colors.green : Colors.red,
+      color: success ? AppColors.success : AppColors.error,
     );
   }
 
   Widget _statusIcon(String status) {
     switch (status) {
       case 'Synced':
-        return const Icon(Icons.check_circle, color: Colors.green);
+        return const Icon(Icons.check_circle, color: AppColors.success);
       case 'Failed':
-        return const Icon(Icons.error, color: Colors.red);
+        return const Icon(Icons.error, color: AppColors.error);
       case 'Syncing':
         return const SizedBox(
           width: 20,
@@ -319,7 +320,7 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
           child: CircularProgressIndicator(strokeWidth: 2),
         );
       default:
-        return const Icon(Icons.hourglass_empty, color: Colors.orange);
+        return const Icon(Icons.hourglass_empty, color: AppColors.primary);
     }
   }
 }

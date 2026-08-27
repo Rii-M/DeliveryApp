@@ -201,19 +201,9 @@ class AppShell extends ConsumerWidget {
   final Widget child;
   const AppShell({super.key, required this.child});
 
-  static const _accentColors = <int, Color>{
-    0: Color(0xFFB4482E), // Sales Return — coral
-    1: Color(0xFFE2992F), // Delivery — amber
-    2: Color(0xFF6B4C7A), // Sync — violet
-    3: Color(0xFF4B7A5B), // Dashboard — teal
-  };
-
-  static const _indicatorColors = <int, Color>{
-    0: Color(0xFFF7E6E1),
-    1: Color(0xFFFBEEDA),
-    2: Color(0xFFEFE7F2),
-    3: Color(0xFFE7F0E9),
-  };
+  static const _accentColor = Color(0xFFF58823);
+  static const _inactiveColor = Color(0xFF795548);
+  static const _indicatorColor = Color(0xFFFFE8CC);
 
   int _currentIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.toString();
@@ -250,7 +240,7 @@ class AppShell extends ConsumerWidget {
             width: 8,
             height: 8,
             decoration: BoxDecoration(
-              color: const Color(0xFFB4482E),
+              color: const Color(0xFFD84315),
               shape: BoxShape.circle,
               border: Border.all(
                 color: const Color(0xFFFFFFFF),
@@ -308,28 +298,28 @@ class AppShell extends ConsumerWidget {
             selectedIndex: currentIndex,
             onDestinationSelected: (index) => _onTap(context, index),
             backgroundColor: colorScheme.surface,
-            indicatorColor: _indicatorColors[currentIndex],
+            indicatorColor: _indicatorColor,
             labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
             destinations: [
               NavigationDestination(
                 icon: Icon(
                   Icons.assignment_return_outlined,
-                  color: currentIndex == 0 ? _accentColors[0] : null,
+                  color: currentIndex == 0 ? _accentColor : _inactiveColor,
                 ),
                 selectedIcon: Icon(
                   Icons.assignment_return,
-                  color: _accentColors[0],
+                  color: _accentColor,
                 ),
                 label: l10n.salesReturn,
               ),
               NavigationDestination(
                 icon: Icon(
                   Icons.local_shipping_outlined,
-                  color: currentIndex == 1 ? _accentColors[1] : null,
+                  color: currentIndex == 1 ? _accentColor : _inactiveColor,
                 ),
                 selectedIcon: Icon(
                   Icons.local_shipping,
-                  color: _accentColors[1],
+                  color: _accentColor,
                 ),
                 label: l10n.delivery,
               ),
@@ -338,14 +328,14 @@ class AppShell extends ConsumerWidget {
                   pendingCount: pendingCount,
                   child: Icon(
                     Icons.sync_outlined,
-                    color: currentIndex == 2 ? _accentColors[2] : null,
+                    color: currentIndex == 2 ? _accentColor : _inactiveColor,
                   ),
                 ),
                 selectedIcon: _badge(
                   pendingCount: pendingCount,
                   child: Icon(
                     Icons.sync,
-                    color: _accentColors[2],
+                    color: _accentColor,
                   ),
                 ),
                 label: l10n.sync,
@@ -353,11 +343,11 @@ class AppShell extends ConsumerWidget {
               NavigationDestination(
                 icon: Icon(
                   Icons.dashboard_outlined,
-                  color: currentIndex == 3 ? _accentColors[3] : null,
+                  color: currentIndex == 3 ? _accentColor : _inactiveColor,
                 ),
                 selectedIcon: Icon(
                   Icons.dashboard,
-                  color: _accentColors[3],
+                  color: _accentColor,
                 ),
                 label: l10n.dashboard,
               ),

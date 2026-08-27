@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../l10n/app_localizations.dart';
 import '../models/selection_option.dart';
 import '../provider/auth_provider.dart';
@@ -90,106 +91,155 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Image.asset(
-                    'assets/icon/logo.png',
-                    height: 80,
-                    width: 80,
-                    fit: BoxFit.contain,
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    width: 96,
+                    height: 96,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        'assets/icon/logo.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   Text(
                     l10n.posDelivery,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.bold,
+                      color: AppColors.primaryDark,
                     ),
                   ),
-                  const SizedBox(height: 32),
-                  TextFormField(
-                    controller: _companyCodeController,
-                    decoration: InputDecoration(
-                      labelText: l10n.companyCode,
-                      prefixIcon: Icon(Icons.business),
-                      border: OutlineInputBorder(),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Nanglo Bakeries',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                      letterSpacing: 1.2,
+                      fontWeight: FontWeight.w500,
                     ),
-                    validator: (v) =>
-                        v == null || v.isEmpty ? l10n.enterCompanyCode : null,
                   ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _usernameController,
-                    decoration: InputDecoration(
-                      labelText: l10n.username,
-                      prefixIcon: Icon(Icons.person),
-                      border: OutlineInputBorder(),
+                  const SizedBox(height: 28),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.06),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
-                    validator: (v) =>
-                        v == null || v.isEmpty ? l10n.enterUsername : null,
-                  ),
-                  const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    decoration: InputDecoration(
-                      labelText: l10n.password,
-                      prefixIcon: Icon(Icons.lock),
-                      suffixIcon: IconButton(
-                      icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                     ),
-                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                   ),
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (v) =>
-                        v == null || v.isEmpty ? l10n.enterPassword : null,
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    height: 52,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1565C0),
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: state.isLoading
-                          ? null
-                          : () {
-                              if (_formKey.currentState!.validate()) {
-                                ref.read(authProvider.notifier).login(
-                                      companyCode:
-                                          _companyCodeController.text.trim(),
-                                      username:
-                                          _usernameController.text.trim(),
-                                      password:
-                                          _passwordController.text,
-                                    );
-                              }
-                            },
-                      child: state.isLoading
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextFormField(
+                          controller: _companyCodeController,
+                          decoration: InputDecoration(
+                            labelText: l10n.companyCode,
+                            prefixIcon: const Icon(Icons.business),
+                          ),
+                          validator: (v) =>
+                              v == null || v.isEmpty
+                                  ? l10n.enterCompanyCode
+                                  : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _usernameController,
+                          decoration: InputDecoration(
+                            labelText: l10n.username,
+                            prefixIcon: const Icon(Icons.person),
+                          ),
+                          validator: (v) =>
+                              v == null || v.isEmpty ? l10n.enterUsername : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          decoration: InputDecoration(
+                            labelText: l10n.password,
+                            prefixIcon: const Icon(Icons.lock),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
                               ),
-                            )
-                          : Text(
-                              l10n.login,
-                              style: TextStyle(fontSize: 16),
+                              onPressed: () => setState(
+                                () => _obscurePassword = !_obscurePassword,
+                              ),
                             ),
+                          ),
+                          validator: (v) =>
+                              v == null || v.isEmpty ? l10n.enterPassword : null,
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          height: 52,
+                          child: ElevatedButton(
+                            onPressed: state.isLoading
+                                ? null
+                                : () {
+                                    if (_formKey.currentState!.validate()) {
+                                      ref.read(authProvider.notifier).login(
+                                            companyCode: _companyCodeController
+                                                .text
+                                                .trim(),
+                                            username:
+                                                _usernameController.text.trim(),
+                                            password: _passwordController.text,
+                                          );
+                                    }
+                                  },
+                            child: state.isLoading
+                                ? const SizedBox(
+                                    height: 24,
+                                    width: 24,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : Text(
+                                    l10n.login,
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                          ),
+                        ),
+                        if (state.error != null) ...[
+                          const SizedBox(height: 16),
+                          Text(
+                            state.error!,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: theme.colorScheme.error,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  if (state.error != null)
-                    Text(
-                      state.error!,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: theme.colorScheme.error,
-                        fontSize: 14,
-                      ),
-                    ),
                 ],
               ),
             ),

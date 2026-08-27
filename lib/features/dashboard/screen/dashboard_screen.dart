@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/provider/auth_provider.dart';
@@ -86,7 +87,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           IconButton(
             icon: Icon(
               locationState.isOnline ? Icons.cloud_done : Icons.cloud_off,
-              color: locationState.isOnline ? Colors.green : Colors.red,
+              color: locationState.isOnline ? AppColors.success : AppColors.error,
             ),
             tooltip: locationState.isOnline ? l10n.online : l10n.offline,
             onPressed: () =>
@@ -144,12 +145,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: locationState.isTracking
-                    ? (isDark ? Colors.green.shade900.withValues(alpha: 0.3) : Colors.green.shade50)
+                    ? (isDark
+                        ? AppColors.success.withValues(alpha: 0.22)
+                        : AppColors.success.withValues(alpha: 0.08))
                     : theme.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: locationState.isTracking
-                      ? (isDark ? Colors.green.shade700 : Colors.green.shade200)
+                      ? (isDark
+                          ? AppColors.success.withValues(alpha: 0.6)
+                          : AppColors.success.withValues(alpha: 0.28))
                       : theme.colorScheme.outlineVariant,
                 ),
               ),
@@ -160,7 +165,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         ? Icons.track_changes
                         : Icons.location_off,
                     color: locationState.isTracking
-                        ? Colors.green
+                        ? AppColors.success
                         : theme.colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: 12),
@@ -172,7 +177,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       style: TextStyle(
                         fontWeight: FontWeight.w500,
                         color: locationState.isTracking
-                            ? (isDark ? Colors.green.shade200 : Colors.green.shade700)
+                            ? AppColors.success
                             : theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
@@ -185,7 +190,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.orange.shade900.withValues(alpha: 0.3) : Colors.orange.shade100,
+                        color: isDark
+                            ? AppColors.primary.withValues(alpha: 0.22)
+                            : AppColors.softOrange,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -193,9 +200,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           locationState.pendingSyncCount.toString(),
                         ),
                         style: TextStyle(
-                          color: isDark ? Colors.orange.shade200 : Colors.orange.shade700,
+                          color: AppColors.primaryDark,
                           fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -216,9 +223,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     icon: const Icon(Icons.play_arrow, size: 18),
                     label: Text(l10n.startDuty),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: AppColors.success,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
@@ -233,9 +243,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     icon: const Icon(Icons.stop, size: 18),
                     label: Text(l10n.stopDuty),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: AppColors.error,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
@@ -268,14 +281,18 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.red.shade900.withValues(alpha: 0.3) : Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: isDark ? Colors.red.shade700 : Colors.red.shade200),
+                  color: isDark
+                      ? AppColors.error.withValues(alpha: 0.18)
+                      : AppColors.error.withValues(alpha: 0.07),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.error.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Text(
                   locationState.error!,
                   style: TextStyle(
-                    color: isDark ? Colors.red.shade200 : Colors.red.shade800,
+                    color: AppColors.error,
                     fontSize: 13,
                   ),
                 ),
