@@ -149,6 +149,7 @@ class ProductRepository {
       p.taxable = (json['Taxable'] as num?)?.toInt() ?? 0;
       p.chalanId = json['ChalanId'] as String?;
       p.chalanNumber = json['ChalanNumber'] as String?;
+      p.customerId = json['CustomerId'] as String?;
 
       final baseUnit = json['BaseUnit'] as Map<String, dynamic>?;
       if (baseUnit != null) {

@@ -19,6 +19,7 @@ class Product {
   int taxable = 0;
   String? chalanId;
   String? chalanNumber;
+  String? customerId;
   List<ProductUnit> units = [];
 
   Product();
@@ -42,6 +43,7 @@ class Product {
       'taxable': taxable,
       'chalan_id': chalanId,
       'chalan_number': chalanNumber,
+      'customer_id': customerId,
       'units_json': units.isNotEmpty ? jsonEncode(units.map((u) => u.toJson()).toList()) : null,
     };
   }
@@ -62,6 +64,7 @@ class Product {
     product.taxable = (map['taxable'] as num?)?.toInt() ?? 0;
     product.chalanId = map['chalan_id'] as String?;
     product.chalanNumber = map['chalan_number'] as String?;
+    product.customerId = map['customer_id'] as String?;
     final imagesRaw = map['product_images'] as String?;
     if (imagesRaw != null && imagesRaw.isNotEmpty) {
       product.productImages = (jsonDecode(imagesRaw) as List).cast<String>();

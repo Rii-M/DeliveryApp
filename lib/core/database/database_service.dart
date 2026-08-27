@@ -60,6 +60,14 @@ class DatabaseService {
 
     if (oldVersion < 7) {
       try {
+        await db.execute(
+          'ALTER TABLE product ADD COLUMN customer_id TEXT',
+        );
+      } catch (_) {}
+    }
+
+    if (oldVersion < 8) {
+      try {
         await db.execute('ALTER TABLE delivery ADD COLUMN payment_mode TEXT');
       } catch (_) {}
       await db.execute('''
@@ -86,6 +94,7 @@ class DatabaseService {
           'ALTER TABLE product ADD COLUMN taxable INTEGER DEFAULT 0',
         );
       } catch (_) {}
+      await db.execute('ALTER TABLE product ADD COLUMN customer_id TEXT');
       await db.execute('DROP TABLE IF EXISTS sales_return_item');
       await db.execute('DROP TABLE IF EXISTS sales_return');
       await db.execute('''
@@ -514,7 +523,8 @@ class DatabaseService {
         taxable INTEGER DEFAULT 0,
         chalan_id TEXT,
         chalan_number TEXT,
-        units_json TEXT
+        units_json TEXT,
+        customer_id TEXT
       )
     ''');
 
