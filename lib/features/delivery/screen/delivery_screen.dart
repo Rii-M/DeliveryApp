@@ -785,7 +785,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
         crossAxisCount: 2,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: 0.6,
+        childAspectRatio: 0.5,
       ),
       itemCount: products.length,
       itemBuilder: (context, index) {
@@ -809,6 +809,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
             children: [
               Expanded(
                 child: Container(
+                  height: 140,
                   color: theme.colorScheme.surfaceContainerHighest,
                   child:
                       card.firstImageUrl != null &&

@@ -402,7 +402,7 @@ void initState() {
         crossAxisCount: 2,
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        childAspectRatio: 0.6,
+        childAspectRatio: 0.5,
       ),
       itemCount: products.length,
       itemBuilder: (context, index) {
@@ -416,6 +416,7 @@ void initState() {
             children: [
               Expanded(
                 child: Container(
+                  height: 140,
                   color: theme.colorScheme.surfaceContainerHighest,
                   child:
                       product.firstImageUrl != null &&
