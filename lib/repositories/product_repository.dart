@@ -107,6 +107,8 @@ class ProductRepository {
           }, conflictAlgorithm: ConflictAlgorithm.replace);
         }
       });
+      // DEBUG: Print after inserting to all_product table
+      print('✅ All products saved to all_product table: ${products.length}');
     }
 
     return products;
@@ -187,10 +189,6 @@ class ProductRepository {
       return p;
     }
 
-    // The API returns one row per chalan/assignment line, so the same product
-    // may appear multiple times. Merge rows that share (ProductId, Rate, UnitId)
-    // by summing their quantity; keep separate rows when the rate or unit
-    // differs so each variant can be delivered independently.
     final merged = <String, Product>{};
     for (final json in data) {
       final p = productFromJson(json);
@@ -203,6 +201,12 @@ class ProductRepository {
       }
     }
     final products = merged.values.toList();
+
+    // DEBUG: Print merged products after processing API response
+    print('📦 Products fetched from API: ${products.length}');
+    for (var p in products) {
+      print('   - ${p.name}: customerId=${p.customerId}, serverId=${p.serverId}, qty=${p.stock}');
+    }
 
     if (products.isNotEmpty) {
       await _db.transaction((txn) async {
