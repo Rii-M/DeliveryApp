@@ -875,12 +875,13 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                               : Icons.add_shopping_cart,
                           size: 16,
                         ),
-                        label: Text(inCart > 0 ? l10n.addMore : l10n.add),
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          backgroundColor: inCart > 0
-                              ? theme.colorScheme.primaryContainer
-                              : null,
+                        label: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 24),
+                          child: Text(
+                            inCart > 0 ? l10n.addMore : l10n.add,
+                            softWrap: false,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ),
                     ),
