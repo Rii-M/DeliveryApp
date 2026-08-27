@@ -71,6 +71,27 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
   void _handleCustomerSelected(Customer customer) {
     setState(() => _customerPickerOpen = false);
     ref.read(deliveryFormProvider.notifier).selectCustomer(customer);
+    // Auto-add customer's assigned products to cart
+    _autoAddCustomerProductsToCart(customer);
+  }
+
+  Future<void> _autoAddCustomerProductsToCart(Customer customer) async {
+    // Wait a frame for the provider to update products state
+    await Future.delayed(const Duration(milliseconds: 100));
+    final notifier = ref.read(deliveryFormProvider.notifier);
+    final products = notifier.state.products;
+    final customerId = customer.serverId;
+    
+    // Add each product that belongs to this customer to the cart
+    for (final product in products) {
+      // Filter products assigned to this customer by customer_id
+      if (product.customerId == customerId) {
+        final key = DeliveryFormState.variantKey(product);
+        print('[DELIVERY_SCREEN] Adding to cart: ${product.name}, customer_id matches: ${product.customerId == customerId}');
+        await notifier.addToCart(key, 1);
+      }
+    }
+    print('[DELIVERY_SCREEN] Auto-add complete');
   }
 
   Future<void> _handleAddCustomer() async {

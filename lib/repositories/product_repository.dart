@@ -28,7 +28,16 @@ class ProductRepository {
     required String customerId,
     required String transactionDate,
   }) async {
-    final cached = await _db.query('product');
+    final condition = customerId.isNotEmpty
+        ? 'WHERE customer_id = ?'
+        : '';
+    final placeholders = customerId.isNotEmpty ? [customerId] : [];
+    final List<Map<String, dynamic>> cached;
+    if (condition.isNotEmpty) {
+      cached = await _db.query('product', where: condition, whereArgs: placeholders);
+    } else {
+      cached = await _db.query('product');
+    }
     if (cached.isNotEmpty) {
       return cached.map((map) => Product.fromMap(map)).toList();
     }

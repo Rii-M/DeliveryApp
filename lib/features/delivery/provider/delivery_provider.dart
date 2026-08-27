@@ -309,8 +309,11 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
     }
   }
 
-  Future<void> refreshProducts() async {
-    final products = await _loadAllProducts();
+  Future<void> refreshProducts({String? customerId, String? transactionDate}) async {
+    final products = await _productRepo.getProducts(
+      customerId: customerId ?? state.selectedCustomer?.serverId ?? '',
+      transactionDate: transactionDate ?? DateTime.now().toString().split(' ').first,
+    );
     if (products.isNotEmpty) {
       _prefetchProductImages(products);
     }
@@ -598,6 +601,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
   }
 
   Future<void> selectCustomer(Customer? customer) async {
+    final transactionDate = DateTime.now().toString().split(' ').first;
     state = DeliveryFormState(
       delivery: state.delivery,
       selectedCategory: state.selectedCategory,
@@ -621,6 +625,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       discountValue: state.discountValue,
       discountAmount: state.discountAmount,
     );
+    await refreshProducts(customerId: customer?.serverId, transactionDate: transactionDate);
     await _applyCategoryDiscounts();
   }
 
