@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/custom_app_bar.dart';
 import '../../../core/widgets/customer_picker_sheet.dart';
 import '../../../features/sync/provider/sync_provider.dart';
 import '../../../l10n/app_localizations.dart';
@@ -179,40 +180,33 @@ void initState() {
     return Stack(
       children: [
         Scaffold(
-          appBar: AppBar(
-            leading: Padding(
-  padding: const EdgeInsets.all(8),
-  child: SizedBox(
-    width: 48,
-    height: 48,
-    child: ClipOval(
-      child: Image.asset(
-        'assets/icon/logo.png',
-        width: 48,
-        height: 48,
-        fit: BoxFit.cover,
-      ),
-    ),
-  ),
-),
-            title: _buildAppBarTitle(state, theme),
-            actions: [
-              if (state.items.isNotEmpty)
-                IconButton(
-                  icon: Badge(
-                    label: Text(totalQty.toStringAsFixed(0)),
-                    isLabelVisible: true,
-                    child: Icon(Icons.shopping_cart_outlined, size: 28),
-                  ),
-                  onPressed: () => _openCart(context),
+          body: SafeArea(
+            child: Column(
+              children: [
+                FloatingAppBar(
+                  title: _buildAppBarTitle(state, theme),
+                  actions: [
+                    if (state.items.isNotEmpty)
+                      IconButton(
+                        icon: Badge(
+                          label: Text(totalQty.toStringAsFixed(0)),
+                          isLabelVisible: true,
+                          child: Icon(Icons.shopping_cart_outlined, size: 28),
+                        ),
+                        onPressed: () => _openCart(context),
+                      ),
+                  ],
                 ),
-            ],
+                Expanded(
+                  child: state.isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : state.saved
+                      ? _buildSuccessState(theme, l10n)
+                      : _buildProductBrowser(state, theme, l10n, langCode),
+                ),
+              ],
+            ),
           ),
-          body: state.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : state.saved
-              ? _buildSuccessState(theme, l10n)
-              : _buildProductBrowser(state, theme, l10n, langCode),
         ),
         if (_customerPickerOpen)
           Positioned.fill(child: _buildCustomerPickerOverlay()),

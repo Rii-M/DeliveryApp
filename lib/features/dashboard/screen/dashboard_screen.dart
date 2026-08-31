@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/custom_app_bar.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../auth/provider/auth_provider.dart';
@@ -49,87 +50,77 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
     final displayName = authState.userName ?? state.driverName;
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 64,
-        centerTitle: false,
-        titleSpacing: 0,
-        leading: Padding(
-  padding: const EdgeInsets.all(8),
-  child: SizedBox(
-    width: 48,
-    height: 48,
-    child: ClipOval(
-      child: Image.asset(
-        'assets/icon/logo.png',
-        width: 48,
-        height: 48,
-        fit: BoxFit.cover,
-      ),
-    ),
-  ),
-),
-        title:Padding(
-          padding: const EdgeInsets.only(left: 16),
-          child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
+      body: SafeArea(
+        child: Column(
           children: [
-            Text(
-              l10n.welcomeBack,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+            FloatingAppBar(
+              title: Padding(
+                padding: const EdgeInsets.only(left: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.welcomeBack,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    Text(
+                      displayName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                IconButton(
+                  icon: Icon(
+                    locationState.isOnline ? Icons.cloud_done : Icons.cloud_off,
+                    color: locationState.isOnline ? AppColors.success : AppColors.error,
+                  ),
+                  tooltip: locationState.isOnline ? l10n.online : l10n.offline,
+                  onPressed: () =>
+                      ref.read(locationStateProvider.notifier).manualSync(),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.account_circle),
+                  onPressed: () => context.push('/profile'),
+                ),
+              ],
+            ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () => ref.read(dashboardProvider.notifier).loadDashboard(),
+                child: ListView(
+                  padding: const EdgeInsets.all(16),
+                  children: [
+                    _buildLocationTrackingSection(locationState, theme, l10n),
+                    const SizedBox(height: 20),
+                    Text(
+                      l10n.quickActions,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _buildQuickActions(context, l10n),
+                    const SizedBox(height: 20),
+                    SectionHeader(title: l10n.todaySection),
+                    const SizedBox(height: 12),
+                    _buildTodayStats(state, l10n),
+                    const SizedBox(height: 20),
+                    SectionHeader(title: l10n.catalogSection),
+                    const SizedBox(height: 12),
+                    _buildCatalogStats(state, l10n),
+                  ],
+                ),
               ),
             ),
-            Text(
-              displayName,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-         ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              locationState.isOnline ? Icons.cloud_done : Icons.cloud_off,
-              color: locationState.isOnline ? AppColors.success : AppColors.error,
-            ),
-            tooltip: locationState.isOnline ? l10n.online : l10n.offline,
-            onPressed: () =>
-                ref.read(locationStateProvider.notifier).manualSync(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.account_circle),
-            onPressed: () => context.push('/profile'),
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () => ref.read(dashboardProvider.notifier).loadDashboard(),
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            _buildLocationTrackingSection(locationState, theme, l10n),
-            const SizedBox(height: 20),
-            Text(
-              l10n.quickActions,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildQuickActions(context, l10n),
-            const SizedBox(height: 20),
-            SectionHeader(title: l10n.todaySection),
-            const SizedBox(height: 12),
-            _buildTodayStats(state, l10n),
-            const SizedBox(height: 20),
-            SectionHeader(title: l10n.catalogSection),
-            const SizedBox(height: 12),
-            _buildCatalogStats(state, l10n),
           ],
         ),
       ),

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/extensions.dart';
 import '../../../core/utils/tax_calculator.dart';
+import '../../../core/widgets/custom_app_bar.dart';
 import '../../../core/widgets/customer_picker_sheet.dart';
 import '../../../features/sync/provider/sync_provider.dart';
 import '../../../l10n/app_localizations.dart';
@@ -254,40 +255,33 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     return Stack(
       children: [
         Scaffold(
-          appBar: AppBar(
-            leading: Padding(
-  padding: const EdgeInsets.all(8),
-  child: SizedBox(
-    width: 48,
-    height: 48,
-    child: ClipOval(
-      child: Image.asset(
-        'assets/icon/logo.png',
-        width: 48,
-        height: 48,
-        fit: BoxFit.cover,
-      ),
-    ),
-  ),
-),
-            title: _buildAppBarTitle(state, theme),
-            actions: [
-              if (!state.isReadOnly && state.cart.isNotEmpty)
-                IconButton(
-                  icon: Badge(
-                    label: Text(
-                      '${cartItems.fold<int>(0, (sum, item) => sum + item.quantity.toInt())}',
-                    ),
-                    isLabelVisible: true,
-                    child: Icon(Icons.shopping_cart_outlined,size: 28,),
-                  ),
-                  onPressed: () => _openCart(context),
+          body: SafeArea(
+            child: Column(
+              children: [
+                FloatingAppBar(
+                  title: _buildAppBarTitle(state, theme),
+                  actions: [
+                    if (!state.isReadOnly && state.cart.isNotEmpty)
+                      IconButton(
+                        icon: Badge(
+                          label: Text(
+                            '${cartItems.fold<int>(0, (sum, item) => sum + item.quantity.toInt())}',
+                          ),
+                          isLabelVisible: true,
+                          child: Icon(Icons.shopping_cart_outlined, size: 28),
+                        ),
+                        onPressed: () => _openCart(context),
+                      ),
+                  ],
                 ),
-            ],
+                Expanded(
+                  child: state.isLoadingCustomers
+                      ? const Center(child: CircularProgressIndicator())
+                      : _buildBody(state, cartItems, theme, l10n, langCode),
+                ),
+              ],
+            ),
           ),
-          body: state.isLoadingCustomers
-              ? const Center(child: CircularProgressIndicator())
-              : _buildBody(state, cartItems, theme, l10n, langCode),
         ),
         if (_customerPickerOpen)
           Positioned.fill(child: _buildCustomerPickerOverlay()),
