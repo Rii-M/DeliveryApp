@@ -4,6 +4,7 @@ import '../../dto/sales_invoice_request.dart';
 import '../../dto/sales_invoice_response.dart';
 import '../../dto/sales_return_request.dart';
 import '../../dto/customer_operation_result.dart';
+import '../../dto/transaction_status_response.dart';
 import 'api_config.dart';
 import 'api_service.dart';
 
@@ -198,30 +199,26 @@ Future<List<Map<String, dynamic>>> fetchAssignedCategories() async {
   }
 
   @override
-  Future<bool> createSalesReturn(Map<String, dynamic> data) async {
-    final response = await _dio.post(
-      ApiConfig.salesInvoiceAddEndpoint,
-      data: data,
-    );
-    final body = response.data as Map<String, dynamic>;
-    final status = body['Status'] == true || body['status'] == true;
-    if (!status) {
-      print('[API] createSalesReturn FAILED. Response: ${response.data}');
-    }
-    return status;
-  }
-
-  @override
-  Future<bool> createSalesReturnV2(SalesReturnRequest request) async {
+  Future<SalesInvoiceResponse> createSalesReturnV2(SalesReturnRequest request) async {
     final response = await _dio.post(
       ApiConfig.salesInvoiceAddEndpoint,
       data: request.toJson(),
     );
     final body = response.data as Map<String, dynamic>;
-    final status = body['Status'] == true || body['status'] == true;
-    if (!status) {
+    final result = SalesInvoiceResponse.fromJson(body);
+    if (!result.success) {
       print('[API] SalesReturnV2 FAILED. Response: ${response.data}');
     }
-    return status;
+    return result;
+  }
+
+  @override
+  Future<TransactionStatusResponse> getTransactionStatus(int transactionId) async {
+    final response = await _dio.get(
+      ApiConfig.salesInvoiceStatusEndpoint,
+      queryParameters: {'transactionId': transactionId},
+    );
+    final body = response.data as Map<String, dynamic>;
+    return TransactionStatusResponse.fromJson(body);
   }
 }

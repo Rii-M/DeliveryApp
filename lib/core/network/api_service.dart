@@ -2,6 +2,7 @@ import '../../dto/sales_invoice_request.dart';
 import '../../dto/sales_invoice_response.dart';
 import '../../dto/sales_return_request.dart';
 import '../../dto/customer_operation_result.dart';
+import '../../dto/transaction_status_response.dart';
 
 abstract class ApiService {
   void updateConfig({String? baseUrl, String? token});
@@ -26,6 +27,6 @@ abstract class ApiService {
       Map<String, dynamic> data, String recordId);
   
   Future<SalesInvoiceResponse> createSalesInvoice(SalesInvoiceRequest request);
-  Future<bool> createSalesReturn(Map<String, dynamic> data);
-  Future<bool> createSalesReturnV2(SalesReturnRequest request);
+  Future<SalesInvoiceResponse> createSalesReturnV2(SalesReturnRequest request);
+  Future<TransactionStatusResponse> getTransactionStatus(int transactionId);
 }

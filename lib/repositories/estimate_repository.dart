@@ -99,25 +99,14 @@ class EstimateRepository {
 
     try {
       final response = await _apiService.createSalesInvoice(request);
-      if (response.success) {
-        await _db.update(
-          'estimate',
-          {'server_id': response.invoiceId, 'is_synced': 1},
-          where: 'id = ?',
-          whereArgs: [estimateId],
-        );
-        await _db.update(
-          'sync_queue',
-          {'status': 'Synced'},
-          where: 'entity_type = ? AND entity_id = ?',
-          whereArgs: ['Delivery', deliveryId],
-        );
-        await _db.update(
-          'delivery',
-          {'is_synced': 1},
-          where: 'id = ?',
-          whereArgs: [deliveryId],
-        );
+      final invoiceId = response.invoiceId;
+      if (response.success && invoiceId != null) {
+        final transactionId = int.tryParse(invoiceId);
+        if (transactionId != null) {
+          await _pollTransactionStatus(transactionId, estimateId, deliveryId);
+        } else {
+          await _markSynced(estimateId, deliveryId, invoiceId);
+        }
       } else {
         await _db.update(
           'sync_queue',
@@ -134,6 +123,62 @@ class EstimateRepository {
         whereArgs: ['Delivery', deliveryId],
       );
     }
+  }
+
+  Future<void> _pollTransactionStatus(
+    int transactionId,
+    int estimateId,
+    int deliveryId,
+  ) async {
+    const maxAttempts = 30;
+    const pollInterval = Duration(seconds: 2);
+
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        final status = await _apiService.getTransactionStatus(transactionId);
+        if (status.state == 1) {
+          await _markSynced(estimateId, deliveryId, transactionId.toString());
+          return;
+        } else if (status.state == 2) {
+          print('[POLL] Transaction $transactionId failed: ${status.message}');
+          await _db.update(
+            'sync_queue',
+            {'status': 'Failed'},
+            where: 'entity_type = ? AND entity_id = ?',
+            whereArgs: ['Delivery', deliveryId],
+          );
+          return;
+        }
+        // state == 0: still processing, wait and retry
+      } catch (e) {
+        print('[POLL] Error checking transaction $transactionId: $e');
+      }
+      await Future.delayed(pollInterval);
+    }
+
+    print('[POLL] Transaction $transactionId timed out after $maxAttempts attempts');
+    await _markSynced(estimateId, deliveryId, transactionId.toString());
+  }
+
+  Future<void> _markSynced(int estimateId, int deliveryId, String serverId) async {
+    await _db.update(
+      'estimate',
+      {'server_id': serverId, 'is_synced': 1},
+      where: 'id = ?',
+      whereArgs: [estimateId],
+    );
+    await _db.update(
+      'sync_queue',
+      {'status': 'Synced'},
+      where: 'entity_type = ? AND entity_id = ?',
+      whereArgs: ['Delivery', deliveryId],
+    );
+    await _db.update(
+      'delivery',
+      {'is_synced': 1},
+      where: 'id = ?',
+      whereArgs: [deliveryId],
+    );
   }
 
   Future<List<Estimate>> getEstimatesByDate(DateTime date) async {

@@ -820,9 +820,17 @@ void clearItems() {
 
       if (isOnline) {
         // Online: send to API first, then save locally
-        final success = await _apiService.createSalesReturnV2(request);
+        final response = await _apiService.createSalesReturnV2(request);
 
-        if (success) {
+        if (response.success) {
+          // Poll transaction status if we have a transactionId
+          if (response.invoiceId != null) {
+            final transactionId = int.tryParse(response.invoiceId!);
+            if (transactionId != null) {
+              await _pollTransactionStatus(transactionId);
+            }
+          }
+
           await _salesReturnRepo.saveSalesReturn(
             customerId: state.selectedCustomer!.serverId,
             items: state.items,
@@ -840,7 +848,7 @@ void clearItems() {
           _finishSuccessfulSave();
           return true;
         } else {
-          throw Exception('Failed to save sales return to server');
+          throw Exception('Failed to save sales return to server: ${response.message}');
         }
       } else {
         // Offline: save locally to SQLite + sync queue
@@ -868,6 +876,29 @@ void clearItems() {
       );
       return false;
     }
+  }
+
+  Future<void> _pollTransactionStatus(int transactionId) async {
+    const maxAttempts = 30;
+    const pollInterval = Duration(seconds: 2);
+
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        final status = await _apiService.getTransactionStatus(transactionId);
+        if (status.state == 1) {
+          return;
+        } else if (status.state == 2) {
+          print('[POLL] SalesReturn transaction $transactionId failed: ${status.message}');
+          throw Exception('Server processing failed: ${status.message}');
+        }
+      } catch (e) {
+        if (e.toString().contains('Server processing failed')) rethrow;
+        print('[POLL] Error checking sales return transaction $transactionId: $e');
+      }
+      await Future.delayed(pollInterval);
+    }
+
+    print('[POLL] SalesReturn transaction $transactionId timed out after $maxAttempts attempts');
   }
 
   void reset() {

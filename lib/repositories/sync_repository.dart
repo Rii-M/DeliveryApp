@@ -546,8 +546,15 @@ class SyncRepository {
       print('[Sync] Item[0]=${jsonEncode(json['SalesInvoiceItem']?.first)}');
       print('[Sync] Payment=${jsonEncode(json['SalesInvoicePayment'])}');
       final response = await _apiService.createSalesReturnV2(request);
-      print('[Sync] SalesReturnV2 response: $response');
-      if (response) {
+      print('[Sync] SalesReturnV2 response: ${response.success}');
+      if (response.success) {
+        // Poll transaction status if we have a transactionId
+        if (response.invoiceId != null) {
+          final transactionId = int.tryParse(response.invoiceId!);
+          if (transactionId != null) {
+            await _pollTransactionStatus(transactionId);
+          }
+        }
         await _db.update(
           'sales_return',
           {'is_synced': 1},
@@ -578,6 +585,27 @@ class SyncRepository {
         whereArgs: [entry.id],
       );
     }
+  }
+
+  Future<void> _pollTransactionStatus(int transactionId) async {
+    const maxAttempts = 30;
+    const pollInterval = Duration(seconds: 2);
+
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        final status = await _apiService.getTransactionStatus(transactionId);
+        if (status.state == 1) {
+          return;
+        } else if (status.state == 2) {
+          print('[POLL] Transaction $transactionId failed: ${status.message}');
+          return;
+        }
+      } catch (e) {
+        print('[POLL] Error checking transaction $transactionId: $e');
+      }
+      await Future.delayed(pollInterval);
+    }
+    print('[POLL] Transaction $transactionId timed out after $maxAttempts attempts');
   }
 
   /// Pushes a single queued customer to the server immediately if online.

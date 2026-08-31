@@ -7,6 +7,7 @@ class ApiConfig {
   static String get customerEndpoint => '/ap1/pos/posMobile/getCustomers';
   static String get allProductsEndpoint => '/ap1/pos/PosMobile/getAllProducts';
   static String get salesInvoiceAddEndpoint => '/ap1/pos/salesInvoice/add';
+  static String get salesInvoiceStatusEndpoint => '/ap1/pos/salesInvoice/GetStatus';
   static String get paymodeEndpoint => '/ap1/pos/posmobile/getPaymentMode';
   static String get customerDiscountGroupEndpoint =>
       '/ap1/pos/customerdiscountgroup/index';
