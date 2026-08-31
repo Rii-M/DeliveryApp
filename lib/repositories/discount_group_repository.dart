@@ -61,22 +61,22 @@ class DiscountGroupRepository {
         .where((g) => g.isActive)
         .toList();
     if (groups.isNotEmpty) {
-      await _db.transaction((txn) async {
-        await txn.delete('customer_discount_group');
-        for (final g in groups) {
-          await txn.insert(
-            'customer_discount_group',
-            {
-              'server_id': g.id,
-              'record_id': g.recordId,
-              'name': g.name,
-              'discount_percent': g.discountPercent,
-              'is_active': g.isActive ? 1 : 0,
-            },
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
-        }
-      });
+      await _db.delete('customer_discount_group');
+      final batch = _db.batch();
+      for (final g in groups) {
+        batch.insert(
+          'customer_discount_group',
+          {
+            'server_id': g.id,
+            'record_id': g.recordId,
+            'name': g.name,
+            'discount_percent': g.discountPercent,
+            'is_active': g.isActive ? 1 : 0,
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      await batch.commit(noResult: true);
     }
     return groups;
   }

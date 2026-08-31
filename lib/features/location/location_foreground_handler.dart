@@ -8,7 +8,6 @@ import 'services/location_database_service.dart';
 import 'services/location_sync_service.dart';
 import 'services/location_api_service.dart';
 import 'package:dio/dio.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
 @pragma('vm:entry-point')
 void startLocationTrackingCallback() {
@@ -46,8 +45,6 @@ class LocationTrackingTaskHandler extends TaskHandler {
       ));
       final apiService = LocationApiService(dio);
       _syncService = LocationSyncService(apiService);
-
-      _syncService!.startPeriodicSync();
 
       _startPositionStream();
 
@@ -99,18 +96,6 @@ class LocationTrackingTaskHandler extends TaskHandler {
 
     if (kDebugMode) {
       print('Foreground: saved location (${pos.latitude}, ${pos.longitude})');
-    }
-
-    try {
-      final connectivity = Connectivity();
-      final result = await connectivity.checkConnectivity();
-      final online = !result.contains(ConnectivityResult.none);
-      if (online) {
-        await _syncService?.sync();
-        if (kDebugMode) print('Foreground: synced locations');
-      }
-    } catch (e) {
-      if (kDebugMode) print('Foreground sync error: $e');
     }
   }
 

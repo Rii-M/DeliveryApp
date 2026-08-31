@@ -45,6 +45,7 @@ class LocationSyncService {
 
       final ids = unsynced.map((r) => r.id!).toList();
       await _db.markAsSynced(ids);
+      await _db.clearSyncedLocations();
 
       if (kDebugMode) print('Synced ${ids.length} locations successfully');
     } catch (e) {

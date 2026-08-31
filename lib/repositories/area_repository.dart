@@ -53,21 +53,21 @@ class AreaRepository {
     final data = await _apiService.fetchAreas();
     final areas = data.map(Area.fromJson).where((a) => a.isActive).toList();
     if (areas.isNotEmpty) {
-      await _db.transaction((txn) async {
-        await txn.delete('area');
-        for (final a in areas) {
-          await txn.insert(
-            'area',
-            {
-              'server_id': a.id,
-              'record_id': a.recordId,
-              'name': a.name,
-              'is_active': a.isActive ? 1 : 0,
-            },
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
-        }
-      });
+      await _db.delete('area');
+      final batch = _db.batch();
+      for (final a in areas) {
+        batch.insert(
+          'area',
+          {
+            'server_id': a.id,
+            'record_id': a.recordId,
+            'name': a.name,
+            'is_active': a.isActive ? 1 : 0,
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      await batch.commit(noResult: true);
     }
     return areas;
   }

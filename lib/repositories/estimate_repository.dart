@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -101,11 +103,10 @@ class EstimateRepository {
       final response = await _apiService.createSalesInvoice(request);
       final invoiceId = response.invoiceId;
       if (response.success && invoiceId != null) {
+        await _markSynced(estimateId, deliveryId, invoiceId);
         final transactionId = int.tryParse(invoiceId);
         if (transactionId != null) {
-          await _pollTransactionStatus(transactionId, estimateId, deliveryId);
-        } else {
-          await _markSynced(estimateId, deliveryId, invoiceId);
+          unawaited(_pollTransactionStatus(transactionId, estimateId, deliveryId));
         }
       } else {
         await _db.update(

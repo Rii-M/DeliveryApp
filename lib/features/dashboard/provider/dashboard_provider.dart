@@ -91,7 +91,6 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
     );
 
     _prefetchImages(cachedCategories);
-    _refreshInBackground();
   }
 
   Future<void> _refreshInBackground() async {

@@ -1,12 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/auth/auth_storage.dart';
 import '../../../core/database/providers.dart';
 import '../../../core/network/api_config.dart';
 import '../../../core/network/providers.dart';
 import '../../../core/services/image_prefetch_service.dart';
 import '../../../models/sync_queue.dart';
-import '../../../repositories/auth_repository.dart';
 import '../../../repositories/category_repository.dart';
 import '../../../repositories/category_wise_discount_repository.dart';
 import '../../../repositories/area_repository.dart';
@@ -241,131 +239,91 @@ incomingStatus: {
     final results = <String, dynamic>{};
 
     final authState = _ref.read(authProvider);
-    final token = authState.finalToken ?? '';
-    final baseUrl = authState.baseUrl ?? '';
-    final userId = authState.userId ?? '';
-
-    String driverId = authState.driverId ?? '';
-
-    try {
-      final authRepo = AuthRepository();
-      final freshDriverId = await authRepo.getDeliveryBoyId(
-        baseUrl: baseUrl,
-        token: token,
-        userId: userId,
-      );
-      if (freshDriverId != null && freshDriverId.isNotEmpty) {
-        driverId = freshDriverId;
-      }
-    } catch (e) {
-      print('[Sync] getDeliveryBoyId failed, using stored driverId: $e');
-    }
-
-    await saveAuthData(
-      token: token,
-      baseUrl: baseUrl,
-      userId: userId,
-      driverId: driverId,
-    );
+    final driverId = authState.driverId ?? '';
 
     final now = DateTime.now();
     final transactionDate =
         '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
-    try {
-      final categories = await _categoryRepo.refreshCategories(
-        customerId: driverId,
-        transactionDate: transactionDate,
-      );
-      results['categories'] = true;
-      final catUrls = categories
-          .where((c) => c.firstImageUrl != null && c.firstImageUrl!.isNotEmpty)
-          .map((c) => c.firstImageUrl!)
-          .toList();
-      if (catUrls.isNotEmpty) {
-        ImagePrefetchService().prefetchImages(catUrls);
+    // Run independent refreshes in parallel batches
+    await Future.wait([
+      // Batch 1: categories, assigned products, customers (need driverId)
+      _runWithResult('categories', () async {
+        final categories = await _categoryRepo.refreshCategories(
+          customerId: driverId,
+          transactionDate: transactionDate,
+        );
+        final catUrls = categories
+            .where((c) => c.firstImageUrl != null && c.firstImageUrl!.isNotEmpty)
+            .map((c) => c.firstImageUrl!)
+            .toList();
+        if (catUrls.isNotEmpty) {
+          ImagePrefetchService().prefetchImages(catUrls);
+        }
+      }),
+      _runWithResult('assignedProducts', () async {
+        final products = await _productRepo.refreshProducts(
+          customerId: driverId,
+          transactionDate: transactionDate,
+        );
+        final prodUrls = products
+            .where((p) => p.firstImageUrl != null && p.firstImageUrl!.isNotEmpty)
+            .map((p) => p.firstImageUrl!)
+            .toList();
+        if (prodUrls.isNotEmpty) {
+          ImagePrefetchService().prefetchImages(prodUrls);
+        }
+      }),
+      _runWithResult('customers', () async {
+        await _customerRepo.refreshCustomers(driverId: driverId);
+      }),
+    ]).then((entries) {
+      for (final entry in entries) {
+        results[entry.key] = entry.value;
       }
-    } catch (e) {
-      results['categories'] = false;
-      results['categories_error'] = e.toString();
-    }
+    });
 
-    try {
-      final products = await _productRepo.refreshProducts(
-        customerId: driverId,
-        transactionDate: transactionDate,
-      );
-      results['assignedProducts'] = true;
-      final prodUrls = products
-          .where((p) => p.firstImageUrl != null && p.firstImageUrl!.isNotEmpty)
-          .map((p) => p.firstImageUrl!)
-          .toList();
-      if (prodUrls.isNotEmpty) {
-        ImagePrefetchService().prefetchImages(prodUrls);
+    // Batch 2: all independent refreshes
+    await Future.wait([
+      _runWithResult('allProducts', () async {
+        await _productRepo.refreshAllProducts();
+      }),
+      _runWithResult('paymentModes', () async {
+        await _paymentModeRepo.refreshPaymentModes();
+      }),
+      _runWithResult('discountGroups', () async {
+        await _discountGroupRepo.refreshFromServer();
+      }),
+      _runWithResult('areas', () async {
+        await _areaRepo.refreshFromServer();
+      }),
+      _runWithResult('customerGroups', () async {
+        await _customerGroupRepo.refreshFromServer();
+      }),
+      _runWithResult('categoryWiseDiscounts', () async {
+        await _categoryWiseDiscountRepo.refreshFromServer();
+      }),
+    ]).then((entries) {
+      for (final entry in entries) {
+        results[entry.key] = entry.value;
       }
-    } catch (e) {
-      print('[Sync] Assigned Products error: $e');
-      results['assignedProducts'] = false;
-      results['assignedProducts_error'] = e.toString();
-    }
-
-    try {
-      await _productRepo.refreshAllProducts();
-      results['allProducts'] = true;
-    } catch (e) {
-      print('[Sync] All Products error: $e');
-      results['allProducts'] = false;
-      results['allProducts_error'] = e.toString();
-    }
-
-    try {
-      await _customerRepo.refreshCustomers(driverId: driverId);
-      results['customers'] = true;
-    } catch (e) {
-      results['customers'] = false;
-      results['customers_error'] = e.toString();
-    }
-
-    try {
-      await _paymentModeRepo.refreshPaymentModes();
-      results['paymentModes'] = true;
-    } catch (e) {
-      results['paymentModes'] = false;
-      results['paymentModes_error'] = e.toString();
-    }
-
-    try {
-      await _discountGroupRepo.refreshFromServer();
-      results['discountGroups'] = true;
-    } catch (e) {
-      results['discountGroups'] = false;
-      results['discountGroups_error'] = e.toString();
-    }
-
-    try {
-      await _areaRepo.refreshFromServer();
-      results['areas'] = true;
-    } catch (e) {
-      results['areas'] = false;
-      results['areas_error'] = e.toString();
-    }
-
-    try {
-      await _customerGroupRepo.refreshFromServer();
-      results['customerGroups'] = true;
-    } catch (e) {
-      results['customerGroups'] = false;
-      results['customerGroups_error'] = e.toString();
-    }
-
-    try {
-      await _categoryWiseDiscountRepo.refreshFromServer();
-      results['categoryWiseDiscounts'] = true;
-    } catch (e) {
-      results['categoryWiseDiscounts'] = false;
-      results['categoryWiseDiscounts_error'] = e.toString();
-    }
+    });
 
     return results;
+  }
+
+  /// Wraps an async operation and returns a MapEntry with the key and
+  /// true/false for success/failure, plus an '_error' key on failure.
+  Future<MapEntry<String, dynamic>> _runWithResult(
+    String key,
+    Future<void> Function() fn,
+  ) async {
+    try {
+      await fn();
+      return MapEntry(key, true);
+    } catch (e) {
+      print('[Sync] $key error: $e');
+      return MapEntry('${key}_error', e.toString());
+    }
   }
 }

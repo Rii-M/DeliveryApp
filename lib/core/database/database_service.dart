@@ -24,7 +24,7 @@ class DatabaseService {
 
       _database = await openDatabase(
         path,
-        version: 29,
+        version: 30,
         onCreate: _createTables,
         onUpgrade: _onUpgrade,
       );
@@ -456,6 +456,19 @@ class DatabaseService {
         );
       } catch (_) {}
     }
+    if (oldVersion < 30) {
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_product_server_id ON product(server_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_product_category_id ON product(category_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_product_customer_id ON product(customer_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_customer_server_id ON customer(server_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_customer_is_synced ON customer(is_synced)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_sync_queue_status ON sync_queue(status)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_sync_queue_entity ON sync_queue(entity_type, entity_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_estimate_delivery_id ON estimate(delivery_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_estimate_item_estimate_id ON estimate_item(estimate_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_delivery_customer_id ON delivery(customer_id)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_delivery_is_synced ON delivery(is_synced)');
+    }
   }
 
   Future<void> _createTables(Database db, int version) async {
@@ -720,6 +733,18 @@ class DatabaseService {
         is_active INTEGER DEFAULT 1
       )
     ''');
+
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_product_server_id ON product(server_id)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_product_category_id ON product(category_id)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_product_customer_id ON product(customer_id)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_customer_server_id ON customer(server_id)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_customer_is_synced ON customer(is_synced)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_sync_queue_status ON sync_queue(status)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_sync_queue_entity ON sync_queue(entity_type, entity_id)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_estimate_delivery_id ON estimate(delivery_id)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_estimate_item_estimate_id ON estimate_item(estimate_id)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_delivery_customer_id ON delivery(customer_id)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_delivery_is_synced ON delivery(is_synced)');
   }
 
   Future<void> close() async {

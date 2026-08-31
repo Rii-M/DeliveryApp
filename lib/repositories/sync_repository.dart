@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -548,13 +549,6 @@ class SyncRepository {
       final response = await _apiService.createSalesReturnV2(request);
       print('[Sync] SalesReturnV2 response: ${response.success}');
       if (response.success) {
-        // Poll transaction status if we have a transactionId
-        if (response.invoiceId != null) {
-          final transactionId = int.tryParse(response.invoiceId!);
-          if (transactionId != null) {
-            await _pollTransactionStatus(transactionId);
-          }
-        }
         await _db.update(
           'sales_return',
           {'is_synced': 1},
@@ -567,6 +561,12 @@ class SyncRepository {
           where: 'id = ?',
           whereArgs: [entry.id],
         );
+        if (response.invoiceId != null) {
+          final transactionId = int.tryParse(response.invoiceId!);
+          if (transactionId != null) {
+            unawaited(_pollTransactionStatus(transactionId));
+          }
+        }
       } else {
         print('[Sync] SalesReturnV2 FAILED - server returned Status: false');
         await _db.update(

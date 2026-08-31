@@ -35,16 +35,16 @@ class CategoryWiseDiscountRepository {
     final data = await _apiService.fetchCategoryWiseDiscounts();
     final rules = data.map(CategoryWiseDiscount.fromJson).toList();
     if (rules.isNotEmpty) {
-      await _db.transaction((txn) async {
-        await txn.delete('category_wise_discount');
-        for (final r in rules) {
-          await txn.insert(
-            'category_wise_discount',
-            r.toMap(),
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
-        }
-      });
+      await _db.delete('category_wise_discount');
+      final batch = _db.batch();
+      for (final r in rules) {
+        batch.insert(
+          'category_wise_discount',
+          r.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      await batch.commit(noResult: true);
     }
     return rules;
   }

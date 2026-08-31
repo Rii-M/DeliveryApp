@@ -10,9 +10,13 @@ class ImagePrefetchService {
     final validUrls = urls.where((url) => url.isNotEmpty).toList();
     if (validUrls.isEmpty) return;
 
-    await Future.wait(
-      validUrls.map((url) => _cacheManager.downloadFile(url)),
-      eagerError: true,
-    );
+    // Download in batches of 10 to avoid flooding the network
+    for (var i = 0; i < validUrls.length; i += 10) {
+      final batch = validUrls.skip(i).take(10);
+      await Future.wait(
+        batch.map((url) => _cacheManager.downloadFile(url)),
+        eagerError: true,
+      );
+    }
   }
 }

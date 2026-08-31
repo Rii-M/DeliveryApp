@@ -37,13 +37,13 @@ class PaymentModeRepository {
   Future<void> refreshPaymentModes() async {
     final modes = await fetchPaymentModesFromApi();
     if (modes.isNotEmpty) {
-      await _db.transaction((txn) async {
-        await txn.delete('payment_mode');
-        for (final mode in modes) {
-          await txn.insert('payment_mode', mode.toMap(),
-              conflictAlgorithm: ConflictAlgorithm.replace);
-        }
-      });
+      await _db.delete('payment_mode');
+      final batch = _db.batch();
+      for (final mode in modes) {
+        batch.insert('payment_mode', mode.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+      await batch.commit(noResult: true);
     }
   }
 
