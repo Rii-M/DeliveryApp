@@ -46,8 +46,6 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
         final state = ref.read(deliveryFormProvider);
         if (state.delivery != null) {
           ref.read(deliveryFormProvider.notifier).resetForm();
-        } else {
-          ref.read(deliveryFormProvider.notifier).clearSelectedCustomer();
         }
       }
     });
