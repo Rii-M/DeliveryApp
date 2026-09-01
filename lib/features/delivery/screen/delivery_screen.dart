@@ -240,7 +240,8 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
         state.selectedCustomer == null &&
         !_customerPickerOpen &&
         !_autoOpenScheduled &&
-        !_preselecting) {
+        !_preselecting &&
+        widget.deliveryId == null) {
       _autoOpenScheduled = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _autoOpenScheduled = false;
