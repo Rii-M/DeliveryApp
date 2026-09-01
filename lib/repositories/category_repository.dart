@@ -78,13 +78,13 @@ class CategoryRepository {
     }).toList();
 
     if (categories.isNotEmpty) {
-      await _db.transaction((txn) async {
-        await txn.delete('category');
-        for (final c in categories) {
-          await txn.insert('category', c.toMap(),
-              conflictAlgorithm: ConflictAlgorithm.replace);
-        }
-      });
+      await _db.delete('category');
+      final batch = _db.batch();
+      for (final c in categories) {
+        batch.insert('category', c.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+      await batch.commit(noResult: true);
     } else {
       await _db.delete('category');
     }

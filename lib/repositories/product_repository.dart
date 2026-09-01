@@ -87,30 +87,31 @@ class ProductRepository {
     }).toList();
 
     if (products.isNotEmpty) {
-      await _db.transaction((txn) async {
-        await txn.delete('all_product');
-        for (final p in products) {
-          await txn.insert('all_product', {
-            'server_id': p.serverId,
-            'code': p.code,
-            'category_id': p.categoryId,
-            'name': p.name,
-            'japanese_name': p.japaneseName,
-            'unit_id': p.unitId,
-            'unit': p.unit,
-            'unit_price':p.unitPrice,
-            'image_url': p.imageUrl,
-            'units_json': p.units.isNotEmpty ? jsonEncode(p.units.map((u) => u.toJson()).toList()) : null,
-            'taxable': p.taxable,
-            'chalan_id': p.chalanId,
-            'chalan_number': p.chalanNumber,
-          }, conflictAlgorithm: ConflictAlgorithm.replace);
-        }
-      });
-      // DEBUG: Print after inserting to all_product table
-      print('✅ All products saved to all_product table: ${products.length}');
+      await _db.delete('all_product');
+      final batch = _db.batch();
+      for (final p in products) {
+        batch.insert('all_product', {
+          'server_id': p.serverId,
+          'code': p.code,
+          'category_id': p.categoryId,
+          'name': p.name,
+          'japanese_name': p.japaneseName,
+          'unit_id': p.unitId,
+          'unit': p.unit,
+          'unit_price':p.unitPrice,
+          'image_url': p.imageUrl,
+          'units_json': p.units.isNotEmpty ? jsonEncode(p.units.map((u) => u.toJson()).toList()) : null,
+          'taxable': p.taxable,
+          'chalan_id': p.chalanId,
+          'chalan_number': p.chalanNumber,
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+      await batch.commit(noResult: true);
+    } else {
+      await _db.delete('all_product');
     }
 
+    print('✅ All products saved to all_product table: ${products.length}');
     return products;
   }
 
@@ -210,16 +211,16 @@ class ProductRepository {
     }
 
     if (products.isNotEmpty) {
-      await _db.transaction((txn) async {
-        await txn.delete('product');
-        for (final p in products) {
-          await txn.insert(
-            'product',
-            p.toMap(),
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
-        }
-      });
+      await _db.delete('product');
+      final batch = _db.batch();
+      for (final p in products) {
+        batch.insert(
+          'product',
+          p.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      await batch.commit(noResult: true);
     } else {
       await _db.delete('product');
     }

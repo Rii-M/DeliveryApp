@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -81,7 +83,11 @@ class EstimateRepository {
     return estimate;
   }
 
-  Future<void> markSynced(int estimateId, int deliveryId, String serverId) async {
+  Future<void> markSynced(
+    int estimateId,
+    int deliveryId,
+    String serverId,
+  ) async {
     await _db.update(
       'estimate',
       {'server_id': serverId, 'is_synced': 1},

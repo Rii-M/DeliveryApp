@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pos_delivery/l10n/app_localizations.dart';
 
@@ -823,11 +825,10 @@ void clearItems() {
         final response = await _apiService.createSalesReturnV2(request);
 
         if (response.success) {
-          // Poll transaction status if we have a transactionId
           if (response.invoiceId != null) {
             final transactionId = int.tryParse(response.invoiceId!);
             if (transactionId != null) {
-              await _pollTransactionStatus(transactionId);
+              unawaited(_pollTransactionStatus(transactionId));
             }
           }
 

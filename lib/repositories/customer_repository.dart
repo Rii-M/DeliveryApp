@@ -71,13 +71,13 @@ class CustomerRepository {
     final customers = data.map(_customerFromJson).toList();
 
     if (customers.isNotEmpty) {
-      await _db.transaction((txn) async {
-        await txn.delete('customer', where: 'is_synced = ?', whereArgs: [1]);
-        for (final c in customers) {
-          txn.insert('customer', c.toMap(),
-              conflictAlgorithm: ConflictAlgorithm.replace);
-        }
-      });
+      await _db.delete('customer', where: 'is_synced = ?', whereArgs: [1]);
+      final batch = _db.batch();
+      for (final c in customers) {
+        batch.insert('customer', c.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace);
+      }
+      await batch.commit(noResult: true);
     }
 
     return customers;
