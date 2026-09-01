@@ -1,8 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_config.dart';
+import '../../../core/network/api_service.dart';
+import '../../../core/network/network_checker.dart';
+import '../../../core/network/providers.dart';
 import '../../../core/utils/tax_calculator.dart';
 import '../../../dto/sales_invoice_request.dart';
 import '../../../models/customer.dart';
@@ -151,6 +152,8 @@ final estimateProvider =
         paymentModeRepo: ref.read(paymentModeRepositoryProvider),
         estimateRepo: ref.read(estimateRepositoryProvider),
         categoryWiseDiscountRepo: ref.read(categoryWiseDiscountRepositoryProvider),
+        apiService: ref.read(apiServiceProvider),
+        networkChecker: ref.read(networkCheckerProvider),
         outletId: ref.read(authProvider).outletId ?? ApiConfig.emptyGuid,
         driverId: ref.read(authProvider).driverId ?? '',
         driverName: ref.read(authProvider).driverName ?? '',    
@@ -164,6 +167,8 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
   final PaymentModeRepository _paymentModeRepo;
   final EstimateRepository _estimateRepo;
   final CategoryWiseDiscountRepository _categoryWiseDiscountRepo;
+  final ApiService _apiService;
+  final NetworkChecker _networkChecker;
   final String _outletId;
   final String _driverId;
   final String _driverName;
@@ -175,6 +180,8 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
     required this._paymentModeRepo,
     required this._estimateRepo,
     required this._categoryWiseDiscountRepo,
+    required this._apiService,
+    required this._networkChecker,
     required String outletId,
     required String driverId,
     required String driverName,
@@ -854,37 +861,76 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
         remarks:state.remarks ?? ' ',
       );
 
-      // Debug: log payment entries
-      print('[Estimate] Payment entries before save: ${state.paymentEntries.map((e) => {"mode": e.paymentModeName, "amount": e.amount, "id": e.paymentModeId}).toList()}');
+      // Check connectivity
+      final isOnline = await _networkChecker.isConnected;
 
-      // Log the request for debugging
-      print('[Estimate] Sending request: ${jsonEncode(salesInvoiceRequest.toJson())}');
+      if (isOnline) {
+        // Online: send to API first, then save locally
+        final response = await _apiService.createSalesInvoice(salesInvoiceRequest);
 
-      await _estimateRepo.saveEstimate(
-        deliveryId: delivery.id!,
-        items: estimateItems,
-        paymentMode: state.paymentMode,
-        paidAmount: state.paidAmount,
-        remarks: state.remarks,
-        discountType: state.discountType,
-        discountValue: state.discountValue,
-        discountAmount: state.discountAmount,
-        paymentEntries: state.paymentEntries,
-        salesInvoiceRequest: salesInvoiceRequest,
-      );
+        if (response.success) {
+          // Poll transaction status if we have a transactionId
+          if (response.invoiceId != null) {
+            final transactionId = int.tryParse(response.invoiceId!);
+            if (transactionId != null) {
+              await _pollTransactionStatus(transactionId);
+            }
+          }
 
-      for (final item in state.items) {
-        await _productRepo.deductStock(
-          item.productId,
-          item.quantity,
-          unitPrice: item.unitPrice,
-          unitId: item.unitId,
+          await _estimateRepo.saveEstimate(
+            deliveryId: delivery.id!,
+            items: estimateItems,
+            paymentMode: state.paymentMode,
+            paidAmount: state.paidAmount,
+            remarks: state.remarks,
+            discountType: state.discountType,
+            discountValue: state.discountValue,
+            discountAmount: state.discountAmount,
+            paymentEntries: state.paymentEntries,
+            isSynced: true,
+          );
+
+          for (final item in state.items) {
+            await _productRepo.deductStock(
+              item.productId,
+              item.quantity,
+              unitPrice: item.unitPrice,
+              unitId: item.unitId,
+            );
+          }
+
+          state = EstimateState(saved: true);
+          return true;
+        } else {
+          throw Exception('Failed to save invoice to server');
+        }
+      } else {
+        // Offline: save locally to SQLite + sync queue
+        await _estimateRepo.saveEstimate(
+          deliveryId: delivery.id!,
+          items: estimateItems,
+          paymentMode: state.paymentMode,
+          paidAmount: state.paidAmount,
+          remarks: state.remarks,
+          discountType: state.discountType,
+          discountValue: state.discountValue,
+          discountAmount: state.discountAmount,
+          paymentEntries: state.paymentEntries,
         );
-      }
 
-      state = EstimateState(saved: true);
-      return true;
-    } catch (_) {
+        for (final item in state.items) {
+          await _productRepo.deductStock(
+            item.productId,
+            item.quantity,
+            unitPrice: item.unitPrice,
+            unitId: item.unitId,
+          );
+        }
+
+        state = EstimateState(saved: true);
+        return true;
+      }
+    } catch (e) {
       state = EstimateState(
         delivery: state.delivery,
         customer: state.customer,
@@ -903,6 +949,29 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
       );
       return false;
     }
+  }
+
+  Future<void> _pollTransactionStatus(int transactionId) async {
+    const maxAttempts = 30;
+    const pollInterval = Duration(seconds: 2);
+
+    for (var attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        final status = await _apiService.getTransactionStatus(transactionId);
+        if (status.state == 1) {
+          return;
+        } else if (status.state == 2) {
+          print('[POLL] Estimate transaction $transactionId failed: ${status.message}');
+          throw Exception('Server processing failed: ${status.message}');
+        }
+      } catch (e) {
+        if (e.toString().contains('Server processing failed')) rethrow;
+        print('[POLL] Error checking estimate transaction $transactionId: $e');
+      }
+      await Future.delayed(pollInterval);
+    }
+
+    print('[POLL] Estimate transaction $transactionId timed out after $maxAttempts attempts');
   }
 
   void reset() {
