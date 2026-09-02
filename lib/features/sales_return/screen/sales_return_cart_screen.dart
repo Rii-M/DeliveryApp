@@ -405,7 +405,7 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(10),
@@ -417,7 +417,7 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
             notifier.decrementItemQuantity(index);
           }),
           ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 22),
+            constraints: const BoxConstraints(minWidth: 45),
             child: Text(
               item.quantity.toStringAsFixed(0),
               textAlign: TextAlign.center,
@@ -467,30 +467,15 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
 
   Widget _buildItemUnitPill(String unitName) {
     final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.outlineVariant, width: 1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            unitName,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(width: 2),
-          Icon(
-            Icons.arrow_drop_down,
-            size: 20,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ],
+    return Padding(
+      padding: const EdgeInsets.only(left: 12),
+      child: Text(
+        unitName,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }

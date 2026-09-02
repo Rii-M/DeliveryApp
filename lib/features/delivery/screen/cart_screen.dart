@@ -306,7 +306,7 @@ class _CartItemCard extends StatelessWidget {
   Widget _buildQuantityStepper(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(10),
@@ -322,7 +322,7 @@ class _CartItemCard extends StatelessWidget {
             }
           }),
           ConstrainedBox(
-            constraints: const BoxConstraints(minWidth: 22),
+            constraints: const BoxConstraints(minWidth: 45),
             child: Text(
               item.quantity.toStringAsFixed(0),
               textAlign: TextAlign.center,
@@ -373,44 +373,14 @@ class _CartItemCard extends StatelessWidget {
   }
 
   Widget _buildUnitDropdown(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(
-        border: Border.all(color: theme.colorScheme.outlineVariant, width: 1),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          key: ValueKey(
-            item.selectedUnitId ?? units.first.unitId,
-          ),
-          value: item.selectedUnitId ?? units.first.unitId,
-          isDense: true,
-          icon: Icon(
-            Icons.arrow_drop_down,
-            size: 20,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-          items: units.map((u) {
-            return DropdownMenuItem(
-              value: u.unitId,
-              child: Text(
-                u.unitName,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            );
-          }).toList(),
-          onChanged: (value) {
-            if (value != null) onUnitChanged(value);
-          },
+    return Padding(
+      padding: const EdgeInsets.only(left: 8),
+      child: Text(
+        item.selectedUnitName ?? '',
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: theme.colorScheme.onSurfaceVariant,
         ),
       ),
     );
