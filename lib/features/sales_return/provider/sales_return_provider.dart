@@ -272,6 +272,23 @@ void _prefetchProductImages(List<Product> products) {
     }
   }
 
+  Future<void> refreshAllFromCache() async {
+    try {
+      final customers = await _customerRepo.getCachedCustomers();
+      final categories = await _categoryRepo.getCachedCategories();
+      final products = await _productRepo.getCachedAllProducts();
+      if (!mounted) return;
+      _prefetchProductImages(products);
+      state = _copyWithAll(
+        customers: customers,
+        categories: categories,
+        products: products,
+      );
+    } catch (e) {
+      print('[SalesReturn] refreshAllFromCache failed: $e');
+    }
+  }
+
   SalesReturnState _copyWithAll({
     List<Category>? categories,
     Category? selectedCategory,

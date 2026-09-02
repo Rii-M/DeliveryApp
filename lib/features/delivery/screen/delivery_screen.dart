@@ -230,8 +230,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     ref.listen<SyncState>(syncProvider, (prev, next) {
       final wasSyncing = prev?.isSyncing ?? false;
       if (wasSyncing && !next.isSyncing) {
-        ref.read(deliveryFormProvider.notifier).refreshCustomersFromCache();
-        ref.read(deliveryFormProvider.notifier).refreshCategoriesFromCache();
+        ref.read(deliveryFormProvider.notifier).refreshAllFromCache();
       }
     });
 
