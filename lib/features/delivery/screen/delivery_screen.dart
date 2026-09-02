@@ -857,7 +857,10 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                                   deliveryFormProvider.notifier,
                                 );
                                 for (final k in variantKeys) {
-                                  notifier.addToCart(k, 1);
+                                    if (state.getRemainingQuantity(k) > 0) {
+                                    notifier.addToCart(k, 1);
+                                    break;
+                                  }
                                 }
                               }
                             : null,
