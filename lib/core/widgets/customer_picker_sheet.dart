@@ -28,7 +28,6 @@ class CustomerPickerSheet extends StatefulWidget {
 }
 
 class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
-  static const int _initialVisibleCount = 5;
 
   final _searchController = TextEditingController();
   late List<Customer> _filtered;
@@ -36,7 +35,7 @@ class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
   @override
   void initState() {
     super.initState();
-    _filtered = widget.customers.take(_initialVisibleCount).toList();
+    _filtered = List<Customer>.from(widget.customers);
   }
 
   @override
@@ -57,7 +56,7 @@ class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
     final query = value.trim().toLowerCase();
     setState(() {
       if (query.isEmpty) {
-        _filtered = widget.customers.take(_initialVisibleCount).toList();
+        _filtered =List<Customer>.from(widget.customers);
       } else {
         _filtered = widget.customers
             .where(
@@ -137,7 +136,7 @@ class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
             ),
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.7,
+                maxHeight: MediaQuery.of(context).size.height * 0.6,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -217,6 +216,7 @@ class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
                           )
                         : ListView.builder(
                             shrinkWrap: true,
+                            itemExtent: 56,
                             padding: const EdgeInsets.only(bottom: 16),
                             itemCount: _filtered.length,
                             itemBuilder: (context, index) {
