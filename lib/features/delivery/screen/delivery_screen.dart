@@ -190,7 +190,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                 customer.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleLarge?.copyWith(
+                style: theme.textTheme.titleMedium?.copyWith(
                   color: _customerPickerOpen ? theme.colorScheme.primary : null,
                 ),
               ),
