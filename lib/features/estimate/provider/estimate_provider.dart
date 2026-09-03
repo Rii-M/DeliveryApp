@@ -894,6 +894,8 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
             isSynced: true,
           );
 
+          await _deliveryRepo.markSynced(delivery.id!, response.invoiceId ?? '');
+          
           for (final item in state.items) {
             await _productRepo.deductStock(
               item.productId,

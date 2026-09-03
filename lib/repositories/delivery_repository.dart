@@ -85,6 +85,15 @@ class DeliveryRepository {
 
     return delivery;
   }
+  
+  Future<void> markSynced(int deliveryId, String serverId) async {
+    await _db.update(
+      'delivery',
+      {'is_synced': 1, 'server_id': serverId},
+      where: 'id = ?',
+      whereArgs: [deliveryId],
+    );
+}
 
   Future<List<Delivery>> getDeliveriesByDate(DateTime date) async {
     final startOfDay = DateTime(date.year, date.month, date.day);
