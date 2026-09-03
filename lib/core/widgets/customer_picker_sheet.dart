@@ -232,14 +232,14 @@ class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
                                     .withValues(alpha: 0.4),
                                 leading: CircleAvatar(
                                   backgroundColor:
-                                      theme.colorScheme.primaryContainer,
+                                      theme.colorScheme.primary,
                                   child: Text(
                                     customer.name.isNotEmpty
                                         ? customer.name[0].toUpperCase()
                                         : '?',
                                     style: TextStyle(
                                       color:
-                                          theme.colorScheme.onPrimaryContainer,
+                                          theme.colorScheme.onPrimary,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
