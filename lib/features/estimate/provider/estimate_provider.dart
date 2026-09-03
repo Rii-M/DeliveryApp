@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_config.dart';
@@ -30,6 +32,8 @@ class EstimateItemView {
   final double taxPercent;
   final String? unitId;
   final String? unitName;
+   final String? chalanId;       
+  final String? chalanNumber; 
 
   const EstimateItemView({
     required this.productId,
@@ -41,6 +45,8 @@ class EstimateItemView {
     this.taxPercent = kDefaultTaxPercent,
     this.unitId,
     this.unitName,
+    this.chalanId,              
+    this.chalanNumber,
   });
 
   ItemTaxBreakdown get tax => computeItemTax(
@@ -758,8 +764,8 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
 
         return SalesInvoiceItemRequest(
           refNo: item.productId,
-          chalanId: product?.chalanId ?? '',
-          chalanNumber: product?.chalanNumber ?? '',
+          chalanId: item.chalanId ?? product?.chalanId ?? '',
+          chalanNumber: item.chalanNumber ?? product?.chalanNumber ?? '',
           productId: item.productId,
           name: item.productName,
           quantity: item.quantity,
@@ -787,10 +793,8 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
         );
       }).toList();
 
-      final chalanId =
-          productsMap[state.items.first.productId]?.chalanId ?? '';
-      final chalanNumber =
-          productsMap[state.items.first.productId]?.chalanNumber ?? '';
+      final chalanId = state.items.first.chalanId ?? '';
+      final chalanNumber = state.items.first.chalanNumber ?? '';
       final totalTaxable = salesInvoiceItems.fold<double>(
         0,
         (sum, item) => sum + item.taxable,
@@ -873,7 +877,7 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
           if (response.invoiceId != null) {
             final transactionId = int.tryParse(response.invoiceId!);
             if (transactionId != null) {
-              await _pollTransactionStatus(transactionId);
+              unawaited(_pollTransactionStatus(transactionId));
             }
           }
 
@@ -896,6 +900,7 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
               item.quantity,
               unitPrice: item.unitPrice,
               unitId: item.unitId,
+              chalanId: item.chalanId,
             );
           }
 
@@ -924,6 +929,7 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
             item.quantity,
             unitPrice: item.unitPrice,
             unitId: item.unitId,
+            chalanId: item.chalanId,
           );
         }
 

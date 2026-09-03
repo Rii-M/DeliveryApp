@@ -56,6 +56,8 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
         taxableType: product?.taxable ?? 0,
         unitId: deliveryForm.getSelectedUnitId(e.key) ?? product?.unitId,
         unitName: deliveryForm.getSelectedUnitName(e.key) ?? product?.unit,
+        chalanId: product?.chalanId,          
+        chalanNumber: product?.chalanNumber,
       );
     }).toList();
 

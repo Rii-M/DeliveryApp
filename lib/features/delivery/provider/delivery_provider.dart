@@ -984,11 +984,16 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
           state.editingDeliveryId!,
         );
         for (final oldItem in oldItems) {
+          final oldProduct = state.products.cast<Product?>().firstWhere(
+            (p) => p?.serverId == oldItem.productId,
+            orElse: () => null,
+          );
           await _productRepo.restoreStock(
             oldItem.productId,
             oldItem.quantity,
             unitPrice: oldItem.unitPrice,
             unitId: oldItem.unitId,
+            chalanId: oldProduct?.chalanId,          // ADD
           );
         }
 
@@ -1013,6 +1018,7 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
           entry.value,
           unitPrice: product?.unitPrice,
           unitId: product?.unitId,
+          chalanId: product?.chalanId,
         );
       }
 

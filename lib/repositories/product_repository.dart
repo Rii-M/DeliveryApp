@@ -245,6 +245,7 @@ class ProductRepository {
     String productId, {
     double? unitPrice,
     String? unitId,
+    String? chalanId,
   }) async {
     var where = 'server_id = ?';
     final args = <Object?>[productId];
@@ -256,9 +257,13 @@ class ProductRepository {
       where += ' AND unit_id = ?';
       args.add(unitId);
     }
+     if (chalanId != null && chalanId.isNotEmpty) {
+      where += ' AND chalan_id = ?';
+      args.add(chalanId);
+    }
     var maps = await _db.query('product', where: where, whereArgs: args);
     if (maps.isEmpty &&
-        (unitPrice != null || (unitId != null && unitId.isNotEmpty))) {
+        (unitPrice != null || (unitId != null && unitId.isNotEmpty) || (chalanId != null && chalanId.isNotEmpty))) {
       maps = await _db.query('product',
           where: 'server_id = ?', whereArgs: [productId]);
     }
@@ -270,9 +275,10 @@ class ProductRepository {
     double quantity, {
     double? unitPrice,
     String? unitId,
+    String? chalanId,
   }) async {
     final maps =
-        await _findVariants(productId, unitPrice: unitPrice, unitId: unitId);
+        await _findVariants(productId, unitPrice: unitPrice, unitId: unitId, chalanId: chalanId);
     if (maps.isEmpty) return;
     final rowId = maps.first['id'] as int;
     final currentStock = (maps.first['stock'] as num?)?.toDouble() ?? 0;
@@ -290,9 +296,10 @@ class ProductRepository {
     double quantity, {
     double? unitPrice,
     String? unitId,
+    String? chalanId,
   }) async {
     final maps =
-        await _findVariants(productId, unitPrice: unitPrice, unitId: unitId);
+        await _findVariants(productId, unitPrice: unitPrice, unitId: unitId, chalanId: chalanId);
     if (maps.isEmpty) return;
     final rowId = maps.first['id'] as int;
     final currentStock = (maps.first['stock'] as num?)?.toDouble() ?? 0;
