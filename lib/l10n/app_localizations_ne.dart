@@ -646,6 +646,9 @@ class AppLocalizationsNe extends AppLocalizations {
   String get enterCustomerMobile => 'कृपया मोबाइल नम्बर लेख्नुहोस्';
 
   @override
+  String get enterValidMobile => 'कृपया १० अंकको मान्य मोबाइल नम्बर लेख्नुहोस्';
+
+  @override
   String get selectDiscountGroupRequired => 'कृपया छुट समूह चयन गर्नुहोस्';
 
   @override
@@ -687,6 +690,9 @@ class AppLocalizationsNe extends AppLocalizations {
 
   @override
   String get enterPan => 'कृपया प्यान नम्बर लेख्नुहोस्';
+
+  @override
+  String get enterValidPan => 'कृपया ९ अंकको मान्य प्यान नम्बर लेख्नुहोस्';
 
   @override
   String get needInternetToSaveCustomer =>

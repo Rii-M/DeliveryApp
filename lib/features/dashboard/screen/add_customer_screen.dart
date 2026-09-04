@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -391,6 +392,10 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                           TextFormField(
                             controller: _mobileController,
                             keyboardType: TextInputType.phone,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(10),
+                            ],
                             decoration: InputDecoration(
                               labelText: l10n.customerMobile,
                               hintText: l10n.customerMobile,
@@ -400,6 +405,9 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return l10n.enterCustomerMobile;
+                              }
+                              if (value.trim().length != 10) {
+                                return l10n.enterValidMobile;
                               }
                               return null;
                             },
@@ -420,6 +428,10 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                             controller: _panController,
                             textCapitalization: TextCapitalization.characters,
                             readOnly: _isEditing,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              LengthLimitingTextInputFormatter(9),
+                            ],
                             decoration: InputDecoration(
                               labelText: l10n.pan,
                               hintText: l10n.pan,
@@ -429,6 +441,9 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
                                 return l10n.enterPan;
+                              }
+                              if (value.trim().length != 9) {
+                                return l10n.enterValidPan;
                               }
                               return null;
                             },

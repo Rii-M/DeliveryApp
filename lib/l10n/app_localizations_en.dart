@@ -646,6 +646,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterCustomerMobile => 'Please enter mobile number';
 
   @override
+  String get enterValidMobile => 'Please enter a valid 10-digit mobile number';
+
+  @override
   String get selectDiscountGroupRequired => 'Please select a discount group';
 
   @override
@@ -686,6 +689,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enterPan => 'Please enter PAN number';
+
+  @override
+  String get enterValidPan => 'Please enter a valid 9-digit PAN number';
 
   @override
   String get needInternetToSaveCustomer =>

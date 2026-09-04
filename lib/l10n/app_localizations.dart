@@ -1304,6 +1304,12 @@ abstract class AppLocalizations {
   /// **'Please enter mobile number'**
   String get enterCustomerMobile;
 
+  /// No description provided for @enterValidMobile.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid 10-digit mobile number'**
+  String get enterValidMobile;
+
   /// No description provided for @selectDiscountGroupRequired.
   ///
   /// In en, this message translates to:
@@ -1387,6 +1393,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter PAN number'**
   String get enterPan;
+
+  /// No description provided for @enterValidPan.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid 9-digit PAN number'**
+  String get enterValidPan;
 
   /// No description provided for @needInternetToSaveCustomer.
   ///
