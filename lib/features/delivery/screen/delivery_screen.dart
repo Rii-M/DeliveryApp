@@ -35,8 +35,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     final customerId = widget.customerId;
     if (customerId != null) _preselecting = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(deliveryFormProvider.notifier).refreshProducts();
-      if (widget.deliveryId != null) {
+    ref.read(deliveryFormProvider.notifier).refreshAllFromCache();      if (widget.deliveryId != null) {
         ref
             .read(deliveryFormProvider.notifier)
             .loadExistingDelivery(widget.deliveryId!);
