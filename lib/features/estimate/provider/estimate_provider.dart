@@ -133,7 +133,10 @@ class EstimateState {
   double get totalPaidAmount =>
       paymentEntries.fold<double>(0, (sum, e) => sum + e.amount);
 
-  double get remainingAmount => netTotal - totalPaidAmount;
+  double get remainingAmount {
+    final diff = netTotal - totalPaidAmount;
+    return diff > -0.01 && diff < 0.01 ? 0.0 : diff;
+  }
 
   List<Customer> get filteredCustomers {
     if (customerSearchQuery.isEmpty) return [];
@@ -584,7 +587,8 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
 
   void addPaymentEntry() {
     print('[Estimate] addPaymentEntry called. Current entries: ${state.paymentEntries.length}, remaining: ${state.netTotal - state.totalPaidAmount}');
-    final remaining = state.netTotal - state.totalPaidAmount;
+    final rawRemaining = state.netTotal - state.totalPaidAmount;
+    final remaining = rawRemaining > -0.01 && rawRemaining < 0.01 ? 0.0 : rawRemaining;
     final updated = [
       ...state.paymentEntries,
       PaymentEntry(amount: remaining > 0 ? remaining : 0),
