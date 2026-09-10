@@ -70,8 +70,11 @@ class CustomerRepository {
     final data = await _apiService.fetchCustomers(id);
     final customers = data.map(_customerFromJson).toList();
 
+      // Always delete old synced customers so that users with zero customers
+    // don't end up seeing stale data from a previously-logged-in user.
+    await _db.delete('customer', where: 'is_synced = ?', whereArgs: [1]);
+
     if (customers.isNotEmpty) {
-      await _db.delete('customer', where: 'is_synced = ?', whereArgs: [1]);
       final batch = _db.batch();
       for (final c in customers) {
         batch.insert('customer', c.toMap(),
