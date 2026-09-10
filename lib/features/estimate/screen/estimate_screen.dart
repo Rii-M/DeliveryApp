@@ -100,7 +100,16 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
     _syncControllers(state);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.billing)),
+      appBar: AppBar(
+        title: Text(l10n.billing),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            ref.read(estimateProvider.notifier).reset();
+            context.go('/delivery/cart');
+          },
+        ),
+      ),
       body: _buildBody(state, theme, l10n),
     );
   }

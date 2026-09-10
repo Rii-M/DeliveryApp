@@ -62,21 +62,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) =>
                 const NoTransitionPage(child: DashboardScreen()),
           ),
-          GoRoute(
-            path: '/delivery',
-            pageBuilder: (context, state) {
-              final deliveryId = int.tryParse(
-                state.uri.queryParameters['deliveryId'] ?? '',
-              );
-              final customerId = state.uri.queryParameters['customerId'];
-              return NoTransitionPage(
-                child: DeliveryScreen(
-                  deliveryId: deliveryId,
-                  customerId: customerId,
-                ),
-              );
-            },
-          ),
           // GoRoute(
           //   path: '/sales-return',
           //   pageBuilder: (context, state) =>
