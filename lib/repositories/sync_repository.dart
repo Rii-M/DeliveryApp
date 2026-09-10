@@ -649,8 +649,8 @@ class SyncRepository {
         customer.recordId != null &&
         customer.recordId!.isNotEmpty;
 
-    // Before adding, ensure the mobile number isn't already used on the server
-    // by a DIFFERENT customer. (Server only enforces name/email uniqueness.)
+    // Before adding, ensure the mobile number and PAN aren't already used on
+    // the server by a DIFFERENT customer.
     if (!isUpdate && customer.phone != null && customer.phone!.trim().isNotEmpty) {
       final exists = await _isMobileUsedServerSide(
         customer.phone!.trim(),
@@ -664,6 +664,24 @@ class SyncRepository {
         await _discardRejectedCustomer(
           customer,
           'mobile ${customer.phone} already exists on server',
+        );
+        return false;
+      }
+    }
+
+    if (!isUpdate && customer.pan != null && customer.pan!.trim().isNotEmpty) {
+      final panExists = await _isPanUsedServerSide(
+        customer.pan!.trim(),
+        excludeCustomerId: isUpdate
+            ? (customer.recordId ?? customer.serverId)
+            : null,
+      );
+      if (panExists) {
+        print(
+            '[Sync] Customer ${customer.name} NOT added - PAN ${customer.pan} already exists on server');
+        await _discardRejectedCustomer(
+          customer,
+          'PAN ${customer.pan} already exists on server',
         );
         return false;
       }
@@ -754,6 +772,30 @@ class SyncRepository {
       final serverMobile =
           (json['Mobile'] ?? json['mobile'] ?? '').toString().trim();
       if (serverMobile.isEmpty || serverMobile != mobile) continue;
+      final id = (json['Id'] ?? json['id'] ?? '').toString();
+      final recordId =
+          (json['RecordId'] ?? json['recordId'] ?? '').toString();
+      if (excludeCustomerId != null &&
+          (id == excludeCustomerId || recordId == excludeCustomerId)) {
+        continue;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  /// Checks the server customer list for a row already using this PAN. When
+  /// [excludeCustomerId] is given, that customer is skipped so editing the same
+  /// customer doesn't false-positive.
+  Future<bool> _isPanUsedServerSide(
+    String pan, {
+    String? excludeCustomerId,
+  }) async {
+    final data = await _apiService.fetchCustomers(await getSavedDriverId() ?? '');
+    for (final json in data) {
+      final serverPan =
+          (json['PAN'] ?? json['Pan'] ?? json['pan'] ?? '').toString().trim();
+      if (serverPan.isEmpty || serverPan != pan) continue;
       final id = (json['Id'] ?? json['id'] ?? '').toString();
       final recordId =
           (json['RecordId'] ?? json['recordId'] ?? '').toString();

@@ -1412,6 +1412,12 @@ abstract class AppLocalizations {
   /// **'A customer with this mobile number already exists.'**
   String get customerMobileAlreadyExists;
 
+  /// No description provided for @customerPanAlreadyExists.
+  ///
+  /// In en, this message translates to:
+  /// **'A customer with this PAN number already exists.'**
+  String get customerPanAlreadyExists;
+
   /// No description provided for @customerSyncStatus.
   ///
   /// In en, this message translates to:

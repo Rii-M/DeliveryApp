@@ -702,6 +702,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'A customer with this mobile number already exists.';
 
   @override
+  String get customerPanAlreadyExists =>
+      'A customer with this PAN number already exists.';
+
+  @override
   String get customerSyncStatus => 'Customer Sync Status';
 
   @override

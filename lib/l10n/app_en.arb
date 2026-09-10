@@ -239,6 +239,7 @@
   "enterValidPan": "Please enter a valid 9-digit PAN number",
   "needInternetToSaveCustomer": "An internet connection is required to add or edit a customer.",
   "customerMobileAlreadyExists": "A customer with this mobile number already exists.",
+  "customerPanAlreadyExists": "A customer with this PAN number already exists.",
   "customerSyncStatus": "Customer Sync Status",
   "notSynced": "Not synced",
   "noCustomerSyncEntries": "No customers pending sync.",

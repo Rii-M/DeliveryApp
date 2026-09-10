@@ -227,6 +227,19 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
           );
           return;
         }
+
+        final panTaken = await customerRepo.isPanTakenOnServer(
+          _panController.text,
+          excludeCustomerId: _isEditing ? widget.customer!.serverId : null,
+        );
+        if (panTaken) {
+          if (!mounted) return;
+          setState(() => _isSaving = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.customerPanAlreadyExists)),
+          );
+          return;
+        }
       }
 
       final Customer? saved;

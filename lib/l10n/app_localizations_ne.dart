@@ -703,6 +703,10 @@ class AppLocalizationsNe extends AppLocalizations {
       'यो मोबाइल नम्बर भएको ग्राहक पहिले नै अवस्थित छ।';
 
   @override
+  String get customerPanAlreadyExists =>
+      'यो प्यान नम्बर भएको ग्राहक पहिले नै अवस्थित छ।';
+
+  @override
   String get customerSyncStatus => 'ग्राहक सिङ्क स्थिति';
 
   @override

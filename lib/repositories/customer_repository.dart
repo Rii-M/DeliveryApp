@@ -136,6 +136,30 @@ class CustomerRepository {
     return false;
   }
 
+  /// Checks whether any customer on the server already uses the given PAN
+  /// number. When [excludeCustomerId] is provided, that customer is skipped so
+  /// editing the SAME customer doesn't false-positive.
+  Future<bool> isPanTakenOnServer(
+    String pan, {
+    String? excludeCustomerId,
+  }) async {
+    final trimmed = pan.trim();
+    if (trimmed.isEmpty) return false;
+    final data = await _apiService.fetchCustomers(await getSavedDriverId() ?? '');
+    for (final json in data) {
+      final serverPan = _getField(json, ['PAN', 'Pan', 'pan']).trim();
+      if (serverPan.isEmpty || serverPan != trimmed) continue;
+      final id = _getField(json, ['Id', 'id']);
+      final recordId = _getField(json, ['RecordId', 'recordId']);
+      if (excludeCustomerId != null &&
+          (id == excludeCustomerId || recordId == excludeCustomerId)) {
+        continue;
+      }
+      return true;
+    }
+    return false;
+  }
+
   /// Saves a brand new customer locally (offline-first) and queues it for
   /// sync. Returns the stored customer with the local id assigned.
   Future<Customer> saveNewCustomerOffline({
