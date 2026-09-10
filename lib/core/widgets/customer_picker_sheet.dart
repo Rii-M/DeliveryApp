@@ -35,7 +35,8 @@ class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
   @override
   void initState() {
     super.initState();
-    _filtered = List<Customer>.from(widget.customers);
+    _filtered = List<Customer>.from(widget.customers)
+      ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
   }
 
   @override
@@ -56,7 +57,8 @@ class _CustomerPickerSheetState extends State<CustomerPickerSheet> {
     final query = value.trim().toLowerCase();
     setState(() {
       if (query.isEmpty) {
-        _filtered =List<Customer>.from(widget.customers);
+        _filtered = List<Customer>.from(widget.customers)
+          ..sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
       } else {
         _filtered = widget.customers
             .where(
