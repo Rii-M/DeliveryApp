@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
-import 'dart:io' show Platform;
 
 import 'core/database/database_service.dart';
 import 'core/database/providers.dart';
@@ -34,12 +32,6 @@ void main() async {
       allowWakeLock: true,
     ),
   );
-
-  // Initialize sqflite for desktop platforms (Windows, Linux, macOS)
-  if (Platform.isWindows || Platform.isLinux) {
-    sqfliteFfiInit();
-    databaseFactory = databaseFactoryFfi;
-  }
 
   final databaseService = DatabaseService();
   await databaseService.initialize();
