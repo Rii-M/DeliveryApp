@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/extensions.dart';
 import '../../../core/utils/tax_calculator.dart';
 import '../../../core/widgets/custom_app_bar.dart';
@@ -35,7 +36,8 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     final customerId = widget.customerId;
     if (customerId != null) _preselecting = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-    ref.read(deliveryFormProvider.notifier).refreshAllFromCache();      if (widget.deliveryId != null) {
+      ref.read(deliveryFormProvider.notifier).refreshAllFromCache();
+      if (widget.deliveryId != null) {
         ref
             .read(deliveryFormProvider.notifier)
             .loadExistingDelivery(widget.deliveryId!);
@@ -85,7 +87,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     final notifier = ref.read(deliveryFormProvider.notifier);
     final products = notifier.state.products;
     final customerId = customer.serverId;
-    
+
     // Add each product that belongs to this customer to the cart
     for (final product in products) {
       // Filter products assigned to this customer by customer_id
@@ -93,7 +95,9 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
         final key = DeliveryFormState.variantKey(product);
         // Use product's actual stock/quantity from API instead of hardcoded 1
         final double quantityToAdd = product.stock > 0 ? product.stock : 1;
-        print('[DELIVERY_SCREEN] Adding to cart: ${product.name}, stock: ${product.stock}, qty: $quantityToAdd');
+        print(
+          '[DELIVERY_SCREEN] Adding to cart: ${product.name}, stock: ${product.stock}, qty: $quantityToAdd',
+        );
         await notifier.addToCart(key, quantityToAdd);
       }
     }
@@ -230,6 +234,25 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
       final wasSyncing = prev?.isSyncing ?? false;
       if (wasSyncing && !next.isSyncing) {
         ref.read(deliveryFormProvider.notifier).refreshAllFromCache();
+      }
+    });
+
+    ref.listen<DeliveryFormState>(deliveryFormProvider, (prev, next) {
+      if (next.stockError != null && next.stockError != prev?.stockError) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.stockError!),
+            backgroundColor: theme.colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+            action: SnackBarAction(
+              label: l10n.done,
+              textColor: theme.colorScheme.onError,
+              onPressed: () =>
+                  ref.read(deliveryFormProvider.notifier).clearStockError(),
+            ),
+          ),
+        );
       }
     });
 
@@ -695,35 +718,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
               .setProductSearchQuery(value),
         ),
         const SizedBox(height: 12),
-        if (state.stockError != null) ...[
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.errorContainer,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.warning, color: theme.colorScheme.error, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    state.stockError!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onErrorContainer,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, size: 16),
-                  onPressed: () =>
-                      ref.read(deliveryFormProvider.notifier).clearStockError(),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
+
         if (state.isLoadingProducts)
           const Center(
             child: Padding(
@@ -789,9 +784,13 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
             .map((p) => DeliveryFormState.variantKey(p))
             .toList();
         final inCart = variantKeys.fold<double>(
-            0.0, (sum, k) => sum + (state.cart[k] ?? 0));
+          0.0,
+          (sum, k) => sum + (state.cart[k] ?? 0),
+        );
         final remaining = variantKeys.fold<double>(
-            0.0, (sum, k) => sum + state.getRemainingQuantity(k));
+          0.0,
+          (sum, k) => sum + state.getRemainingQuantity(k),
+        );
 
         return Card(
           clipBehavior: Clip.antiAlias,
@@ -841,7 +840,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                       '${l10n.available} ${remaining.toStringAsFixed(0)}',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: remaining > 0
-                            ? theme.colorScheme.primary
+                            ? AppColors.success
                             : theme.colorScheme.error,
                         fontWeight: FontWeight.w500,
                       ),
@@ -856,7 +855,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                                   deliveryFormProvider.notifier,
                                 );
                                 for (final k in variantKeys) {
-                                    if (state.getRemainingQuantity(k) > 0) {
+                                  if (state.getRemainingQuantity(k) > 0) {
                                     notifier.addToCart(k, 1);
                                     break;
                                   }
