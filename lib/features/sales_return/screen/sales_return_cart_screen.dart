@@ -78,8 +78,9 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
                 const SizedBox(height: 16),
                 // Commented out: volume discount section disabled for now.
                 // _buildHeaderDiscountSection(state, theme, l10n),
-                const SizedBox(height: 16),
-                _buildTotalsCard(state, theme, l10n),
+                // const SizedBox(height: 16),
+                // Commented out: gross amount, discount, total not needed in sales return
+                // _buildTotalsCard(state, theme, l10n),
                 const SizedBox(height: 24),
                 Text(
                   l10n.additionalDetails,
@@ -374,27 +375,28 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
               _buildItemUnitPill(item.unit!),
           ],
         ),
-        const SizedBox(height: 4),
-        Text(
-          '${l10n.total}: Rs. ${item.lineTotal.toStringAsFixed(2)}',
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF2E7D32),
-          ),
-        ),
-        if (item.discountAmount > 0)
-          Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(
-              '${l10n.discount}: Rs. ${item.discountAmount.toStringAsFixed(2)}',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ),
+        // Commented out: total and discount per item not needed in sales return
+        // const SizedBox(height: 4),
+        // Text(
+        //   '${l10n.total}: Rs. ${item.lineTotal.toStringAsFixed(2)}',
+        //   style: const TextStyle(
+        //     fontSize: 14,
+        //     fontWeight: FontWeight.w600,
+        //     color: Color(0xFF2E7D32),
+        //   ),
+        // ),
+        // if (item.discountAmount > 0)
+        //   Padding(
+        //     padding: const EdgeInsets.only(top: 4),
+        //     child: Text(
+        //       '${l10n.discount}: Rs. ${item.discountAmount.toStringAsFixed(2)}',
+        //       style: TextStyle(
+        //         fontSize: 14,
+        //         fontWeight: FontWeight.w600,
+        //         color: theme.colorScheme.error,
+        //       ),
+        //     ),
+        //   ),
       ],
     );
   }
@@ -480,110 +482,93 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
     );
   }
 
-  Widget _buildTotalsCard(
-    SalesReturnState state,
-    ThemeData theme,
-    AppLocalizations l10n,
-  ) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _totalRow(
-              l10n.grossAmount,
-              state.totalGrossAmountIncTax,
-              theme,
-              null,
-            ),
-            if (state.totalProductDiscountIncTax + state.discountAmount > 0)
-              ...[
-                const SizedBox(height: 4),
-                _totalRow(
-                  l10n.discount,
-                  -(state.totalProductDiscountIncTax + state.discountAmount),
-                  theme,
-                  theme.colorScheme.error,
-                ),
-              ],
-            if (state.totalTaxAmount > 0) ...[
-              const SizedBox(height: 4),
-              _totalRow(
-                l10n.tax,
-                state.totalTaxAmount,
-                theme,
-                theme.colorScheme.onSurfaceVariant,
-              ),
-            ],
-            const Divider(),
-            _totalRow(
-              l10n.totalAmount,
-              state.netTotalIncTax,
-              theme,
-              theme.colorScheme.primary,
-              bold: true,
-            ),
-            // Commented out: payment modal disabled for now.
-            // const SizedBox(height: 12),
-            // SizedBox(
-            //   width: double.infinity,
-            //   child: ElevatedButton.icon(
-            //     onPressed: () => _showPaymentModal(context),
-            //     icon: const Icon(Icons.payment, size: 20),
-            //     label: Text(l10n.makePayment),
-            //     style: ElevatedButton.styleFrom(
-            //       backgroundColor: theme.colorScheme.secondaryContainer,
-            //       foregroundColor: theme.colorScheme.onSecondaryContainer,
-            //       minimumSize: const Size(double.infinity, 48),
-            //       shape: RoundedRectangleBorder(
-            //         borderRadius: BorderRadius.circular(8),
-            //       ),
-            //     ),
-            //   ),
-            // ),
-          ],
-        ),
-      ),
-    );
-  }
+  // Commented out: gross amount, discount, total not needed in sales return
+  // Widget _buildTotalsCard(
+  //   SalesReturnState state,
+  //   ThemeData theme,
+  //   AppLocalizations l10n,
+  // ) {
+  //   return Card(
+  //     child: Padding(
+  //       padding: const EdgeInsets.all(16),
+  //       child: Column(
+  //         children: [
+  //           _totalRow(
+  //             l10n.grossAmount,
+  //             state.totalGrossAmountIncTax,
+  //             theme,
+  //             null,
+  //           ),
+  //           if (state.totalProductDiscountIncTax + state.discountAmount > 0)
+  //             ...[
+  //               const SizedBox(height: 4),
+  //               _totalRow(
+  //                 l10n.discount,
+  //                 -(state.totalProductDiscountIncTax + state.discountAmount),
+  //                 theme,
+  //                 theme.colorScheme.error,
+  //               ),
+  //             ],
+  //           if (state.totalTaxAmount > 0) ...[
+  //             const SizedBox(height: 4),
+  //             _totalRow(
+  //               l10n.tax,
+  //               state.totalTaxAmount,
+  //               theme,
+  //               theme.colorScheme.onSurfaceVariant,
+  //             ),
+  //           ],
+  //           const Divider(),
+  //           _totalRow(
+  //             l10n.totalAmount,
+  //             state.netTotalIncTax,
+  //             theme,
+  //             theme.colorScheme.primary,
+  //             bold: true,
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
-  Widget _totalRow(
-    String label,
-    double amount,
-    ThemeData theme,
-    Color? color, {
-    bool bold = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: bold ? FontWeight.w600 : FontWeight.normal,
-            ),
-          ),
-          Text(
-            amount >= 0
-                ? 'Rs. ${amount.toStringAsFixed(2)}'
-                : '- Rs. ${(-amount).toStringAsFixed(2)}',
-            style:
-                (bold
-                        ? theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          )
-                        : theme.textTheme.bodyMedium)
-                    ?.copyWith(
-                      color: color,
-                      fontWeight: bold ? FontWeight.w600 : null,
-                    ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _totalRow(
+  //   String label,
+  //   double amount,
+  //   ThemeData theme,
+  //   Color? color, {
+  //   bool bold = false,
+  // }) {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(vertical: 2),
+  //     child: Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //       children: [
+  //         Text(
+  //           label,
+  //           style: theme.textTheme.bodyMedium?.copyWith(
+  //             fontWeight: bold ? FontWeight.w600 : FontWeight.normal,
+  //           ),
+  //         ),
+  //         Text(
+  //           amount >= 0
+  //               ? 'Rs. ${amount.toStringAsFixed(2)}'
+  //               : '- Rs. ${(-amount).toStringAsFixed(2)}',
+  //           style:
+  //               (bold
+  //                       ? theme.textTheme.bodyMedium?.copyWith(
+  //                           fontWeight: FontWeight.w600,
+  //                         )
+  //                       : theme.textTheme.bodyMedium)
+  //                   ?.copyWith(
+  //                     color: color,
+  //                     fontWeight: bold ? FontWeight.w600 : null,
+  //                   ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   // Commented out: volume discount section disabled for now.
   // Widget _buildHeaderDiscountSection(
