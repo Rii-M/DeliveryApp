@@ -1,0 +1,6 @@
+-keep class io.flutter.** { *; }
+-keep class io.flutter.plugins.** { *; }
+-keep class io.flutter.embedding.** { *; }
+-dontwarn io.flutter.embedding.**
+-keep class com.pravera.flutter_foreground_task.** { *; }
+-keep class com.baseflow.geolocator.** { *; }
