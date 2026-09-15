@@ -33,7 +33,8 @@ class EstimateItemView {
   final String? unitId;
   final String? unitName;
    final String? chalanId;       
-  final String? chalanNumber; 
+  final String? chalanNumber;
+  final bool isExchange;
 
   const EstimateItemView({
     required this.productId,
@@ -47,19 +48,33 @@ class EstimateItemView {
     this.unitName,
     this.chalanId,              
     this.chalanNumber,
+    this.isExchange = false,
   });
 
-  ItemTaxBreakdown get tax => computeItemTax(
-    rate: unitPrice,
-    quantity: quantity,
-    discount: discountAmount,
-    taxableType: taxableType,
-    taxPercent: taxPercent,
-  );
+  ItemTaxBreakdown get tax => isExchange
+      ? const ItemTaxBreakdown(
+          rateExTax: 0,
+          rateIncTax: 0,
+          grossAmount: 0,
+          grossAmountIncTax: 0,
+          taxableAmount: 0,
+          nonTaxableAmount: 0,
+          taxAmount: 0,
+          discountExcTax: 0,
+          discountIncludingTax: 0,
+          netAmount: 0,
+        )
+      : computeItemTax(
+          rate: unitPrice,
+          quantity: quantity,
+          discount: discountAmount,
+          taxableType: taxableType,
+          taxPercent: taxPercent,
+        );
 
   /// Ex-tax gross (used for storage/invoice line totals).
-  double get grossAmount => quantity * unitPrice;
-  double get lineTotal => grossAmount - discountAmount;
+  double get grossAmount => isExchange ? 0 : quantity * unitPrice;
+  double get lineTotal => isExchange ? 0 : grossAmount - discountAmount;
 
   /// Tax-inclusive values shown on the billing screen.
   double get rateExTax => tax.rateExTax;
@@ -466,6 +481,9 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
         taxPercent: item.taxPercent,
         unitId: item.unitId,
         unitName: item.unitName,
+        chalanId: item.chalanId,
+        chalanNumber: item.chalanNumber,
+        isExchange: item.isExchange,
       );
     }).toList();
   }
@@ -692,8 +710,10 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
 
   Future<bool> saveInvoice() async {
     if (state.customer == null || state.items.isEmpty) return false;
-    if (state.paymentEntries.isEmpty) return false; 
-    if (state.paymentEntries.any((e) => e.paymentModeId == null)) return false;
+    if (state.netTotal > 0) {
+      if (state.paymentEntries.isEmpty) return false;
+      if (state.paymentEntries.any((e) => e.paymentModeId == null)) return false;
+    }
 
     state = EstimateState(
       delivery: state.delivery,
@@ -765,6 +785,38 @@ class EstimateNotifier extends StateNotifier<EstimateState> {
           taxableType: product?.taxable ?? 0,
           taxPercent: kDefaultTaxPercent,
         );
+
+        if (item.isExchange) {
+          return SalesInvoiceItemRequest(
+            refNo: item.productId,
+            chalanId: item.chalanId ?? product?.chalanId ?? '',
+            chalanNumber: item.chalanNumber ?? product?.chalanNumber ?? '',
+            productId: item.productId,
+            name: item.productName,
+            quantity: item.quantity,
+            unitId: item.unitId ?? product?.unitId ?? '',
+            unitName: item.unitName ?? product?.unit ?? '',
+            categoryId: product?.categoryId ?? '',
+            rate: 0,
+            rateIncludingTax: 0,
+            grossAmount: 0,
+            grossAmountIncludingTax: 0,
+            discount: 0,
+            discountIncludingTax: 0,
+            taxable: 0,
+            nonTaxable: 0,
+            taxPercent: 0,
+            taxAmount: 0,
+            netAmount: 0,
+            salesInvoiceItemTax: [
+              SalesInvoiceItemTaxRequest(
+                taxableAmount: 0,
+                taxAmount: 0,
+                netAmount: 0,
+              ),
+            ],
+          );
+        }
 
         return SalesInvoiceItemRequest(
           refNo: item.productId,

@@ -58,6 +58,7 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
         unitName: deliveryForm.getSelectedUnitName(e.key) ?? product?.unit,
         chalanId: product?.chalanId,          
         chalanNumber: product?.chalanNumber,
+        isExchange: deliveryForm.exchangeItems.contains(e.key),
       );
     }).toList();
 
@@ -333,23 +334,44 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          item.productName,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                item.productName,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            if (item.isExchange)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.tertiaryContainer,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'Exchange',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.onTertiaryContainer,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                         const SizedBox(height: 4),
                         Text(
                           l10n.qtyWithPrice(
-                            item.rateIncTax.toStringAsFixed(2),
+                            item.isExchange ? '0.00' : item.rateIncTax.toStringAsFixed(2),
                             item.quantity.toStringAsFixed(0),
                           ),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
-                        if (item.discountAmount > 0) ...[
+                        if (!item.isExchange && item.discountAmount > 0) ...[
                           const SizedBox(height: 2),
                           Text(
                             'Discount: -Rs. ${item.discountAmount.toStringAsFixed(2)}',
@@ -362,7 +384,7 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
                     ),
                   ),
                   Text(
-                    'Rs. ${item.netAmount.toStringAsFixed(2)}',
+                    'Rs. ${item.isExchange ? '0.00' : item.netAmount.toStringAsFixed(2)}',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -613,7 +635,7 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
   Future<void> _saveInvoice(BuildContext context) async {
     
   final state = ref.read(estimateProvider);
-  if (state.remainingAmount > 0) {
+  if (state.netTotal > 0 && state.remainingAmount > 0) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(AppLocalizations.of(context)!.pleaseMakeFullPayment),
@@ -646,16 +668,18 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
     return;
   }
 
-  final hasUnsetPaymode=state.paymentEntries.any((e)=>e.paymentModeId == null || e.paymentModeId!.isEmpty);
-              if (hasUnsetPaymode) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text('Please select paymode'),
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                  ),
-                );
-                return;
-               } 
+  if (state.netTotal > 0) {
+    final hasUnsetPaymode=state.paymentEntries.any((e)=>e.paymentModeId == null || e.paymentModeId!.isEmpty);
+                if (hasUnsetPaymode) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      content: Text('Please select paymode'),
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                  );
+                  return;
+                 } 
+  }
     
     final success = await ref.read(estimateProvider.notifier).saveInvoice();
 

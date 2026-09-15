@@ -631,6 +631,55 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     final list = ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        if (!state.isReadOnly) ...[
+          SegmentedButton<bool>(
+            segments: const [
+              ButtonSegment<bool>(
+                value: false,
+                label: Text('Sales'),
+                icon: Icon(Icons.point_of_sale, size: 18),
+              ),
+              ButtonSegment<bool>(
+                value: true,
+                label: Text('Exchange'),
+                icon: Icon(Icons.swap_horiz, size: 18),
+              ),
+            ],
+            selected: {state.isExchangeMode},
+            onSelectionChanged: (selected) {
+              if (state.cart.isNotEmpty) {
+                showDialog<bool>(
+                  context: context,
+                  builder: (dialogContext) => AlertDialog(
+                    title: Text(state.isExchangeMode ? 'Switch to Sales?' : 'Switch to Exchange?'),
+                    content: Text(
+                      state.isExchangeMode
+                          ? 'Switching to Sales mode will clear the cart. Items will have normal prices.'
+                          : 'Switching to Exchange mode will clear the cart. Exchange items have Rs. 0 amount.',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(false),
+                        child: Text(l10n.cancel),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(true),
+                        child: const Text('Switch'),
+                      ),
+                    ],
+                  ),
+                ).then((confirmed) {
+                  if (confirmed == true) {
+                    ref.read(deliveryFormProvider.notifier).toggleExchangeMode();
+                  }
+                });
+              } else {
+                ref.read(deliveryFormProvider.notifier).toggleExchangeMode();
+              }
+            },
+          ),
+          const SizedBox(height: 12),
+        ],
         Row(
           children: [
             Text(
