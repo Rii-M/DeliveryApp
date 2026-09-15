@@ -19,14 +19,14 @@ class AppConstants {
   /// Dashboard accent palettes (tonal icon pairs: light bg + saturated icon),
   /// kept within the warm brand family so the dashboard stays cohesive and
   /// professional rather than multi-coloured.
-  static const Color tealGreenIcon = Color(0xFF3E6B52);
-  static const Color tealGreenBg = Color(0xFFE8F2EC);
-  static const Color indigoIcon = Color(0xFFA8722E);
-  static const Color indigoBg = Color(0xFFF9EDD9);
-  static const Color rustIcon = Color(0xFFD84315);
-  static const Color rustBg = Color(0xFFFBE3D9);
-  static const Color violetIcon = Color(0xFF795548);
-  static const Color violetBg = Color(0xFFF3E9DF);
-  static const Color amberIcon = Color(0xFFF58823);
-  static const Color amberBg = Color(0xFFFFF0E0);
+  static const Color tealGreenIcon = Color(0xFF2E8B6A);
+  static const Color tealGreenBg = Color(0xFFD4F0E4);
+  static const Color indigoIcon = Color(0xFFD4952A);
+  static const Color indigoBg = Color(0xFFFFF0D6);
+  static const Color rustIcon = Color(0xFFEF5330);
+  static const Color rustBg = Color(0xFFFFDDD3);
+  static const Color violetIcon = Color(0xFF8D6E63);
+  static const Color violetBg = Color(0xFFEFDDD0);
+  static const Color amberIcon = Color(0xFFFF9100);
+  static const Color amberBg = Color(0xFFFFF3E0);
 }
