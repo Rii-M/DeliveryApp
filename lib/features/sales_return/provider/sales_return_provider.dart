@@ -20,7 +20,7 @@ import '../../../repositories/payment_mode_repository.dart';
 import '../../../repositories/product_repository.dart';
 import '../../../repositories/sales_return_repository.dart';
 import '../../../features/auth/provider/auth_provider.dart';
-import '../../location/location_provider.dart';
+
 import '../../../core/services/image_prefetch_service.dart';
 import '../../../models/category.dart';
 import '../../../repositories/category_repository.dart';
@@ -156,6 +156,7 @@ double itemQuantityOf(String productId) => items
 final salesReturnProvider =
     StateNotifierProvider<SalesReturnNotifier, SalesReturnState>((ref) {
   return SalesReturnNotifier(
+    ref: ref,
     categoryRepo: ref.read(categoryRepositoryProvider),
     categoryWiseDiscountRepo: ref.read(categoryWiseDiscountRepositoryProvider),
     customerRepo: ref.read(customerRepositoryProvider),
@@ -163,14 +164,12 @@ final salesReturnProvider =
     salesReturnRepo: ref.read(salesReturnRepositoryProvider),
     paymentModeRepo: ref.read(paymentModeRepositoryProvider),
     apiService: ref.read(apiServiceProvider),
-    locationState: ref.read(locationStateProvider),
-    driverName: ref.read(authProvider).driverName ?? '',   
     networkChecker: ref.read(networkCheckerProvider),
-    outletId: ref.read(authProvider).outletId ?? ApiConfig.emptyGuid,
   );
 });
 
 class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
+  final Ref _ref;
   final CategoryRepository _categoryRepo;
   final CategoryWiseDiscountRepository _categoryWiseDiscountRepo;
   final CustomerRepository _customerRepo;
@@ -178,12 +177,10 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
   final SalesReturnRepository _salesReturnRepo;
   final PaymentModeRepository _paymentModeRepo;
   final ApiService _apiService;
-  final LocationState _locationState;
-  final String _driverName;
   final NetworkChecker _networkChecker;
-  final String _outletId;
 
   SalesReturnNotifier({
+    required Ref ref,
     required this._categoryRepo,
     required this._categoryWiseDiscountRepo,
     required this._customerRepo,
@@ -191,13 +188,9 @@ class SalesReturnNotifier extends StateNotifier<SalesReturnState> {
     required this._salesReturnRepo,
     required this._paymentModeRepo,
     required this._apiService,
-    required this._locationState,
-   required String driverName,
     required this._networkChecker,
-    required String outletId,
-  })  : _productRepo = productRepo,
-        _outletId = outletId,
-        _driverName = driverName,
+  })  : _ref = ref,
+        _productRepo = productRepo,
         super(SalesReturnState()) {
     _loadInitialData();
   }
@@ -779,9 +772,11 @@ void clearItems() {
           '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')} '
           '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
 
-      // Get delivery boy ID from location provider
-      final deliveryBoyId = _locationState.driverId ?? '';
-      final deliveryBoyName = _driverName;
+      // Get current auth state at save time (not stale captured values)
+      final currentAuth = _ref.read(authProvider);
+      final deliveryBoyId = currentAuth.driverId ?? '';
+      final deliveryBoyName = currentAuth.driverName ?? '';
+      final outletId = currentAuth.outletId ?? ApiConfig.emptyGuid;
       // Build the request
       final request = SalesReturnRequest(
         transactionDate: transactionDate,
@@ -792,7 +787,7 @@ void clearItems() {
         customerId: state.selectedCustomer!.serverId,
         customerName: state.selectedCustomer!.name,
         returnReason: state.reason ?? state.remarks ?? '',
-        outletId: _outletId,
+        outletId: outletId,
         chalanId: chalanId,
         chalanNumber: chalanNumber,
         totalQuantity: totalQty,
