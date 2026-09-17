@@ -42,8 +42,6 @@ class DeliveryFormState {
   final String? discountType;
   final double discountValue;
   final double discountAmount;
-  final bool isExchangeMode;
-  final Set<String> exchangeItems;
 
   DeliveryFormState({
     this.delivery,
@@ -71,8 +69,6 @@ class DeliveryFormState {
     this.discountType,
     this.discountValue = 0,
     this.discountAmount = 0,
-    this.isExchangeMode = false,
-    this.exchangeItems = const {},
   });
 
   List<Product> get displayedProducts {
@@ -264,8 +260,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       discountType: state.discountType,
       discountValue: state.discountValue,
       discountAmount: state.discountAmount,
-      isExchangeMode: state.isExchangeMode,
-      exchangeItems: state.exchangeItems,
     );
   }
 
@@ -376,8 +370,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       discountType: state.discountType,
       discountValue: state.discountValue,
       discountAmount: state.discountAmount,
-      isExchangeMode: state.isExchangeMode,
-      exchangeItems: state.exchangeItems,
     );
   }
 
@@ -417,8 +409,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
         discountType: state.discountType,
         discountValue: state.discountValue,
         discountAmount: state.discountAmount,
-        isExchangeMode: state.isExchangeMode,
-        exchangeItems: state.exchangeItems,
       );
     } catch (e) {
       print('[Delivery] category refresh failed: $e');
@@ -451,8 +441,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
         discountType: state.discountType,
         discountValue: state.discountValue,
         discountAmount: state.discountAmount,
-        isExchangeMode: state.isExchangeMode,
-        exchangeItems: state.exchangeItems,
       );
     } catch (e) {
       print('[Delivery] customer refresh failed: $e');
@@ -488,8 +476,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
         discountType: state.discountType,
         discountValue: state.discountValue,
         discountAmount: state.discountAmount,
-        isExchangeMode: state.isExchangeMode,
-        exchangeItems: state.exchangeItems,
       );
     } catch (e) {
       print('[Delivery] refreshAllFromCache failed: $e');
@@ -655,8 +641,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       customerName: state.customerName,
       editingDeliveryId: state.editingDeliveryId,
       isReadOnly: state.isReadOnly,
-      isExchangeMode: state.isExchangeMode,
-      exchangeItems: state.exchangeItems,
     );
   }
 
@@ -676,8 +660,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       selectedCustomer: state.selectedCustomer,
       customers: state.customers,
       customerName: state.customerName,
-      isExchangeMode: state.isExchangeMode,
-      exchangeItems: state.exchangeItems,
     );
   }
 
@@ -705,8 +687,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       discountType: state.discountType,
       discountValue: state.discountValue,
       discountAmount: state.discountAmount,
-      isExchangeMode: state.isExchangeMode,
-      exchangeItems: state.exchangeItems,
     );
     await refreshProducts(customerId: customer?.serverId, transactionDate: transactionDate);
     await _applyCategoryDiscounts();
@@ -756,8 +736,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       productSearchQuery: state.productSearchQuery,
       selectedCustomer: state.selectedCustomer,
       customers: state.customers,
-      isExchangeMode: state.isExchangeMode,
-      exchangeItems: state.exchangeItems,
     );
     await _applyCategoryDiscounts();
   }
@@ -788,8 +766,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       productSearchQuery: state.productSearchQuery,
       selectedCustomer: state.selectedCustomer,
       customers: state.customers,
-      isExchangeMode: state.isExchangeMode,
-      exchangeItems: state.exchangeItems,
     );
     await _applyCategoryDiscounts();
   }
@@ -816,17 +792,11 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
         selectedCustomer: state.selectedCustomer,
         customers: state.customers,
         stockError: 'Entered quantity exceeds today\'s available stock.',
-        isExchangeMode: state.isExchangeMode,
-        exchangeItems: state.exchangeItems,
       );
       return;
     }
     final updated = Map<String, double>.from(state.cart);
     updated[productId] = newQty;
-    final updatedExchange = Set<String>.from(state.exchangeItems);
-    if (state.isExchangeMode) {
-      updatedExchange.add(productId);
-    }
     state = DeliveryFormState(
       delivery: state.delivery,
       selectedCategory: state.selectedCategory,
@@ -841,8 +811,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       productSearchQuery: state.productSearchQuery,
       selectedCustomer: state.selectedCustomer,
       customers: state.customers,
-      isExchangeMode: state.isExchangeMode,
-      exchangeItems: updatedExchange,
     );
     await _applyCategoryDiscounts();
   }
@@ -866,16 +834,12 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
         selectedCustomer: state.selectedCustomer,
         customers: state.customers,
         stockError: 'Entered quantity exceeds today\'s available stock.',
-        isExchangeMode: state.isExchangeMode,
-        exchangeItems: state.exchangeItems,
       );
       return;
     }
     final updated = Map<String, double>.from(state.cart);
-    final updatedExchange = Set<String>.from(state.exchangeItems);
     if (quantity < 0) {
       updated.remove(productId);
-      updatedExchange.remove(productId);
     } else {
       updated[productId] = quantity;
     }
@@ -894,8 +858,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       productSearchQuery: state.productSearchQuery,
       selectedCustomer: state.selectedCustomer,
       customers: state.customers,
-      isExchangeMode: state.isExchangeMode,
-      exchangeItems: updatedExchange,
     );
     await _applyCategoryDiscounts();
   }
@@ -905,8 +867,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
     final updatedDiscounts = Map<String, double>.from(state.productDiscounts)
       ..remove(productId);
     final updatedUnits = Map<String, String>.from(state.selectedUnitIds)
-      ..remove(productId);
-    final updatedExchange = Set<String>.from(state.exchangeItems)
       ..remove(productId);
     state = DeliveryFormState(
       delivery: state.delivery,
@@ -923,8 +883,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       productSearchQuery: state.productSearchQuery,
       selectedCustomer: state.selectedCustomer,
       customers: state.customers,
-      isExchangeMode: state.isExchangeMode,
-      exchangeItems: updatedExchange,
     );
   }
 
@@ -940,8 +898,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       productSearchQuery: state.productSearchQuery,
       selectedCustomer: state.selectedCustomer,
       customers: state.customers,
-      isExchangeMode: state.isExchangeMode,
-      exchangeItems: const {},
     );
   }
 
@@ -958,8 +914,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       productSearchQuery: state.productSearchQuery,
       selectedCustomer: state.selectedCustomer,
       customers: state.customers,
-      isExchangeMode: state.isExchangeMode,
-      exchangeItems: state.exchangeItems,
     );
   }
 
@@ -981,34 +935,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
     );
   }
 
-  void toggleExchangeMode() {
-    state = DeliveryFormState(
-      delivery: state.delivery,
-      selectedCategory: state.selectedCategory,
-      categories: state.categories,
-      products: state.products,
-      paymentModes: state.paymentModes,
-      paymentEntries: state.paymentEntries,
-      selectedPaymentMode: state.selectedPaymentMode,
-      cart: const {},
-      customPrices: const {},
-      productDiscounts: const {},
-      selectedUnitIds: const {},
-      productSearchQuery: state.productSearchQuery,
-      selectedCustomer: state.selectedCustomer,
-      customers: state.customers,
-      customerName: state.customerName,
-      editingDeliveryId: state.editingDeliveryId,
-      isReadOnly: state.isReadOnly,
-      paidAmount: state.paidAmount,
-      discountType: state.discountType,
-      discountValue: state.discountValue,
-      discountAmount: state.discountAmount,
-      isExchangeMode: !state.isExchangeMode,
-      exchangeItems: const {},
-    );
-  }
-
   void resetForm() {
     state = DeliveryFormState(
       categories: state.categories,
@@ -1016,7 +942,6 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
       paymentModes: state.paymentModes,
       paymentEntries: state.paymentEntries,
       customers: state.customers,
-      isExchangeMode: state.isExchangeMode,
     );
   }
 

@@ -62,11 +62,9 @@ class CartScreen extends ConsumerWidget {
                     itemBuilder: (context, index) {
                       final item = cartItems[index];
                       final units = state.getProductUnits(item.productId);
-                      final isExchange = state.exchangeItems.contains(item.productId);
                       return _CartItemCard(
                         item: item,
                         units: units,
-                        isExchange: isExchange,
                         imageUrl: state
                             .getProductByKey(item.productId)
                             ?.firstImageUrl,
@@ -122,9 +120,7 @@ class CartScreen extends ConsumerWidget {
                                 ),
                               ),
                               Text(
-                                state.isExchangeMode
-                                    ? 'Rs. 0.00'
-                                    : 'Rs. ${state.estimatedTotal.toStringAsFixed(2)}',
+                                'Rs. ${state.estimatedTotal.toStringAsFixed(2)}',
                                 style: theme.textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: theme.colorScheme.primary,
@@ -132,16 +128,6 @@ class CartScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
-                          if (state.isExchangeMode) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              'Exchange Mode - All items are free',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.tertiary,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ),
-                          ],
                           const SizedBox(height: 12),
                           const SizedBox(height: 16),
                           FilledButton.icon(
@@ -169,7 +155,6 @@ class _CartItemCard extends StatelessWidget {
   final CartItem item;
   final List<ProductUnit> units;
   final String? imageUrl;
-  final bool isExchange;
   final ValueChanged<double> onQuantityChanged;
   final ValueChanged<String> onUnitChanged;
   final ValueChanged<double> onUnitPriceChanged;
@@ -179,7 +164,6 @@ class _CartItemCard extends StatelessWidget {
     required this.item,
     this.units = const [],
     this.imageUrl,
-    this.isExchange = false,
     required this.onQuantityChanged,
     required this.onUnitChanged,
     required this.onUnitPriceChanged,
@@ -276,37 +260,15 @@ class _CartItemCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                item.productName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: theme.colorScheme.onSurface,
-                ),
-              ),
-            ),
-            if (isExchange)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.tertiaryContainer,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  'Exchange',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: theme.colorScheme.onTertiaryContainer,
-                  ),
-                ),
-              ),
-          ],
+        Text(
+          item.productName,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            color: theme.colorScheme.onSurface,
+          ),
         ),
         const SizedBox(height: 8),
         Row(
@@ -318,16 +280,14 @@ class _CartItemCard extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          '${l10n.total}: Rs. ${isExchange ? '0.00' : item.lineTotal.toStringAsFixed(2)}',
-          style: TextStyle(
+          '${l10n.total}: Rs. ${item.lineTotal.toStringAsFixed(2)}',
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: isExchange
-                ? theme.colorScheme.tertiary
-                : const Color(0xFF2E7D32),
+            color: Color(0xFF2E7D32),
           ),
         ),
-        if (!isExchange && item.discountAmount > 0)
+        if (item.discountAmount > 0)
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
