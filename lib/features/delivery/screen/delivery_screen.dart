@@ -316,10 +316,13 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     AppLocalizations l10n,
     String langCode,
   ) {
-    if (state.isReadOnly) {
-      return _buildReadOnlyView(state, cartItems, theme, l10n);
-    }
-    return _buildEditableForm(state, cartItems, theme, l10n, langCode);
+    final body = state.isReadOnly
+        ? _buildReadOnlyView(state, cartItems, theme, l10n)
+        : _buildEditableForm(state, cartItems, theme, l10n, langCode);
+    return RefreshIndicator(
+      onRefresh: () => ref.read(syncProvider.notifier).syncAll(),
+      child: body,
+    );
   }
 
   Widget _buildReadOnlyView(
@@ -363,6 +366,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
 
     return ListView(
       padding: const EdgeInsets.all(16),
+      physics: const AlwaysScrollableScrollPhysics(),
       children: [
         Container(
           padding: const EdgeInsets.all(12),
@@ -630,6 +634,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     final hasCustomer = state.selectedCustomer != null;
     final list = ListView(
       padding: const EdgeInsets.all(16),
+      physics: const AlwaysScrollableScrollPhysics(),
       children: [
         Row(
           children: [
