@@ -96,7 +96,16 @@ class DeliveryFormState {
   }
 
   List<Product> get filteredProducts {
-    if (productSearchQuery.isEmpty) return displayProducts.take(6).toList();
+    if (productSearchQuery.isEmpty) {
+      final displayed = displayProducts.toList();
+      final indexed = displayed.asMap().entries.toList()
+        ..sort((a, b) {
+          final aAvail = a.value.stock > 0 ? 1 : 0;
+          final bAvail = b.value.stock > 0 ? 1 : 0;
+          return bAvail != aAvail ? bAvail - aAvail : a.key - b.key;
+        });
+      return indexed.take(6).map((e) => e.value).toList();
+    }
     final query = productSearchQuery.toLowerCase();
     return displayProducts.where((p) => p.name.toLowerCase().contains(query)).toList();
   }
