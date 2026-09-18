@@ -230,25 +230,33 @@ void initState() {
             ),
           ),
           const SizedBox(height: 24),
-          FilledButton(
-            onPressed: () {
-              ref.read(salesReturnProvider.notifier).reset();
-            },
-            child: Text(l10n.newSalesReturn),
+          SizedBox(
+            width: 220,
+            height: 52,
+            child: OutlinedButton(
+              onPressed: () {
+                ref.read(salesReturnProvider.notifier).reset();
+              },
+              child: Text(l10n.newSalesReturn),
+            ),
           ),
           const SizedBox(height: 12),
-          OutlinedButton(
-            onPressed: () 
-            {
-              final customer = ref.read(salesReturnProvider).selectedCustomer;
-              ref.read(salesReturnProvider.notifier).reset();
-              if (customer != null) {
-                context.go('/delivery?customerId=${customer.serverId}');
-              } else {
-                context.go('/delivery');
-              }
-            },
-            child: Text(l10n.goToDelivery),
+          SizedBox(
+            width: 220,
+            height: 52,
+            child: FilledButton(
+              onPressed: () 
+              {
+                final customer = ref.read(salesReturnProvider).selectedCustomer;
+                ref.read(salesReturnProvider.notifier).reset();
+                if (customer != null) {
+                  context.go('/delivery?customerId=${customer.serverId}');
+                } else {
+                  context.go('/delivery');
+                }
+              },
+              child: Text(l10n.goToDelivery),
+            ),
           ),
         ],
       ),

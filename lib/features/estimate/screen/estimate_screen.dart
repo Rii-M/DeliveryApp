@@ -147,20 +147,28 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
                 style: theme.textTheme.titleLarge,
               ),
               const SizedBox(height: 24),
-              FilledButton(
-                onPressed: () {
-                  ref.read(estimateProvider.notifier).reset();
-                  context.pop();
-                },
-                child: Text(l10n.newDelivery),
+              SizedBox(
+                width: 220,
+                height: 52,
+                child: OutlinedButton(
+                  onPressed: () {
+                    ref.read(estimateProvider.notifier).reset();
+                    context.pop();
+                  },
+                  child: Text(l10n.newDelivery),
+                ),
               ),
               const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () {
-                  ref.read(estimateProvider.notifier).reset();
-                  context.go('/sales-return');
-                },
-                child: Text(l10n.goToSalesReturn),
+              SizedBox(
+                width: 220,
+                height: 52,
+                child: FilledButton(
+                  onPressed: () {
+                    ref.read(estimateProvider.notifier).reset();
+                    context.go('/sales-return');
+                  },
+                  child: Text(l10n.goToSalesReturn),
+                ),
               ),
             ],
           ),
