@@ -1,5 +1,6 @@
 ﻿import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../l10n/app_localizations.dart';
@@ -17,6 +18,17 @@ class SalesReturnCartScreen extends ConsumerStatefulWidget {
 class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
   // Commented out: discount value controller disabled for now.
   // final _discountValueController = TextEditingController();
+  final Map<String, TextEditingController> _qtyControllers = {};
+  final Set<String> _editingQty = {};
+
+  TextEditingController _getQtyController(String productId, double quantity) {
+    if (!_qtyControllers.containsKey(productId)) {
+      _qtyControllers[productId] = TextEditingController(
+        text: quantity.toStringAsFixed(0),
+      );
+    }
+    return _qtyControllers[productId]!;
+  }
 
   @override
   void initState() {
@@ -31,6 +43,10 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
   @override
   void dispose() {
     // _discountValueController.dispose();
+    for (final c in _qtyControllers.values) {
+      c.dispose();
+    }
+    _qtyControllers.clear();
     super.dispose();
   }
 
@@ -405,6 +421,12 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
     final item = ref.read(salesReturnProvider).items[index];
     final notifier = ref.read(salesReturnProvider.notifier);
     final theme = Theme.of(context);
+    final controller = _getQtyController(item.productId, item.quantity);
+
+    final newText = item.quantity.toStringAsFixed(0);
+    if (controller.text != newText && !_editingQty.contains(item.productId)) {
+      controller.text = newText;
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -416,22 +438,50 @@ class _SalesReturnCartScreenState extends ConsumerState<SalesReturnCartScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           _itemStepButton(context, Icons.remove, () {
+            _editingQty.remove(item.productId);
             notifier.decrementItemQuantity(index);
           }),
           ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 45),
-            child: Text(
-              item.quantity.toStringAsFixed(0),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface,
+            child: SizedBox(
+              width: 50,
+              child: TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                textInputAction: TextInputAction.done,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 8),
+                ),
+                onChanged: (value) {
+                  _editingQty.add(item.productId);
+                  final qty = int.tryParse(value);
+                  if (qty == null || qty <= 0) return;
+                  notifier.setItemQuantity(index, qty.toDouble());
+                },
+                onSubmitted: (value) {
+                  _editingQty.remove(item.productId);
+                  final qty = int.tryParse(value) ?? 0;
+                  if (qty <= 0) {
+                    controller.text = item.quantity.toStringAsFixed(0);
+                  } else {
+                    notifier.setItemQuantity(index, qty.toDouble());
+                  }
+                },
               ),
             ),
           ),
           _itemStepButton(context, Icons.add, () {
+            _editingQty.remove(item.productId);
             notifier.incrementItemQuantity(index);
           }),
         ],

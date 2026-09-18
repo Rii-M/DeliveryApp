@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -151,7 +152,7 @@ class CartScreen extends ConsumerWidget {
   }
 }
 
-class _CartItemCard extends StatelessWidget {
+class _CartItemCard extends StatefulWidget {
   final CartItem item;
   final List<ProductUnit> units;
   final String? imageUrl;
@@ -169,6 +170,38 @@ class _CartItemCard extends StatelessWidget {
     required this.onUnitPriceChanged,
     required this.onRemove,
   });
+
+  @override
+  State<_CartItemCard> createState() => _CartItemCardState();
+}
+
+class _CartItemCardState extends State<_CartItemCard> {
+  late final TextEditingController _qtyController;
+
+  @override
+  void initState() {
+    super.initState();
+    _qtyController = TextEditingController(
+      text: widget.item.quantity.toStringAsFixed(0),
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _CartItemCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.item.quantity != widget.item.quantity) {
+      final newText = widget.item.quantity.toStringAsFixed(0);
+      if (_qtyController.text != newText) {
+        _qtyController.text = newText;
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _qtyController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -190,7 +223,7 @@ class _CartItemCard extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(child: _buildInfoColumn(context)),
             IconButton(
-              onPressed: onRemove,
+              onPressed: widget.onRemove,
               icon: Icon(
                 Icons.delete_outline,
                 size: 18,
@@ -209,7 +242,7 @@ class _CartItemCard extends StatelessWidget {
 
   Widget _buildThumbnail(BuildContext context) {
     final theme = Theme.of(context);
-    final url = imageUrl;
+    final url = widget.imageUrl;
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: SizedBox(
@@ -261,7 +294,7 @@ class _CartItemCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          item.productName,
+          widget.item.productName,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(
@@ -275,23 +308,23 @@ class _CartItemCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _buildQuantityStepper(context),
-            if (units.isNotEmpty) _buildUnitDropdown(theme),
+            if (widget.units.isNotEmpty) _buildUnitDropdown(theme),
           ],
         ),
         const SizedBox(height: 4),
         Text(
-          '${l10n.total}: Rs. ${item.lineTotal.toStringAsFixed(2)}',
+          '${l10n.total}: Rs. ${widget.item.lineTotal.toStringAsFixed(2)}',
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: Color(0xFF2E7D32),
           ),
         ),
-        if (item.discountAmount > 0)
+        if (widget.item.discountAmount > 0)
           Padding(
             padding: const EdgeInsets.only(top: 4),
             child: Text(
-              '${l10n.discount}: Rs. ${item.discountAmount.toStringAsFixed(2)}',
+              '${l10n.discount}: Rs. ${widget.item.discountAmount.toStringAsFixed(2)}',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -315,29 +348,54 @@ class _CartItemCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _stepperButton(context, Icons.remove, () {
-            if (item.quantity <= 1) {
-              onRemove();
+            if (widget.item.quantity <= 1) {
+              widget.onRemove();
             } else {
-              onQuantityChanged(item.quantity - 1);
+              widget.onQuantityChanged(widget.item.quantity - 1);
             }
           }),
           ConstrainedBox(
             constraints: const BoxConstraints(minWidth: 45),
-            child: Text(
-              item.quantity.toStringAsFixed(0),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 17,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface,
+            child: SizedBox(
+              width: 50,
+              child: TextField(
+                controller: _qtyController,
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.center,
+                textInputAction: TextInputAction.done,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                style: TextStyle(
+                  fontFamily: 'monospace',
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.symmetric(vertical: 8),
+                ),
+                onChanged: (value) {
+                  final qty = int.tryParse(value);
+                  if (qty == null || qty <= 0) return;
+                  widget.onQuantityChanged(qty.toDouble());
+                },
+                onSubmitted: (value) {
+                  final qty = int.tryParse(value) ?? 0;
+                  if (qty <= 0) {
+                    _qtyController.text =
+                        widget.item.quantity.toStringAsFixed(0);
+                  } else {
+                    widget.onQuantityChanged(qty.toDouble());
+                  }
+                },
               ),
             ),
           ),
           _stepperButton(
             context,
             Icons.add,
-            () => onQuantityChanged(item.quantity + 1),
+            () => widget.onQuantityChanged(widget.item.quantity + 1),
           ),
         ],
       ),
@@ -376,7 +434,7 @@ class _CartItemCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(left: 8),
       child: Text(
-        item.selectedUnitName ?? '',
+        widget.item.selectedUnitName ?? '',
         style: TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,

@@ -523,6 +523,19 @@ void clearItems() {
     await _applyCategoryDiscounts();
   }
 
+  Future<void> setItemQuantity(int index, double qty) async {
+    if (index < 0 || index >= state.items.length) return;
+    if (qty <= 0) {
+      removeItem(index);
+      return;
+    }
+    final updated = [...state.items];
+    updated[index].quantity = qty;
+
+    state = _copyWithAll(items: updated);
+    await _applyCategoryDiscounts();
+  }
+
   Future<void> decrementItemQuantity(int index) async {
     if (index < 0 || index >= state.items.length) return;
     final updated = [...state.items];
