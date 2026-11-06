@@ -622,13 +622,10 @@ class _EstimateScreenState extends ConsumerState<EstimateScreen> {
     
   final state = ref.read(estimateProvider);
   if (state.netTotal > 0 && state.remainingAmount > 0) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context)!.pleaseMakeFullPayment),
-        backgroundColor: Theme.of(context).colorScheme.error,
-      ),
+    _showPaymentModal(
+      context,
+      errorMessage: AppLocalizations.of(context)!.pleaseMakeFullPayment,
     );
-    _showPaymentModal(context);
     return;
   }
 
@@ -702,7 +699,7 @@ if (state.netTotal > 0) {
   //  }
   }
 
-  void _showPaymentModal(BuildContext context) {
+  void _showPaymentModal(BuildContext context, {String? errorMessage}) {
   final s = ref.read(estimateProvider);
   if (s.paymentEntries.isEmpty && s.remainingAmount > 0) {
     ref.read(estimateProvider.notifier).addPaymentEntry();
@@ -711,7 +708,7 @@ if (state.netTotal > 0) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (ctx) => _PaymentModalSheet(),
+      builder: (ctx) => _PaymentModalSheet(initialErrorMessage: errorMessage),
     );
   }
 }
@@ -721,12 +718,14 @@ class _PaymentEntryRow extends ConsumerStatefulWidget {
   final PaymentEntry payment;
   final List<PaymentMode> paymentModes;
   final AppLocalizations l10n;
+  final VoidCallback? onPaymentChanged;
 
   const _PaymentEntryRow({
     required this.index,
     required this.payment,
     required this.paymentModes,
     required this.l10n,
+    this.onPaymentChanged,
     super.key,
   });
 
@@ -808,6 +807,7 @@ class _PaymentEntryRowState extends ConsumerState<_PaymentEntryRow> {
                     .firstOrNull;
                 ref.read(estimateProvider.notifier)
                     .updatePaymentEntryMode(widget.index, value, mode?.name);
+                widget.onPaymentChanged?.call();
               },
             ),
           
@@ -837,10 +837,12 @@ class _PaymentEntryRowState extends ConsumerState<_PaymentEntryRow> {
                 if (parsed == null) {
                   ref.read(estimateProvider.notifier)
                       .updatePaymentEntryAmount(widget.index, 0);
+                  widget.onPaymentChanged?.call();
                   return;
                 }
                 ref.read(estimateProvider.notifier)
                     .updatePaymentEntryAmount(widget.index, parsed);
+                widget.onPaymentChanged?.call();
               },
             ),
           ),
@@ -859,9 +861,26 @@ class _PaymentEntryRowState extends ConsumerState<_PaymentEntryRow> {
   }
 }
 
-class _PaymentModalSheet extends ConsumerWidget {
+class _PaymentModalSheet extends ConsumerStatefulWidget {
+  final String? initialErrorMessage;
+
+  const _PaymentModalSheet({this.initialErrorMessage});
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_PaymentModalSheet> createState() => _PaymentModalSheetState();
+}
+
+class _PaymentModalSheetState extends ConsumerState<_PaymentModalSheet> {
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _errorMessage = widget.initialErrorMessage;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(estimateProvider);
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
@@ -906,6 +925,11 @@ class _PaymentModalSheet extends ConsumerWidget {
                 payment: payment,
                 paymentModes: state.paymentModes,
                 l10n: l10n,
+                onPaymentChanged: () {
+                  if (_errorMessage != null) {
+                    setState(() => _errorMessage = null);
+                  }
+                },
               );
             }),
             const SizedBox(height: 8),
@@ -957,18 +981,43 @@ class _PaymentModalSheet extends ConsumerWidget {
                 ],
               ),
             ),
+            if (_errorMessage != null) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.errorContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 20,
+                      color: theme.colorScheme.onErrorContainer,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _errorMessage!,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onErrorContainer,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () {
                 final s = ref.read(estimateProvider);
                 final hasUnsetPaymode=s.paymentEntries.any((e)=>e.paymentModeId == null || e.paymentModeId!.isEmpty);
                 if (hasUnsetPaymode) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text(AppLocalizations.of(context)!.pleaseEnterPaymode),
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                  ),
-               );
+                 setState(() {
+                    _errorMessage = AppLocalizations.of(context)!.pleaseEnterPaymode;
+                  });
                } else {
                   Navigator.of(context).pop();
                }
