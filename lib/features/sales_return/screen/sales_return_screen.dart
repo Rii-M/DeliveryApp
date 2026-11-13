@@ -202,7 +202,10 @@ void initState() {
                       ? const Center(child: CircularProgressIndicator())
                       : state.saved
                       ? _buildSuccessState(theme, l10n)
-                      : _buildProductBrowser(state, theme, l10n, langCode),
+                      : RefreshIndicator(
+                          onRefresh: () => ref.read(syncProvider.notifier).syncAll(),
+                          child: _buildProductBrowser(state, theme, l10n, langCode),
+                        ),
                 ),
               ],
             ),

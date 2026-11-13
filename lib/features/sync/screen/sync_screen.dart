@@ -37,7 +37,9 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
               title: Text(l10n.sync),
             ),
             Expanded(
-              child: ListView(
+              child: RefreshIndicator(
+                onRefresh: () => ref.read(syncProvider.notifier).syncAll(),
+                child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
                   if (state.pendingQueue.isNotEmpty && !state.isSyncing) ...[
@@ -276,6 +278,7 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
                     ],
                   ],
                 ],
+              ),
               ),
             ),
           ],
