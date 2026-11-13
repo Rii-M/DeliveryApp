@@ -836,6 +836,8 @@ class SyncRepository {
       'ReferenceBranchId': null,
       'ReferredBy': null,
       'SetAsSupplier': false,
+      if (c.latitude != null) 'Latitude': c.latitude,
+      if (c.longitude != null) 'Longitude': c.longitude,
     };
   }
 }

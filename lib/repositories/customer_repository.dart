@@ -35,7 +35,7 @@ class CustomerRepository {
   }
 
   Customer _customerFromJson(Map<String, dynamic> json) {
-    return Customer()
+    final customer = Customer()
       ..serverId = _getField(json, ['Id', 'id', 'server_id'])
       ..recordId = _getField(json, ['RecordId', 'recordId'])
       ..name = _getField(json, ['Name', 'name'])
@@ -53,6 +53,11 @@ class CustomerRepository {
           (json['IsAllowCredit'] ?? json['isAllowCredit'] ?? true) == true
       ..isSynced = true
       ..pendingAction = null;
+    final lat = json['Latitude'] ?? json['latitude'];
+    if (lat is num) customer.latitude = lat.toDouble();
+    final lng = json['Longitude'] ?? json['longitude'];
+    if (lng is num) customer.longitude = lng.toDouble();
+    return customer;
   }
 
   Future<List<Customer>> getCustomers() async {
@@ -171,6 +176,8 @@ class CustomerRepository {
     required String discountGroupId,
     String? areaId,
     String? customerGroupId,
+    double? latitude,
+    double? longitude,
   }) async {
     final customer = Customer()
       ..serverId = _generateTempId()
@@ -183,6 +190,8 @@ class CustomerRepository {
       ..areaId = areaId
       ..customerGroupId = customerGroupId
       ..metaData = '{"ContactPersons":[]}'
+      ..latitude = latitude
+      ..longitude = longitude
       ..isActive = true
       ..isAllowCredit = true
       ..isSynced = false
@@ -217,6 +226,8 @@ class CustomerRepository {
     required String discountGroupId,
     String? areaId,
     String? customerGroupId,
+    double? latitude,
+    double? longitude,
   }) async {
     final maps = await _db.query('customer',
         where: 'server_id = ?', whereArgs: [serverId], limit: 1);
@@ -234,6 +245,8 @@ class CustomerRepository {
       ..discountGroupId = discountGroupId
       ..areaId = areaId
       ..customerGroupId = customerGroupId
+      ..latitude = latitude
+      ..longitude = longitude
       ..isSynced = false;
     if (wasSynced) {
       existing.pendingAction = 'Update';

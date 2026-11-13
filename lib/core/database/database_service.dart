@@ -24,7 +24,7 @@ class DatabaseService {
 
       _database = await openDatabase(
         path,
-        version: 30,
+        version: 31,
         onCreate: _createTables,
         onUpgrade: _onUpgrade,
       );
@@ -469,6 +469,18 @@ class DatabaseService {
       await db.execute('CREATE INDEX IF NOT EXISTS idx_delivery_customer_id ON delivery(customer_id)');
       await db.execute('CREATE INDEX IF NOT EXISTS idx_delivery_is_synced ON delivery(is_synced)');
     }
+    if (oldVersion < 31) {
+      try {
+        await db.execute(
+          'ALTER TABLE customer ADD COLUMN latitude REAL',
+        );
+      } catch (_) {}
+      try {
+        await db.execute(
+          'ALTER TABLE customer ADD COLUMN longitude REAL',
+        );
+      } catch (_) {}
+    }
   }
 
   Future<void> _createTables(Database db, int version) async {
@@ -501,7 +513,9 @@ class DatabaseService {
         is_active INTEGER DEFAULT 1,
         is_allow_credit INTEGER DEFAULT 1,
         is_synced INTEGER DEFAULT 1,
-        pending_action TEXT
+        pending_action TEXT,
+        latitude REAL,
+        longitude REAL
       )
     ''');
 

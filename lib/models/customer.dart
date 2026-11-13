@@ -11,6 +11,8 @@ class Customer {
   String? customerGroupId;
   String? recordId;
   String? metaData;
+  double? latitude;
+  double? longitude;
   bool isActive = true;
   bool isAllowCredit = true;
   bool isSynced = true;
@@ -36,6 +38,8 @@ class Customer {
       'is_allow_credit': isAllowCredit ? 1 : 0,
       'is_synced': isSynced ? 1 : 0,
       'pending_action': pendingAction,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
     };
   }
 
@@ -57,6 +61,8 @@ class Customer {
     customer.isAllowCredit = (map['is_allow_credit'] ?? 1) == 1;
     customer.isSynced = (map['is_synced'] ?? 1) == 1;
     customer.pendingAction = map['pending_action'] as String?;
+    customer.latitude = map['latitude'] as double?;
+    customer.longitude = map['longitude'] as double?;
     return customer;
   }
 }

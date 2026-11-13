@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/network/providers.dart';
+import '../../../features/location/location_provider.dart';
 import '../../../features/sync/provider/sync_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/customer.dart';
@@ -207,6 +208,18 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
     final l10n = AppLocalizations.of(context)!;
     setState(() => _isSaving = true);
 
+    // Best-effort: grab the driver's current location. A missing/denied
+    // location must never block saving the customer — we just send null.
+    double? latitude;
+    double? longitude;
+    try {
+      final position = await ref.read(locationServiceProvider).getCurrentPosition();
+      latitude = position?.latitude;
+      longitude = position?.longitude;
+    } catch (_) {
+      // location unavailable - proceed without coordinates
+    }
+
     final customerRepo = ref.read(customerRepositoryProvider);
     final isOnline = await ref.read(networkCheckerProvider).isConnected;
 
@@ -260,6 +273,8 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
           discountGroupId: _selectedDiscountGroup!.id,
           areaId: _selectedArea!.id,
           customerGroupId: _selectedCustomerGroup!.id,
+          latitude: latitude,
+          longitude: longitude,
         );
       } else {
         saved = await customerRepo.saveNewCustomerOffline(
@@ -277,6 +292,8 @@ class _AddCustomerScreenState extends ConsumerState<AddCustomerScreen> {
           discountGroupId: _selectedDiscountGroup!.id,
           areaId: _selectedArea!.id,
           customerGroupId: _selectedCustomerGroup!.id,
+          latitude: latitude,
+          longitude: longitude,
         );
       }
 
