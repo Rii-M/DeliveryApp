@@ -347,10 +347,22 @@ class DeliveryFormNotifier extends StateNotifier<DeliveryFormState> {
   }
 
   Future<void> refreshProducts({String? customerId, String? transactionDate}) async {
-    final products = await _productRepo.getProducts(
-      customerId: customerId ?? state.selectedCustomer?.serverId ?? '',
-      transactionDate: transactionDate ?? DateTime.now().toString().split(' ').first,
-    );
+    final effectiveCustomerId = customerId ?? state.selectedCustomer?.serverId ?? '';
+    final effectiveDate = transactionDate ?? DateTime.now().toString().split(' ').first;
+    List<Product> products;
+    try {
+      // Always fetch fresh from backend so carry-forward (cumulative) stock is current.
+      // Falls back to local cache when offline.
+      products = await _productRepo.refreshProducts(
+        customerId: effectiveCustomerId,
+        transactionDate: effectiveDate,
+      );
+    } catch (_) {
+      products = await _productRepo.getProducts(
+        customerId: effectiveCustomerId,
+        transactionDate: effectiveDate,
+      );
+    }
     if (products.isNotEmpty) {
       _prefetchProductImages(products);
     }
