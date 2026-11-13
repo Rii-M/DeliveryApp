@@ -95,7 +95,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: () => ref.read(dashboardProvider.notifier).loadDashboard(),
+                onRefresh: () async {
+                  await ref.read(dashboardProvider.notifier).loadDashboard();
+                  await ref.read(syncProvider.notifier).syncAll();
+                },
                 child: ListView(
                   padding: const EdgeInsets.all(16),
                   children: [
